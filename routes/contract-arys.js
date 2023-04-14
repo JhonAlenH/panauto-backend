@@ -77,13 +77,22 @@ const operationCreate = async(authHeader, requestBody) => {
         ncapacidad_p: requestBody.ncapacidad_p,
         cestado: requestBody.cestado ? requestBody.cestado : undefined,
         cciudad: requestBody.cciudad ? requestBody.cciudad : undefined,
+        ccorregimiento: requestBody.ccorregimiento ? requestBody.ccorregimiento : undefined,
         cpais: requestBody.cpais ? requestBody.cpais : undefined,
         icedula: requestBody.icedula ? requestBody.icedula : undefined,
         femision: requestBody.femision ,
         cusuario: requestBody.cusuario ? requestBody.cusuario : undefined,
         xzona_postal: requestBody.xzona_postal ? requestBody.xzona_postal : undefined,
-        cestatusgeneral: 13
+        cuso: requestBody.cuso,
+        ctipovehiculo: requestBody.ctipovehiculo,
+        cclase: requestBody.cclase,
+        fdesde_pol: requestBody.fdesde_pol,
+        fhasta_pol: requestBody.fhasta_pol,
+        ccorredor: requestBody.ccorredor,
+        cestatusgeneral: 13,
+        fnac: requestBody.fnac
     };
+    console.log(userData)
     if(userData){
         let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
         if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
