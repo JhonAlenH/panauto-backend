@@ -19,6 +19,7 @@ const operationAuth = async(requestBody) => {
     let xemail = requestBody.xemail.toUpperCase();
     let xcontrasena = requestBody.xcontrasena;
     let query = await bd.authQuery(xemail).then((res) => res);
+    console.log(query);
     if(query.error){ return { status: false, code: 500, message: query.error }; }
     if(query.result.rowsAffected > 0){
         if(query.result.recordset[0].XCONTRASENA != xcontrasena){ 

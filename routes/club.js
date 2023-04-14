@@ -315,12 +315,14 @@ router.route('/Data/Solicitud').post((req, res) => {
 const operationGenerateSolicitud = async(requestBody) => {
     let ClientData = {       
         cestado: requestBody.cestado,
+        cpais: requestBody.cpais,
         cciudad: requestBody.cciudad,
         cservicio: requestBody.cservicio,
         ctiposervicio: requestBody.ctiposervicio,
         cproveedor: requestBody.cproveedor,
         cpropietario: requestBody.cpropietario,
-        ccontratoflota: requestBody.ccontratoflota
+        ccontratoflota: requestBody.ccontratoflota,
+        fsolicitud: requestBody.fsolicitud,
     };
     let client = await bd.SolicitudServiceClub(ClientData).then((res) => res);
     if(client.error){ return { status: false, code: 500, message: client.error }; }
@@ -368,7 +370,109 @@ const operationStoreProcedureFromClub = async(authHeader, requestBody) => {
             });
         }
         return { status: true, list: jsonList };
-    }else{ return { status: false, code: 404, message: 'Replacement not found.' }; }
+    }else{ return { status: false, code: 404, message: 'Replacement not found.' }; };}
+    router.route('/client-agenda').post((req, res) => {
+        CreateAgenda(req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'CreateAgenda' } });
+        });
+    });
+
+    const CreateAgenda = async(requestBody) => {
+        let DataAgenda = {
+            cpropietario: requestBody.cpropietario,
+            id: requestBody.id,
+            xtitulo: requestBody.title,
+            fdesde: requestBody.start,
+            fhasta: requestBody.end,
+            condicion: requestBody.allDay,
+        };
+        let Agenda = await bd.DataCreateAgendaClient(DataAgenda).then((res) => res);
+        if(Agenda.error){ return { status: false, code: 500, message: Agenda.error }; }
+        if(Agenda.rowsAffected == 0){ return { status: false, code: 404 }; }
+        if(Agenda.result.rowsAffected > 0){
+            let events = [];
+            for(let i = 0; i < Agenda.result.recordset.length; i++){
+                events.push({
+                    id: Agenda.result.recordset[i].ID, 
+                    title: Agenda.result.recordset[i].XTITULO,
+                    start: Agenda.result.recordset[i].FDESDE.toISOString().replace(/T.*$/, ''),
+                    end: Agenda.result.recordset[i].FHASTA.toISOString().replace(/T.*$/, ''),
+                    allDay : Agenda.result.recordset[i].XCONDICION
+                });
+            }
+            return { status: true, list: events };
+        }
+        return { 
+        status: false, 
+    };
+        
+    }
+
+    router.route('/search/client-agenda').post((req, res) => {
+        SearcheAgenda(req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'SearcheAgenda' } });
+        });
+    });
+
+    const SearcheAgenda = async(requestBody) => {
+        let DataAgenda = {
+            cpropietario: requestBody.cpropietario,
+        };
+        let AgendaEvent = await bd.DataAgendaClientSolicitud(DataAgenda).then((res) => res);
+        let Agenda = await bd.DataAgendaClient(DataAgenda).then((res) => res);
+        if(AgendaEvent.error){ return { status: false, code: 500, message: Agenda.error }; }
+        if(AgendaEvent.rowsAffected == 0){ return { status: false, code: 404 }; }
+        
+        if(Agenda.result.rowsAffected > 0){
+            let events = [];
+            for(let i = 0; i < Agenda.result.recordset.length; i++){
+                events.push({
+                    id: Agenda.result.recordset[i].ID, 
+                    title: Agenda.result.recordset[i].XTITULO,
+                    start: Agenda.result.recordset[i].FDESDE.toISOString().replace(/T.*$/, ''),
+                    end: Agenda.result.recordset[i].FHASTA.toISOString().replace(/T.*$/, ''),
+                    allDay : Agenda.result.recordset[i].XCONDICION
+                });
+            }
+            let datagenda = events 
+            if(AgendaEvent.result.rowsAffected > 0){
+                let events = [];
+                for(let i = 0; i < AgendaEvent.result.recordset.length; i++){
+                    events.push({
+                        id: AgendaEvent.result.recordset[i].CSOLICITUDSERVICIO, 
+                        title:AgendaEvent.result.recordset[i].XSERVICIO, 
+                        start: AgendaEvent.result.recordset[i].FCREACION.toISOString().replace(/T.*$/, ''),
+                        end: AgendaEvent.result.recordset[i].FCREACION.toISOString().replace(/T.*$/, ''),
+                    });
+                }
+                return { 
+                    status: true, 
+                    list: events, datagenda
+                };}
+
+        
+        }
+        
+        
+
+        return { 
+        status: false, 
+
+    };
+
+
 }
 
 module.exports = router;
