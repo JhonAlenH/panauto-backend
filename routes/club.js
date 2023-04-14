@@ -457,9 +457,13 @@ const operationStoreProcedureFromClub = async(authHeader, requestBody) => {
                         end: AgendaEvent.result.recordset[i].FCREACION.toISOString().replace(/T.*$/, ''),
                     });
                 }
+
+                const datagendbr = events
+                const dataeventdbr = datagenda
+                const list = datagendbr.concat(dataeventdbr);
                 return { 
                     status: true, 
-                    list: events, datagenda
+                    list: list
                 };}
 
         
