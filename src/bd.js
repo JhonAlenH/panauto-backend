@@ -13771,24 +13771,15 @@ createPlanQuery: async(dataList, cplan) => {
             .input('cplan', sql.Int, cplan)
             .input('xplan', sql.NVarChar, dataList.xplan)
             .input('ctipoplan', sql.Int, dataList.ctipoplan)
-            .input('binternacional', sql.Bit, dataList.binternacional ? dataList.binternacional: 0)
             .input('brcv', sql.Int, dataList.brcv)
             .input('cpais', sql.Int, dataList.cpais)
             .input('ccompania', sql.Int, dataList.ccompania)
             .input('mcosto', sql.Numeric(18, 2), dataList.mcosto)
-            .input('mcosto_mensual', sql.Numeric(18, 2), dataList.mcosto_mensual)
-            .input('parys', sql.Numeric(18, 2), dataList.parys)
-            .input('paseguradora', sql.Numeric(18, 2), dataList.paseguradora)
-            .input('ptasa_casco', sql.Numeric(18, 2), dataList.ptasa_casco)
-            .input('ptasa_catastrofico', sql.Numeric(18, 2), dataList.ptasa_catastrofico)
-            .input('msuma_recuperacion', sql.Numeric(18, 2), dataList.msuma_recuperacion)
-            .input('mprima_recuperacion', sql.Numeric(18, 2), dataList.mprima_recuperacion)
-            .input('mdeducible', sql.Numeric(18, 2), dataList.mdeducible)
             .input('cmoneda', sql.Int, dataList.cmoneda)
             .input('bactivo', sql.Bit, dataList.bactivo)
             .input('cusuariocreacion', sql.Int, dataList.cusuario)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into POPLAN (CPLAN, XPLAN, CTIPOPLAN, BINTERNACIONAL, BRCV, PTASA_CASCO, PTASA_CATASTROFICO, MSUMA_RECUPERACION, MPRIMA_RECUPERACION, MDEDUCIBLE, CPAIS, CCOMPANIA, MCOSTO, MCOSTO_MENSUAL, PARYS, PASEGURADORA, CMONEDA, BACTIVO, CUSUARIOCREACION, FCREACION ) values (@cplan, @xplan, @ctipoplan, @binternacional, @brcv, @ptasa_casco, @ptasa_catastrofico, @msuma_recuperacion, @mprima_recuperacion, @mdeducible, @cpais, @ccompania, @mcosto, @mcosto_mensual, @parys, @paseguradora, @cmoneda, @bactivo, @cusuariocreacion, @fcreacion)')
+            .query('insert into POPLAN (CPLAN, XPLAN, CTIPOPLAN, BRCV, CPAIS, CCOMPANIA, MCOSTO, CMONEDA, BACTIVO, CUSUARIOCREACION, FCREACION ) values (@cplan, @xplan, @ctipoplan, @brcv, @cpais, @ccompania, @mcosto, @cmoneda, @bactivo, @cusuariocreacion, @fcreacion)')
 
             return { result: result, cplan};
     }
@@ -14477,6 +14468,88 @@ storeProcedureFromClubQuery: async(data) => {
     }catch(err){
         return { error: err.message };
         }
+},
+searchContractArysQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('SELECT * FROM VWBUSCARCONTRATOSSERVICIOSARYS');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+getContractArysDataQuery: async(contractData) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cpais', sql.Numeric(4, 0), contractData.cpais ? contractData.cpais: undefined)
+            .input('ccompania', sql.Int, contractData.ccompania)
+            .input('ccontratoflota', sql.Int, contractData.ccontratoflota)
+            .query('select * from VWBUSCARSUCONTRATOFLOTADATA where CCONTRATOFLOTA = @ccontratoflota and CCOMPANIA = @ccompania');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+getContractArysOwnerDataQuery: async(contractData, cpropietario) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cpais', sql.Numeric(4, 0), contractData.cpais)
+            .input('ccompania', sql.Int, contractData.ccompania)
+            .input('cpropietario', sql.Int, cpropietario)
+            .query('select * from VWBUSCARPROPIETARIOXCONTRATOFLOTADATA where  CCOMPANIA = @ccompania and CPROPIETARIO = @cpropietario');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+getContractClientDataQuery: async(ccliente) => {
+    console.log(ccliente)
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccliente', sql.Int, ccliente)
+            .query('select * from VWBUSCARCLIENTEXCONTRATOFLOTADATA where CCLIENTE = @ccliente');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+getPlanData: async(cplan) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan', sql.Int, cplan)
+            .query('select * from POPLAN where CPLAN = @cplan');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+getServiceFromPlanQuery: async(cplan) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan', sql.Int, cplan)
+            .query('select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan');
+        //sql.close();
+        console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
 },
 }
 
