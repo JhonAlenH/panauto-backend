@@ -167,7 +167,7 @@ const operationUpdateGroup = async(authHeader, requestBody) => {
                 if(requestBody.modules.create && requestBody.modules.create.length > 0){
                     for(let i = 0; i < requestBody.modules.create.length; i++){
                         if(!helper.validateRequestObj(requestBody.modules.create[i], ['xmodulo', 'xruta', 'bactivo'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
-                        requestBody.modules.create[i].xmodulo = requestBody.modules.create[i].xmodulo.toUpperCase();
+                        requestBody.modules.create[i].xmodulo = requestBody.modules.create[i].xmodulo;
                     }
                     let createModulesByGroupUpdate = await bd.createModulesByGroupUpdateQuery(requestBody.modules.create, groupData).then((res) => res);
                     if(createModulesByGroupUpdate.error){ return { status: false, code: 500, message: createModulesByGroupUpdate.error }; }
@@ -176,7 +176,7 @@ const operationUpdateGroup = async(authHeader, requestBody) => {
                 if(requestBody.modules.update && requestBody.modules.update.length > 0){
                     for(let i = 0; i < requestBody.modules.update.length; i++){
                         if(!helper.validateRequestObj(requestBody.modules.update[i], ['cmodulo','xmodulo', 'xruta', 'bactivo'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
-                        requestBody.modules.update[i].xmodulo = requestBody.modules.update[i].xmodulo.toUpperCase();
+                        requestBody.modules.update[i].xmodulo = requestBody.modules.update[i].xmodulo;
                     }
                     let updateModulesByGroupUpdate = await bd.updateModulesByGroupUpdateQuery(requestBody.modules.update, groupData).then((res) => res);
                     if(updateModulesByGroupUpdate.error){ return { status: false, code: 500, message: updateModulesByGroupUpdate.error }; }
