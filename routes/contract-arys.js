@@ -370,4 +370,32 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
     }else{ return { status: false, code: 404, message: 'Fleet Contract not found.' }; }
 }
 
+router.route('/password').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationPassword(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationPassword' } });
+        });
+    }
+});
+
+const operationPassword = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let dataPassword = await bd.dataPasswordQuery().then((res) => res);
+    if(dataPassword.error){ return { status: false}; }
+    console.log(dataPassword.result.recordset[0].XCLAVE_CLUB)
+        return {    
+                status: true, 
+                xclave_club: dataPassword.result.recordset[0].XCLAVE_CLUB,
+               };
+}
+
 module.exports = router;

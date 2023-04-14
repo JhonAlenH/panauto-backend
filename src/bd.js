@@ -5179,6 +5179,19 @@ module.exports = {
             return { error: err.message };
         }
     },
+    townshipValrepQuery: async(searchData) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+                .input('cciudad', sql.Int, searchData.cciudad)
+                .input('cestado', sql.Int, searchData.cestado)
+                .query('select * from MACORREGIMIENTOS where CESTADO = @cestado and CCIUDAD = @cciudad');
+            //sql.close();
+            return { result: result };
+        }catch(err){
+            return { error: err.message };
+        }
+    },
     searchBrokerQuery: async(searchData) => {
         try{
             let query = `select * from VWBUSCARCORREDORDATA where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.xnombre ? " and XNOMBRE like '%" + searchData.xnombre + "%'" : '' }${ searchData.cactividadempresa ? " and CACTIVIDADEMPRESA = @cactividadempresa" : '' }${ searchData.ctipodocidentidad ? " and CTIPODOCIDENTIDAD = @ctipodocidentidad" : '' }${ searchData.xdocidentidad ? " and XDOCIDENTIDAD like '%" + searchData.xdocidentidad + "%'" : '' }${ searchData.xapellido ? " and XAPELLIDO like '%" + searchData.xapellido + "%'" : '' }${ searchData.ncorredor ? " and NCORREDOR = @ncorredor" : '' }`;
@@ -14546,6 +14559,17 @@ getServiceFromPlanQuery: async(cplan) => {
             .query('select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan');
         //sql.close();
         console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+dataPasswordQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('SELECT * FROM SECONFIG');
+        //sql.close();
         return { result: result };
     }catch(err){
         return { error: err.message };

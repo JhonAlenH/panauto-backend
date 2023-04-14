@@ -240,6 +240,38 @@ const operationValrepCity = async(authHeader, requestBody) => {
     return { status: true, list: jsonArray }
 }
 
+router.route('/township').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationValrepTownship(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationValrepTownship' } });
+        });
+    }
+});
+
+const operationValrepTownship = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cciudad: requestBody.cciudad,
+        cestado: requestBody.cestado
+    };
+    let query = await bd.townshipValrepQuery(searchData).then((res) => res);
+    if(query.error){ return { status: false, code: 500, message: query.error }; }
+    let jsonArray = [];
+    for(let i = 0; i < query.result.recordset.length; i++){
+        jsonArray.push({ ccorregimiento: query.result.recordset[i].CCORREGIMIENTO, xcorregimiento: query.result.recordset[i].XCORREGIMIENTO, bactivo: query.result.recordset[i].BACTIVO });
+    }
+    return { status: true, list: jsonArray }
+}
+
 router.route('/service-type').post((req, res) => {
     if(!req.header('Authorization')){ 
         res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
