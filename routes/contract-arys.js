@@ -216,13 +216,20 @@ const operationSearchContractArys = async(authHeader, requestBody) => {
             let xnombres = searchContractArys.result.recordset[i].XNOMBRE + ' ' + searchContractArys.result.recordset[i].XAPELLIDO
             let xvehiculo = searchContractArys.result.recordset[i].XMARCA + ' ' + searchContractArys.result.recordset[i].XMODELO + ' ' + searchContractArys.result.recordset[i].XVERSION
             let xidentificacion = searchContractArys.result.recordset[i].ICEDULA + ' ' + searchContractArys.result.recordset[i].XDOCIDENTIDAD
+            let xestadocontrato;
+            if(searchContractArys.result.recordset[i].CCAUSAANULACION){
+                xestadocontrato = 'Anulado'
+            }else{
+                xestadocontrato = 'Vigente'
+            }
             contractArysList.push({ 
                 xnombres: xnombres, 
                 xvehiculo: xvehiculo, 
                 fano: searchContractArys.result.recordset[i].CANO, 
                 identificacion: xidentificacion,
                 ccontratoflota: searchContractArys.result.recordset[i].CCONTRATOFLOTA,
-                xplaca: searchContractArys.result.recordset[i].XPLACA
+                xplaca: searchContractArys.result.recordset[i].XPLACA,
+                xestadocontrato: xestadocontrato
             });
         }
     }
@@ -406,6 +413,34 @@ const operationPassword = async(authHeader, requestBody) => {
                 status: true, 
                 xclave_club: dataPassword.result.recordset[0].XCLAVE_CLUB,
                };
+}
+
+router.route('/cancellation').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationCancellation(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationCancellation' } });
+        });
+    }
+});
+
+const operationCancellation = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let data = {
+        ccontratoflota: requestBody.ccontratoflota,
+        ccausaanulacion: requestBody.cancellationData.ccausaanulacion
+    }
+    let dataCancellation = await bd.dataCancellationQuery(data).then((res) => res);
+    if(dataCancellation.error){ return { status: false}; }
+    return { status: true};
 }
 
 module.exports = router;
