@@ -15577,6 +15577,7 @@ getContractArysDataQuery: async(contractData) => {
             .input('ccontratoflota', sql.Int, contractData.ccontratoflota)
             .query('select * from VWBUSCARSUCONTRATOFLOTADATA where CCONTRATOFLOTA = @ccontratoflota and CCOMPANIA = @ccompania');
         //sql.close();
+        console.log(result)
         return { result: result };
     }catch(err){
         console.log(err.message)
@@ -15645,6 +15646,21 @@ dataPasswordQuery: async() => {
             .query('SELECT * FROM SECONFIG');
         //sql.close();
         return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+dataCancellationQuery: async(data) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        let update = await pool.request()
+        .input('ccontratoflota', sql.Int, data.ccontratoflota)
+        .input('ccausaanulacion', sql.Int, data.ccausaanulacion)
+        .query('UPDATE SUCONTRATOFLOTA SET CCAUSAANULACION = @ccausaanulacion WHERE CCONTRATOFLOTA = @ccontratoflota');
+        rowsAffected = rowsAffected + update.rowsAffected;
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
     }catch(err){
         return { error: err.message };
     }
