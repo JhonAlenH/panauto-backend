@@ -273,11 +273,13 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
 
         let getPlan = await bd.getPlanData(getContractArysData.result.recordset[0].CPLAN);
         if(getPlan.error){ return { status: false, code: 500, message: getPlan.error }; }
+
         if(getPlan.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Fleet Contract Plan not found.' }; }
 
         let serviceList = [];
         let getServiceFromPlan = await bd.getServiceFromPlanQuery(getContractArysData.result.recordset[0].CPLAN);
         if(getServiceFromPlan.error){ return { status: false, code: 500, message: getServiceFromPlan.error }; }
+
         if(getServiceFromPlan.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Fleet Contract Plan not found.' }; }
         if(getServiceFromPlan.result.recordset != 0){
             for(let i = 0; i < getServiceFromPlan.result.recordset.length; i++){
@@ -286,7 +288,6 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                     xservicio: getServiceFromPlan.result.recordset[i].XSERVICIO,
                 })
             }
-            console.log(serviceList)
         }
         return {
             status: true,

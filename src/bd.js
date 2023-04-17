@@ -15516,6 +15516,7 @@ getContractArysDataQuery: async(contractData) => {
             .input('ccontratoflota', sql.Int, contractData.ccontratoflota)
             .query('select * from VWBUSCARSUCONTRATOFLOTADATA where CCONTRATOFLOTA = @ccontratoflota and CCOMPANIA = @ccompania');
         //sql.close();
+        console.log(result)
         return { result: result };
     }catch(err){
         console.log(err.message)
