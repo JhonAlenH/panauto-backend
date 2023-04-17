@@ -262,6 +262,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
         ccompania: requestBody.ccompania,
         ccontratoflota: requestBody.ccontratoflota
     };
+    let getCompanyContractData = await bd.getCompanyContractData();
+    if(getCompanyContractData.error){ return { status: false, code: 500, message: getCompanyContractData.error }; }
     let getContractArysData = await bd.getContractArysDataQuery(contractData).then((res) => res);
     if(getContractArysData.error){ return { status: false, code: 500, message: getContractArysData.error }; }
     if(getContractArysData.result.rowsAffected > 0){
@@ -298,6 +300,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
         }
         return {
             status: true,
+            xlogo: getCompanyContractData.result.recordset[0].xlogo,
             ccarga: getContractArysData.result.recordset[0].ccarga,
             ccontratoflota: getContractArysData.result.recordset[0].CCONTRATOFLOTA,
             xrecibo: getContractArysData.result.recordset[0].xrecibo,
