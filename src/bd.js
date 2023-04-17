@@ -14494,6 +14494,17 @@ searchContractArysQuery: async() => {
         return { error: err.message };
     }
 },
+getCompanyContractData: async() => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('select * from macompania where ccompania = 1')
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
 getContractArysDataQuery: async(contractData) => {
     try{
         let pool = await sql.connect(config);
