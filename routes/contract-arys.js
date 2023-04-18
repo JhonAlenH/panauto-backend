@@ -266,6 +266,12 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
     if(getCompanyContractData.error){ return { status: false, code: 500, message: getCompanyContractData.error }; }
     let getContractArysData = await bd.getContractArysDataQuery(contractData).then((res) => res);
     if(getContractArysData.error){ return { status: false, code: 500, message: getContractArysData.error }; }
+    let xestadocontrato; 
+    if(getContractArysData.result.recordset[0].CCAUSAANULACION){
+        xestadocontrato = 'Anulado'
+    }else{
+        xestadocontrato = 'Vigente'
+    }
     if(getContractArysData.result.rowsAffected > 0){
 
         let getContractArysOwnerData = await bd.getContractArysOwnerDataQuery(contractData, getContractArysData.result.recordset[0].CPROPIETARIO).then((res) => res);
@@ -385,7 +391,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
-            services: serviceList
+            services: serviceList,
+            xestadocontrato: xestadocontrato
         }
     }else{ return { status: false, code: 404, message: 'Fleet Contract not found.' }; }
 }
