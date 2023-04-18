@@ -216,13 +216,20 @@ const operationSearchContractArys = async(authHeader, requestBody) => {
             let xnombres = searchContractArys.result.recordset[i].XNOMBRE + ' ' + searchContractArys.result.recordset[i].XAPELLIDO
             let xvehiculo = searchContractArys.result.recordset[i].XMARCA + ' ' + searchContractArys.result.recordset[i].XMODELO + ' ' + searchContractArys.result.recordset[i].XVERSION
             let xidentificacion = searchContractArys.result.recordset[i].ICEDULA + ' ' + searchContractArys.result.recordset[i].XDOCIDENTIDAD
+            let xestadocontrato;
+            if(searchContractArys.result.recordset[i].CCAUSAANULACION){
+                xestadocontrato = 'Anulado'
+            }else{
+                xestadocontrato = 'Vigente'
+            }
             contractArysList.push({ 
                 xnombres: xnombres, 
                 xvehiculo: xvehiculo, 
                 fano: searchContractArys.result.recordset[i].CANO, 
                 identificacion: xidentificacion,
                 ccontratoflota: searchContractArys.result.recordset[i].CCONTRATOFLOTA,
-                xplaca: searchContractArys.result.recordset[i].XPLACA
+                xplaca: searchContractArys.result.recordset[i].XPLACA,
+                xestadocontrato: xestadocontrato
             });
         }
     }
@@ -255,8 +262,16 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
         ccompania: requestBody.ccompania,
         ccontratoflota: requestBody.ccontratoflota
     };
+    let getCompanyContractData = await bd.getCompanyContractData();
+    if(getCompanyContractData.error){ return { status: false, code: 500, message: getCompanyContractData.error }; }
     let getContractArysData = await bd.getContractArysDataQuery(contractData).then((res) => res);
     if(getContractArysData.error){ return { status: false, code: 500, message: getContractArysData.error }; }
+    let xestadocontrato; 
+    if(getContractArysData.result.recordset[0].CCAUSAANULACION){
+        xestadocontrato = 'Anulado'
+    }else{
+        xestadocontrato = 'Vigente'
+    }
     if(getContractArysData.result.rowsAffected > 0){
 
         let getContractArysOwnerData = await bd.getContractArysOwnerDataQuery(contractData, getContractArysData.result.recordset[0].CPROPIETARIO).then((res) => res);
@@ -273,11 +288,13 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
 
         let getPlan = await bd.getPlanData(getContractArysData.result.recordset[0].CPLAN);
         if(getPlan.error){ return { status: false, code: 500, message: getPlan.error }; }
+
         if(getPlan.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Fleet Contract Plan not found.' }; }
 
         let serviceList = [];
         let getServiceFromPlan = await bd.getServiceFromPlanQuery(getContractArysData.result.recordset[0].CPLAN);
         if(getServiceFromPlan.error){ return { status: false, code: 500, message: getServiceFromPlan.error }; }
+
         if(getServiceFromPlan.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Fleet Contract Plan not found.' }; }
         if(getServiceFromPlan.result.recordset != 0){
             for(let i = 0; i < getServiceFromPlan.result.recordset.length; i++){
@@ -286,10 +303,10 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                     xservicio: getServiceFromPlan.result.recordset[i].XSERVICIO,
                 })
             }
-            console.log(serviceList)
         }
         return {
             status: true,
+            xlogo: getCompanyContractData.result.recordset[0].xlogo,
             ccarga: getContractArysData.result.recordset[0].ccarga,
             ccontratoflota: getContractArysData.result.recordset[0].CCONTRATOFLOTA,
             xrecibo: getContractArysData.result.recordset[0].xrecibo,
@@ -374,7 +391,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
-            services: serviceList
+            services: serviceList,
+            xestadocontrato: xestadocontrato
         }
     }else{ return { status: false, code: 404, message: 'Fleet Contract not found.' }; }
 }
@@ -405,6 +423,34 @@ const operationPassword = async(authHeader, requestBody) => {
                 status: true, 
                 xclave_club: dataPassword.result.recordset[0].XCLAVE_CLUB,
                };
+}
+
+router.route('/cancellation').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationCancellation(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationCancellation' } });
+        });
+    }
+});
+
+const operationCancellation = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let data = {
+        ccontratoflota: requestBody.ccontratoflota,
+        ccausaanulacion: requestBody.cancellationData.ccausaanulacion
+    }
+    let dataCancellation = await bd.dataCancellationQuery(data).then((res) => res);
+    if(dataCancellation.error){ return { status: false}; }
+    return { status: true};
 }
 
 module.exports = router;

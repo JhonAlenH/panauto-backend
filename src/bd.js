@@ -21,7 +21,7 @@ module.exports = {
                 .input('xemail', sql.NVarChar, xemail)
                 .input('bactivo', sql.Bit, true)
                 .query('select * from VWAUTENTICACIONUSUARIO where XEMAIL = @xemail and BACTIVO = @bactivo');
-            //sql.close();
+            console.log(result)
             return { result: result };
         }
         catch(err){
@@ -12255,6 +12255,53 @@ module.exports = {
             return { error: err.message };
         }
     },
+    DataCreateAgendaClient: async(DataAgenda) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+                .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+                .input('xtitulo', sql.NVarChar, DataAgenda.xtitulo)
+                .input('fdesde', sql.Date, DataAgenda.fdesde)
+                .input('fhasta', sql.Date, DataAgenda.fhasta)
+                .input('xcondicion', sql.Bit, DataAgenda.condicion)
+                .query('insert into TRAGENDA (CPROPIETARIO, XTITULO, FDESDE, FHASTA, XCONDICION) values (@cpropietario,@xtitulo, @fdesde, @fhasta, @xcondicion)');
+                if(result.rowsAffected > 0){
+                let query = await pool.request()
+                    .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+                    .query('SELECT * FROM TRAGENDA  where CPROPIETARIO = @cpropietario');
+
+                return { result: query };
+            }else{
+                return { result: result };
+                
+            }
+        }catch(err){
+            console.log(err.message);
+            return { error: err.message };
+        }
+    },
+    DataAgendaClientSolicitud: async(DataAgenda) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+            .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+            .query('SELECT FCREACION,CSOLICITUDSERVICIO,XSERVICIO FROM VWBUSCARSOLICITUDSERVICIODATA  where CPROPIETARIO = @cpropietario');
+            return { result: result };
+        }catch(err){
+            return { error: err.message };
+        }
+    },
+    DataAgendaClient: async(DataAgenda) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+            .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+            .query('SELECT * FROM TRAGENDA  where CPROPIETARIO = @cpropietario');
+            return { result: result };
+        }catch(err){
+            return { error: err.message };
+        }
+    },
     sexValrepQuery: async() => {
         try{
             let pool = await sql.connect(config);
@@ -12337,19 +12384,22 @@ module.exports = {
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
+                .input('cpais', sql.Int, ClientData.cpais)
                 .input('cestado', sql.Int, ClientData.cestado)
                 .input('cciudad', sql.Int, ClientData.cciudad)
                 .input('cservicio', sql.Int, ClientData.cservicio)
                 .input('ctiposervicio', sql.Int, ClientData.ctiposervicio)
                 .input('cproveedor', sql.Int, ClientData.cproveedor)
+                .input('fsolicitud', sql.DateTime, ClientData.fsolicitud)
                 .input('cpropietario', sql.Int, ClientData.cpropietario)
                 .input('ccontratoflota', sql.Int, ClientData.ccontratoflota)
                 .input('isolicitante', sql.NVarChar, 'USR')
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('INSERT INTO evsolicitudservicio (CESTADO,CCIUDAD,CSERVICIO,CTIPOSERVICIO,CPROVEEDOR,CPROPIETARIO,ISOLICITANTE,CCONTRATOFLOTA,FCREACION) VALUES(@cestado,@cciudad,@cservicio,@ctiposervicio,@cproveedor, @cpropietario,@isolicitante,@ccontratoflota, @fcreacion)');
+                .query('INSERT INTO evsolicitudservicio (CPAIS, CESTADO,CCIUDAD,CSERVICIO,CTIPOSERVICIO,CPROVEEDOR,CPROPIETARIO,ISOLICITANTE,CCONTRATOFLOTA,FCREACION, FSOLICITUD) VALUES(@cpais,@cestado,@cciudad,@cservicio,@ctiposervicio,@cproveedor, @cpropietario,@isolicitante,@ccontratoflota, @fcreacion, @fsolicitud)');
             //sql.close();
             return { result: result };
         }catch(err){
+            console.error(err);
             return { error: err.message };
         }
     },
@@ -15507,6 +15557,17 @@ searchContractArysQuery: async() => {
         return { error: err.message };
     }
 },
+getCompanyContractData: async() => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('select * from macompania where ccompania = 1')
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
 getContractArysDataQuery: async(contractData) => {
     try{
         let pool = await sql.connect(config);
@@ -15516,6 +15577,7 @@ getContractArysDataQuery: async(contractData) => {
             .input('ccontratoflota', sql.Int, contractData.ccontratoflota)
             .query('select * from VWBUSCARSUCONTRATOFLOTADATA where CCONTRATOFLOTA = @ccontratoflota and CCOMPANIA = @ccompania');
         //sql.close();
+        console.log(result)
         return { result: result };
     }catch(err){
         console.log(err.message)
@@ -15584,6 +15646,21 @@ dataPasswordQuery: async() => {
             .query('SELECT * FROM SECONFIG');
         //sql.close();
         return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+dataCancellationQuery: async(data) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        let update = await pool.request()
+        .input('ccontratoflota', sql.Int, data.ccontratoflota)
+        .input('ccausaanulacion', sql.Int, data.ccausaanulacion)
+        .query('UPDATE SUCONTRATOFLOTA SET CCAUSAANULACION = @ccausaanulacion WHERE CCONTRATOFLOTA = @ccontratoflota');
+        rowsAffected = rowsAffected + update.rowsAffected;
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
     }catch(err){
         return { error: err.message };
     }
