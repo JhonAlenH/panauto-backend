@@ -13628,6 +13628,18 @@ dataContractsCollectedQuery: async(data) => {
         return { error: err.message };
     }
 },
+dataUserQuery: async(data) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cusuario', sql.Int, data.cusuario)
+            .query('SELECT * FROM SEUSUARIO WHERE CUSUARIO = @cusuario');
+        //sql.close()
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
 dataNotificationsQuery: async(data) => {
     try{
         let pool = await sql.connect(config);
@@ -13657,7 +13669,7 @@ amountsPaidQuery: async() => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT DATEPART(month, FDESDE_REC) as MES, SUM(MPRIMA_PAGADA) as MPRIMA_PAGADA FROM SURECIBO GROUP BY DATEPART(month, FDESDE_REC)');
+            .query('SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 7 GROUP BY DATEPART(month, FDESDE_POL)');
         //sql.close()
         return { result: result };
     }catch(err){
@@ -13668,7 +13680,7 @@ amountsOutstandingQuery: async() => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT DATEPART(month, FDESDE_REC) as MES, SUM(MPRIMA_ANUAL) as MPRIMA_ANUAL FROM SURECIBO GROUP BY DATEPART(month, FDESDE_REC)');
+            .query('SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 13 GROUP BY DATEPART(month, FDESDE_POL)');
         //sql.close()
         return { result: result };
     }catch(err){
