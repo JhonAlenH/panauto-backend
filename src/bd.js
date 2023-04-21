@@ -12339,6 +12339,17 @@ module.exports = {
             return { error: err.message };
         }
     },
+    BirthdayClient: async(DataAgenda) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+            .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+            .query('SELECT * FROM TRPROPIETARIO  where CPROPIETARIO = @cpropietario');
+            return { result: result };
+        }catch(err){
+            return { error: err.message };
+        }
+    },
     sexValrepQuery: async() => {
         try{
             let pool = await sql.connect(config);
