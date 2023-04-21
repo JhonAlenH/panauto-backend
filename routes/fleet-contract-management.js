@@ -1113,7 +1113,7 @@ const validateIsDate = (date, key, rowLine) => {
 const validateChargeContract = (contract, rowLine) => {
     for (const key in contract) {
         if (contract[key] === null || contract[key] === undefined) {
-            if (key !== 'FNAC' && key !== 'XTELEFONO1' && key !== 'XTELEFONO2' && key !== 'SUMA ASEGURADA OTROS') {
+            if (key !== 'APELLIDO' && key !== 'FNAC' && key !== 'XTELEFONO1' && key !== 'XTELEFONO2' && key !== 'IFRACCIONAMIENTO') {
                 return {
                     error: `Error, la columna ${key} de la fila ${rowLine + 2} No acepta valores nulos. Por favor arréglelo e intente nuevamente.`
                 }
@@ -1129,23 +1129,15 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'POLIZA':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CERTIFICADO':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
             case 'Rif_Cliente':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break;
+            case 'POLIZA':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1175,6 +1167,14 @@ const validateChargeContract = (contract, rowLine) => {
                         return {
                             error: error
                         }
+                    }
+                }
+                break;
+            case 'CMETODOLOGIAPAGO':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
                     }
                 }
                 break;
@@ -1218,14 +1218,6 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'PTOS':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
             case 'EMAIL':
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contract[key])) {
                     return {
@@ -1257,7 +1249,23 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'CASEGURADORA':
+            case 'CPROVINCIA':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break;
+            case 'CDISTRITO':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break;
+            case 'CCORREGIMIENTO':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1273,7 +1281,7 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'SUMA ASEGURADORA OTROS':
+            case 'PRIMA':
                 if (contract[key]){
                     error = validateIsFloat(contract[key], key, rowLine).error
                     if (error) {
@@ -1283,8 +1291,40 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'MONTO DEDUCIBLE':
-                error = validateIsFloat(contract[key], key, rowLine).error
+            case 'CASEGURADORA':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break;
+            case 'CTIPOVEHICULO':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break; 
+            case 'CCLASE':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break;
+            case 'CUSO':
+            error = validateIsInteger(contract[key], key, rowLine).error;
+            if (error) {
+                return {
+                    error: error
+                }
+            }
+            break;
+            case 'CCORREDOR':
+                error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
                         error: error
@@ -1308,6 +1348,14 @@ const validateChargeContract = (contract, rowLine) => {
                 }
                 break;
             default: break;
+            case 'XZONA_POSTAL':
+                error = validateIsInteger(contract[key], key, rowLine).error;
+                if (error) {
+                    return {
+                        error: error
+                    }
+                }
+                break;
         }
     }
     return true;
@@ -1334,23 +1382,18 @@ router.route('/charge-contracts').post((req, res) => {
 const operationChargeContracts = async(authHeader, requestBody) => { 
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     if (requestBody.parsedData.length < 1) { return { status: false, code: 400, message: 'No puede guardar un archivo vacío' } }
+    console.log(requestBody.parsedData);
     for (let i = 0; i < requestBody.parsedData.length; i++) {
         let error = validateChargeContract(requestBody.parsedData[i], i).error;
         if (error) { console.log(error); return { status: false, code: 400, message: error } };
     }
-    let getLastBatchCode = await bd.getLastParentPolicyBatchQuery(requestBody.ccarga).then((res) => res);
-    if (getLastBatchCode.error){ console.log(getLastBatchCode.error); return { status: false, code: 500, message: getLastBatchCode.error }; }
-    let createBatchQuery = await bd.createBatchQuery(requestBody.ccarga, requestBody.cusuario, requestBody.xobservacion, getLastBatchCode.result.clote);
-    if (createBatchQuery.error){ console.log(createBatchQuery.error); return { status: false, code: 500, message: createBatchQuery.error }; } 
-    let maxId = await bd.getFleetMaxId();
-    if (maxId.error){ return { status: 500, message: maxId.error }; }
-    let processCharge = await bd.createChargeQuery(requestBody.parsedData, requestBody.ccarga, createBatchQuery.result.clote, maxId + 1);
+    let processCharge = await bd.createChargeQuery(requestBody.parsedData);
     if(processCharge.error){ return { status: false, code: 500, message: processCharge.error }; }
     if(processCharge.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Internal Error.' }; }
     return {
         status: true,
         code: 200,
-        message: `Se ha generado el lote N° ${getLastBatchCode.result.clote + 1} - ${requestBody.xobservacion} exitosamente`
+        message: `Se ha generado la carga exitosamente`
     }
 }
 
