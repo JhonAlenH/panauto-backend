@@ -12284,6 +12284,43 @@ module.exports = {
             return { error: err.message };
         }
     },
+    UploadDocAgendaClient: async(DataAgenda) => {
+        try{
+            let pool = await sql.connect(config);
+            let upload = await pool.request()
+                .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+                .input('xarchivo', sql.NVarChar, DataAgenda.xarchivo)
+                .input('itipodocumento', sql.NVarChar, DataAgenda.itipodocumento)
+                .input('fvencimiento', sql.Date, DataAgenda.fvencimiento)
+                .input('cusuariocreacion', sql.Bit, DataAgenda.cusuariocreacion)
+                .input('fcreacion', sql.DateTime, new Date())
+                .query('insert into MADOCPROPIETARIO (CPROPIETARIO, XRUTA, ITIPODOCUMENTO, FVENCIMIENTO, CUSUARIOCREACION, FCREACION) values (@cpropietario,@xarchivo, @itipodocumento, @fvencimiento, @cusuariocreacion,@fcreacion )');
+                if(upload.rowsAffected > 0){
+                    let pool = await sql.connect(config);
+                    let uploadagend = await pool.request()
+                    .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+                    .input('itipodocumento', sql.NVarChar, ('Renovacion de '+DataAgenda.itipodocumento) )
+                    .input('fvencimiento', sql.Date, DataAgenda.fvencimiento)
+                    .input('cusuariocreacion', sql.Bit, DataAgenda.cusuariocreacion)
+                    .input('fcreacion', sql.DateTime, new Date())
+                    .query('insert into TRAGENDA (CPROPIETARIO, XTITULO, FDESDE, FHASTA, CUSUARIOCREACION, FCREACION) values (@cpropietario, @itipodocumento, @fvencimiento, @fvencimiento, @cusuariocreacion,@fcreacion )');
+                    if(uploadagend.rowsAffected > 0){
+                        let query = await pool.request()
+                            .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+                            .query('SELECT * FROM MADOCPROPIETARIO  where CPROPIETARIO = @cpropietario');
+        
+                        return { result: query };
+                    
+                }
+                }else{
+                return { result: result };
+                
+            }
+        }catch(err){
+            console.log(err.message);
+            return { error: err.message };
+        }
+    },
     DataAgendaClientSolicitud: async(DataAgenda) => {
         try{
             let pool = await sql.connect(config);
