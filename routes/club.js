@@ -221,6 +221,7 @@ const operationSearchDataPlan = async(requestBody) => {
         status: true, 
         xplan: client.result.recordset[0].XPLAN,
         cplan: client.result.recordset[0].CPLAN,
+        mcosto: client.result.recordset[0].MCOSTO,
         ccontratoflota: client.result.recordset[0].CCONTRATOFLOTA,
         listTypeService : DataTypeService,
     }
