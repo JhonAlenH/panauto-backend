@@ -138,7 +138,7 @@ const operationSearchService = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     let ctiposervicio =  requestBody.ctiposervicio
 
-    let searchService = await bd.getServiceFromPlanQuery(ctiposervicio).then((res) => res);
+    let searchService = await bd.getServiceFromPlanServiceQuery(ctiposervicio).then((res) => res);
     if(searchService.error){ return  { status: false, code: 500, message: searchService.error }; }
     if(searchService.result.rowsAffected == 0){ return { status: false, code: 404, message: 'Plan not found.' }; }
     let jsonList = [];

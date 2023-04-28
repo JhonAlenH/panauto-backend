@@ -3836,6 +3836,7 @@ module.exports = {
                 return { result: result };
             }
         }catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -9767,7 +9768,7 @@ module.exports = {
             let result = await pool.request()
                 //.input('cpais', sql.Numeric(4, 0), searchData.cpais)
                 .input('ccompania', sql.Int, searchData.ccompania)
-                .query('select CTIPONOTIFICACION, XTIPONOTIFICACION, BACTIVO from MATIPONOTIFICACION where CCOMPANIA = @ccompania AND CPAIS = 58');
+                .query('select CTIPONOTIFICACION, XTIPONOTIFICACION, BACTIVO from MATIPONOTIFICACION where CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -9782,6 +9783,7 @@ module.exports = {
                 .input('ccompania', sql.Int, searchData.ccompania)
                 .query('select CCAUSASINIESTRO, XCAUSASINIESTRO, BACTIVO from MACAUSASINIESTRO where CCOMPANIA = ccompania AND CPAIS = @cpais');
             //sql.close();
+            console.log(result)
             return { result: result };
         }catch(err){
             return { error: err.message };
@@ -15696,6 +15698,19 @@ getServiceFromPlanQuery: async(cplan) => {
         let result = await pool.request()
             .input('cplan', sql.Int, cplan)
             .query('select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan');
+        //sql.close();
+        console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getServiceFromPlanServiceQuery: async(ctiposervicio) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ctiposervicio', sql.Int, ctiposervicio)
+            .query('select * from MASERVICIO where CTIPOSERVICIO = @ctiposervicio');
         //sql.close();
         console.log(result)
         return { result: result };
