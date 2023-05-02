@@ -13966,25 +13966,23 @@ createServicePlanRcvQuery: async(dataList, plan) => {
         return { error: err.message };
     }
 },
-createPlanRcvQuery: async(dataList, rcv, plan) => {
+createPlanRcvQuery: async(dataList, rcv, cplan) => {
     try{
         let rowsAffected = 0;
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .input('cplan_rc', sql.Int, plan.cplan)
-            .input('xplan_rc', sql.NVarChar, plan.xplan)
-            .input('msuma_dc', sql.Numeric(22, 2), rcv.msuma_dc)
-            .input('msuma_personas', sql.Numeric(22, 2), rcv.msuma_personas)
-            .input('msuma_exceso', sql.Numeric(22, 2), rcv.msuma_exceso)
-            .input('msuma_dp', sql.Numeric(22, 2), rcv.msuma_dp)
-            .input('msuma_muerte', sql.Numeric(22, 2), rcv.msuma_muerte)
-            .input('msuma_invalidez', sql.Numeric(22, 2), rcv.msuma_invalidez)
-            .input('msuma_gm', sql.Numeric(22, 2), rcv.msuma_gm)
-            .input('msuma_gf', sql.Numeric(22, 2), rcv.msuma_gf)
-            .input('bactivo', sql.Bit, dataList.bactivo)
+            .input('cplan', sql.Int, cplan)
+            .input('mlesioncor', sql.NVarChar, rcv.mlesioncor)
+            .input('mlesioncor_per', sql.NVarChar, rcv.mlesioncor_per)
+            .input('mdanosp_ajena', sql.NVarChar, rcv.mdanosp_ajena)
+            .input('mgastos_medicos', sql.NVarChar, rcv.mgastos_medicos)
+            .input('mmuerte', sql.NVarChar, rcv.mmuerte)
+            .input('mservicios_fune', sql.NVarChar, rcv.mservicios_fune)
+            .input('mprima_sin_rep', sql.NVarChar, rcv.mprima_sin_rep)
+            .input('mimpuesto', sql.NVarChar, rcv.mimpuesto)
             .input('cusuariocreacion', sql.Int, dataList.cusuario)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('INSERT INTO PRPLAN_RC (CPLAN_RC, XPLAN_RC, MSUMA_DC, MSUMA_PERSONAS, MSUMA_EXCESO, MSUMA_DP, MSUMA_MUERTE, MSUMA_INVALIDEZ, MSUMA_GM, MSUMA_GF, BACTIVO, FCREACION, CUSUARIOCREACION  ) values (@cplan_rc, @xplan_rc, @msuma_personas, @msuma_exceso, @msuma_dp, @msuma_muerte, @msuma_invalidez, @msuma_dc, @msuma_gm, @msuma_gf, @bactivo, @fcreacion, @cusuariocreacion)')
+            .query('INSERT INTO POCOBERTURAS (CPLAN, MLESIONCOR, MLESIONCOR_PER, MDANOSP_AJENA, MGASTOS_MEDICOS, MMUERTE, MSERVICIOS_FUNE, MPRIMA_SIN_REP, MIMPUESTO, FCREACION, CUSUARIOCREACION) values (@cplan, @mlesioncor, @mlesioncor_per, @mdanosp_ajena, @mgastos_medicos, @mmuerte, @mservicios_fune, @mprima_sin_rep, @mimpuesto, @fcreacion, @cusuariocreacion)')
 
             return { result: result};
     }

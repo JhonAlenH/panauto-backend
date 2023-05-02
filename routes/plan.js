@@ -225,6 +225,11 @@ const operationCreatePlan = async(authHeader, requestBody) => {
                 let updateServiceFromQuantity = await bd.updateServiceFromQuantityQuery(quantityList, cplan).then((res) => res);
                 if(updateServiceFromQuantity.error){ return  { status: false, code: 500, message: updateServiceFromQuantity.error }; }
             }
+            if(requestBody.rcv){
+                let rcv = requestBody.rcv
+                let createPlanRcv = await bd.createPlanRcvQuery(dataList, rcv, cplan).then((res) => res);
+                if(createPlanRcv.error){ return  { status: false, code: 500, message: createPlanRcv.error }; }
+            }
             let searchLastPlan = await bd.searchLastPlanQuery().then((res) => res);
             if(searchLastPlan.error){ return  { status: false, code: 500, message: searchLastPlan.error }; }
             if(createPlan.result.rowsAffected > 0){return {status: true, cplan: searchLastPlan.result.recordset[0].CPLAN, list: apovList}}
