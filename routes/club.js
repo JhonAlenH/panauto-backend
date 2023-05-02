@@ -221,6 +221,7 @@ const operationSearchDataPlan = async(requestBody) => {
         status: true, 
         xplan: client.result.recordset[0].XPLAN,
         cplan: client.result.recordset[0].CPLAN,
+        mcosto: client.result.recordset[0].MCOSTO,
         ccontratoflota: client.result.recordset[0].CCONTRATOFLOTA,
         listTypeService : DataTypeService,
     }
@@ -429,19 +430,33 @@ router.route('/search/client-agenda').post((req, res) => {
 });
 
 const SearcheAgenda = async(requestBody) => {
+
     let DataAgenda = {
         cpropietario: requestBody.cpropietario,
     };
 
-    let AgendaEvent = await bd.DataAgendaClientSolicitud(DataAgenda).then((res) => res);
-    let Agenda = await bd.DataAgendaClient(DataAgenda).then((res) => res);
+    // Declaracion de variables con la ejecucion de los querys
+    let AgendaEvent = await bd.DataAgendaClientSolicitud(DataAgenda).then((res) => res); //busqueda de solicitudes de servicio
+
+    let Agenda = await bd.DataAgendaClient(DataAgenda).then((res) => res); //busqueda de eventos de la agenda
+
+    let BirthdayEvent = await bd.BirthdayClient(DataAgenda).then((res) => res); //busqueda de fecha de nacimiento
+
+    //obtener fecha actual
+
+    const DateNow = new Date().toLocaleDateString('en-us', { day:"numeric", month:"numeric"})
+
+
     if(AgendaEvent.error){ return { status: false, code: 500, message: Agenda.error }; }
+
     if(AgendaEvent.rowsAffected == 0){ return { status: false, code: 404 }; }
-    
+
+     // primero entra a la busqueda de solicitudes de servicio (busca solicitudes,eventos,fecha de nacimiento)
     if(Agenda.result.rowsAffected > 0){
-        let events = [];
+        let agenda = [];
+
         for(let i = 0; i < Agenda.result.recordset.length; i++){
-            events.push({
+            agenda.push({
                 id: Agenda.result.recordset[i].ID, 
                 title: Agenda.result.recordset[i].XTITULO,
                 start: Agenda.result.recordset[i].FDESDE.toISOString().replace(/T.*$/, ''),
@@ -449,11 +464,14 @@ const SearcheAgenda = async(requestBody) => {
                 allDay : Agenda.result.recordset[i].XCONDICION
             });
         }
-        let datagenda = events 
+
+        let datagenda = agenda 
+        //si la agenda contiene solicitudes de servcio procede a buscar los eventos guardados de la agenda
         if(AgendaEvent.result.rowsAffected > 0){
-            let events = [];
+            let solicitud = [];
+
             for(let i = 0; i < AgendaEvent.result.recordset.length; i++){
-                events.push({
+                solicitud.push({
                     id: AgendaEvent.result.recordset[i].CSOLICITUDSERVICIO, 
                     title:AgendaEvent.result.recordset[i].XSERVICIO, 
                     start: AgendaEvent.result.recordset[i].FCREACION.toISOString().replace(/T.*$/, ''),
@@ -461,23 +479,81 @@ const SearcheAgenda = async(requestBody) => {
                 });
             }
 
-            const datagendbr = events
-            const dataeventdbr = datagenda
-            const list = datagendbr.concat(dataeventdbr);
+            let agendaEvent = solicitud
+
+            const datebirtday = BirthdayEvent.result.recordset[0].FNACIMIENTO
+            const dateprocess = datebirtday.toLocaleDateString('en-us', { day:"numeric", month:"numeric"})
+            // valida en comparacion con la fecha actual si el usuario esta de cumpleaños o no
+            if(dateprocess == DateNow){
+                    const name = BirthdayEvent.result.recordset[0].XNOMBRE 
+                    const apellido = BirthdayEvent.result.recordset[0].XAPELLIDO
+
+                    let query = await bd.companyValrepQuery().then((res) => res);
+                    const company =  query.result.recordset[0].XCOMPANIA
+                    const message = 'En ' + company + ' sabemos que estás de cumpleaños, por eso te deseamos que pases un excelente día rodeado de tus seres queridos'
+                    const datagendbr = datagenda
+                    const dataeventdbr = agendaEvent
+                    const list = datagendbr.concat(dataeventdbr);
+                        return { 
+                            status: true, 
+                            list: list,
+                            message : message,
+                            name: name,
+                            apellido: apellido
+                        };  
+            }else{
+                const datagendbr = datagenda
+                const dataeventdbr = agendaEvent
+                const list = datagendbr.concat(dataeventdbr);
+                    return { 
+                        status: true, 
+                        list: list
+                    }; 
+            }   
+        }
+    }
+    // sino entra en la busqueda de eventos de la agenda (busca eventos y fecha de nacimiento)
+     else{
+        let solicitud = [];
+
+        for(let i = 0; i < AgendaEvent.result.recordset.length; i++){
+            solicitud.push({
+                id: AgendaEvent.result.recordset[i].CSOLICITUDSERVICIO, 
+                title:AgendaEvent.result.recordset[i].XSERVICIO, 
+                start: AgendaEvent.result.recordset[i].FCREACION.toISOString().replace(/T.*$/, ''),
+                end: AgendaEvent.result.recordset[i].FCREACION.toISOString().replace(/T.*$/, ''),
+            });
+        }
+
+        let list = solicitud
+
+        const datebirtday = BirthdayEvent.result.recordset[0].FNACIMIENTO
+        const dateprocess = datebirtday.toLocaleDateString('en-us', { day:"numeric", month:"numeric"})
+        // valida en comparacion con la fecha actual si el usuario esta de cumpleaños o no
+        if(dateprocess == DateNow){
+            const name = BirthdayEvent.result.recordset[0].XNOMBRE 
+            const apellido = BirthdayEvent.result.recordset[0].XAPELLIDO
+
+            let query = await bd.companyValrepQuery().then((res) => res);
+            const company =  query.result.recordset[0].XCOMPANIA
+            const message = 'En ' + company + ' sabemos que estás de cumpleaños, por eso te deseamos que pases un excelente día rodeado de tus seres queridos'
+
+                return { 
+                    status: true, 
+                    list: list,
+                    message : message,
+                    name: name,
+                    apellido: apellido
+                };  
+        }
             return { 
                 status: true, 
                 list: list
-            };}
-    
-    }
-    
-    
-
+            }; 
+        }
     return { 
     status: false, 
-
 };
-
 
 }
 
@@ -517,5 +593,6 @@ const UploadDocumentClub = async(requestBody) => {
 
 
 }
+
 
 module.exports = router;

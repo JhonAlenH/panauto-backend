@@ -3836,6 +3836,7 @@ module.exports = {
                 return { result: result };
             }
         }catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -9767,7 +9768,7 @@ module.exports = {
             let result = await pool.request()
                 //.input('cpais', sql.Numeric(4, 0), searchData.cpais)
                 .input('ccompania', sql.Int, searchData.ccompania)
-                .query('select CTIPONOTIFICACION, XTIPONOTIFICACION, BACTIVO from MATIPONOTIFICACION where CCOMPANIA = @ccompania AND CPAIS = 58');
+                .query('select CTIPONOTIFICACION, XTIPONOTIFICACION, BACTIVO from MATIPONOTIFICACION where CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -9782,6 +9783,7 @@ module.exports = {
                 .input('ccompania', sql.Int, searchData.ccompania)
                 .query('select CCAUSASINIESTRO, XCAUSASINIESTRO, BACTIVO from MACAUSASINIESTRO where CCOMPANIA = ccompania AND CPAIS = @cpais');
             //sql.close();
+            console.log(result)
             return { result: result };
         }catch(err){
             return { error: err.message };
@@ -12343,6 +12345,17 @@ module.exports = {
             return { error: err.message };
         }
     },
+    BirthdayClient: async(DataAgenda) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+            .input('cpropietario', sql.Int, DataAgenda.cpropietario)
+            .query('SELECT * FROM TRPROPIETARIO  where CPROPIETARIO = @cpropietario');
+            return { result: result };
+        }catch(err){
+            return { error: err.message };
+        }
+    },
     sexValrepQuery: async() => {
         try{
             let pool = await sql.connect(config);
@@ -13669,6 +13682,18 @@ dataContractsCollectedQuery: async(data) => {
         return { error: err.message };
     }
 },
+dataUserQuery: async(data) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cusuario', sql.Int, data.cusuario)
+            .query('SELECT * FROM SEUSUARIO WHERE CUSUARIO = @cusuario');
+        //sql.close()
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
 dataNotificationsQuery: async(data) => {
     try{
         let pool = await sql.connect(config);
@@ -13698,7 +13723,7 @@ amountsPaidQuery: async() => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT DATEPART(month, FDESDE_REC) as MES, SUM(MPRIMA_PAGADA) as MPRIMA_PAGADA FROM SURECIBO GROUP BY DATEPART(month, FDESDE_REC)');
+            .query('SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 7 GROUP BY DATEPART(month, FDESDE_POL)');
         //sql.close()
         return { result: result };
     }catch(err){
@@ -13709,7 +13734,7 @@ amountsOutstandingQuery: async() => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT DATEPART(month, FDESDE_REC) as MES, SUM(MPRIMA_ANUAL) as MPRIMA_ANUAL FROM SURECIBO GROUP BY DATEPART(month, FDESDE_REC)');
+            .query('SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 13 GROUP BY DATEPART(month, FDESDE_POL)');
         //sql.close()
         return { result: result };
     }catch(err){
@@ -13941,25 +13966,23 @@ createServicePlanRcvQuery: async(dataList, plan) => {
         return { error: err.message };
     }
 },
-createPlanRcvQuery: async(dataList, rcv, plan) => {
+createPlanRcvQuery: async(dataList, rcv, cplan) => {
     try{
         let rowsAffected = 0;
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .input('cplan_rc', sql.Int, plan.cplan)
-            .input('xplan_rc', sql.NVarChar, plan.xplan)
-            .input('msuma_dc', sql.Numeric(22, 2), rcv.msuma_dc)
-            .input('msuma_personas', sql.Numeric(22, 2), rcv.msuma_personas)
-            .input('msuma_exceso', sql.Numeric(22, 2), rcv.msuma_exceso)
-            .input('msuma_dp', sql.Numeric(22, 2), rcv.msuma_dp)
-            .input('msuma_muerte', sql.Numeric(22, 2), rcv.msuma_muerte)
-            .input('msuma_invalidez', sql.Numeric(22, 2), rcv.msuma_invalidez)
-            .input('msuma_gm', sql.Numeric(22, 2), rcv.msuma_gm)
-            .input('msuma_gf', sql.Numeric(22, 2), rcv.msuma_gf)
-            .input('bactivo', sql.Bit, dataList.bactivo)
+            .input('cplan', sql.Int, cplan)
+            .input('mlesioncor', sql.NVarChar, rcv.mlesioncor)
+            .input('mlesioncor_per', sql.NVarChar, rcv.mlesioncor_per)
+            .input('mdanosp_ajena', sql.NVarChar, rcv.mdanosp_ajena)
+            .input('mgastos_medicos', sql.NVarChar, rcv.mgastos_medicos)
+            .input('mmuerte', sql.NVarChar, rcv.mmuerte)
+            .input('mservicios_fune', sql.NVarChar, rcv.mservicios_fune)
+            .input('mprima_sin_rep', sql.NVarChar, rcv.mprima_sin_rep)
+            .input('mimpuesto', sql.NVarChar, rcv.mimpuesto)
             .input('cusuariocreacion', sql.Int, dataList.cusuario)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('INSERT INTO PRPLAN_RC (CPLAN_RC, XPLAN_RC, MSUMA_DC, MSUMA_PERSONAS, MSUMA_EXCESO, MSUMA_DP, MSUMA_MUERTE, MSUMA_INVALIDEZ, MSUMA_GM, MSUMA_GF, BACTIVO, FCREACION, CUSUARIOCREACION  ) values (@cplan_rc, @xplan_rc, @msuma_personas, @msuma_exceso, @msuma_dp, @msuma_muerte, @msuma_invalidez, @msuma_dc, @msuma_gm, @msuma_gf, @bactivo, @fcreacion, @cusuariocreacion)')
+            .query('INSERT INTO POCOBERTURAS (CPLAN, MLESIONCOR, MLESIONCOR_PER, MDANOSP_AJENA, MGASTOS_MEDICOS, MMUERTE, MSERVICIOS_FUNE, MPRIMA_SIN_REP, MIMPUESTO, FCREACION, CUSUARIOCREACION) values (@cplan, @mlesioncor, @mlesioncor_per, @mdanosp_ajena, @mgastos_medicos, @mmuerte, @mservicios_fune, @mprima_sin_rep, @mimpuesto, @fcreacion, @cusuariocreacion)')
 
             return { result: result};
     }
@@ -15673,6 +15696,19 @@ getServiceFromPlanQuery: async(cplan) => {
         let result = await pool.request()
             .input('cplan', sql.Int, cplan)
             .query('select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan');
+        //sql.close();
+        console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getServiceFromPlanServiceQuery: async(ctiposervicio) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ctiposervicio', sql.Int, ctiposervicio)
+            .query('select * from MASERVICIO where CTIPOSERVICIO = @ctiposervicio');
         //sql.close();
         console.log(result)
         return { result: result };
