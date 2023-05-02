@@ -76,7 +76,13 @@ const operationDetailCollection = async(authHeader, requestBody) => {
     let detailCollection = await bd.detailCollectionQuery(searchData).then((res) => res);
     if(detailCollection.error){ return { status: false}; }
         let xvehiculo = detailCollection.result.recordset[0].XMARCA + ' ' + detailCollection.result.recordset[0].XMODELO + ' ' + detailCollection.result.recordset[0].XVERSION
-        let mprima = detailCollection.result.recordset[0].MPRIMA_ANUAL + ' ' + detailCollection.result.recordset[0].xmoneda
+        let mprima
+        if(detailCollection.result.recordset[0].MPRIMA_ANUAL){
+            mprima = detailCollection.result.recordset[0].MPRIMA_ANUAL + ' ' + detailCollection.result.recordset[0].xmoneda
+        }else{
+            mprima = detailCollection.result.recordset[0].MPRIMA_PAGADA + ' ' + detailCollection.result.recordset[0].xmoneda
+        }
+        
         
         return {    
                 status: true, 
@@ -91,7 +97,7 @@ const operationDetailCollection = async(authHeader, requestBody) => {
                 xplaca: detailCollection.result.recordset[0].XPLACA,
                 xestatusgeneral: detailCollection.result.recordset[0].XESTATUSGENERAL,
                 mprima: mprima,
-                mprima_pagada: detailCollection.result.recordset[0].MPRIMA_ANUAL,
+                mprima_pagada: detailCollection.result.recordset[0].MPRIMA_PAGADA,
                 ccodigo_ubii: detailCollection.result.recordset[0].CCODIGO_UBII,
                 ccontratoflota: detailCollection.result.recordset[0].CCONTRATOFLOTA
                };
