@@ -62,8 +62,7 @@ router.route('/detail').post((req, res) => {
 const operationDetailPlanRcv = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     let searchData = {
-        cplan_rc: requestBody.cplan_rc,
-        ctarifa: requestBody.ctarifa
+        cplan_rc: requestBody.cplan_rc
     }
     
     let detailPlanRcv = await bd.detailPlanRcvQuery(searchData).then((res) => res);
@@ -145,6 +144,63 @@ const operationUpdatePlanRcv = async(authHeader, requestBody) => {
     if(updatePlanRcvDetail.error){ return { status: false, code: 500, message: updatePlanRcvDetail.error }; }
     if(updatePlanRcvDetail.result.rowsAffected > 0){ return { status: true, cplan_rc: dataPlanRcv.cplan_rc }; }
     else{ return { status: false, code: 404, message: 'Service Order not found.' }; }
+}
+
+
+router.route('/create').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationCreatePlanRcv(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationCreatePlanRcv' } });
+        });
+    }
+});
+
+const operationCreatePlanRcv = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let dataPlanRcv = {
+        cusuariocreacion: requestBody.cusuario,
+        datos: requestBody.datos,
+        xdescripcion: requestBody.xdescripcion,
+        mcosto: requestBody.mcosto,
+    }
+    let cplan_rc;
+    let planList = [];
+    let query = await bd.searchCodePlanRcvQuery(dataPlanRcv).then((res) => res);
+    cplan_rc = query.result.recordset[0].CPLAN_RC + 1;
+
+    if(query.result.recordset){
+        let createPlan = await bd.createPlanRcvQuery(dataPlanRcv).then((res) => res);
+        if(createPlan.error){ return { status: false, code: 500, message: createPlan.error }; }
+
+        if(dataPlanRcv.datos){
+            for(let i = 0; i < dataPlanRcv.datos.length; i++){
+                planList.push({
+                    xcobertura: dataPlanRcv.datos[i].xcobertura,
+                    xsoat: dataPlanRcv.datos[i].xsoat,
+                })
+            }
+            let createPlanCoverage = await bd.createPlanCoverageRcvQuery(cplan_rc, planList, dataPlanRcv).then((res) => res);
+            if(createPlanCoverage.error){ return { status: false, code: 500, message: createPlanCoverage.error }; }
+        }
+
+        let searchLastPlanRcv = await bd.searchLastPlanRcvQuery().then((res) => res);
+        if(searchLastPlanRcv.error){ return  { status: false, code: 500, message: searchLastPlanRcv.error }; }
+        if(searchLastPlanRcv.result.rowsAffected > 0){return {status: true, cplan_rc: searchLastPlanRcv.result.recordset[0].CPLAN_RC}}
+    }else{
+        return{status: false, code: 404, message: 'Error de Conexión'}
+    }
+    
+    
 }
 
 module.exports = router;
