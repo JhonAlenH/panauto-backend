@@ -1698,6 +1698,7 @@ module.exports = {
                 return { result: result };
             }
         }catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -12678,7 +12679,7 @@ module.exports = {
     },
     searchPlanRcvQuery: async(cplan_rc) => {
         try{
-            let query = `select * from PRPLAN_RC_DETALLE where BACTIVO = @bactivo${cplan_rc ? " and CPLAN_RC = @cplan_rc" : '' }`;
+            let query = `select * from POPLAN_RC where BACTIVO = @bactivo${cplan_rc ? " and CPLAN_RC = @cplan_rc" : '' }`;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('bactivo', sql.Bit, 1)
@@ -12695,54 +12696,41 @@ module.exports = {
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('cplan_rc', sql.Int, searchData.cplan_rc)
-                .input('ctarifa', sql.Int, searchData.ctarifa)
-                .query('select * from VWBUSCARPLANESRCV where CPLAN_RC = @cplan_rc AND CTARIFA = @ctarifa');
+                .query('select * from POPLAN_RC_DETALLE where CPLAN_RC = @cplan_rc');
             //sql.close();
             return { result: result };
         }catch(err){
             return { error: err.message };
         }
     },
-    updatePlanRcvQuery: async(dataPlanRcv) => {
+    detailPlanQuery: async(searchData) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+                .input('cplan_rc', sql.Int, searchData.cplan_rc)
+                .query('select * from POPLAN_RC where CPLAN_RC = @cplan_rc');
+            //sql.close();
+            console.log(result)
+            return { result: result };
+        }catch(err){
+            return { error: err.message };
+        }
+    },
+    updatePlanRcvQuery: async(dataPlanRcv, planList) => {
         try{
             let rowsAffected = 0;
             let pool = await sql.connect(config);
-            let update = await pool.request()
-                .input('cplan_rc', sql.Int, dataPlanRcv.cplan_rc)
-                .input('ctarifa', sql.Int, dataPlanRcv.ctarifa)
-                .input('xclase', sql.NVarChar, dataPlanRcv.xclase)
-                .input('xtipo', sql.NVarChar, dataPlanRcv.xtipo)
-                .input('xgrupo', sql.NVarChar, dataPlanRcv.xgrupo)
-                .input('msuma_cosas_rc', sql.Numeric(18, 2), dataPlanRcv.msuma_cosas_rc)
-                .input('msuma_personas_rc', sql.Numeric(18, 2), dataPlanRcv.msuma_personas_rc)
-                .input('mprima_rc', sql.Numeric(18, 2), dataPlanRcv.mprima_rc)
-                .input('msuma_defensa_per', sql.Numeric(18, 2), dataPlanRcv.msuma_defensa_per)
-                .input('mprima_defensa_per', sql.Numeric(18, 2), dataPlanRcv.mprima_defensa_per)
-                .input('msuma_limite_ind', sql.Numeric(18, 2), dataPlanRcv.msuma_limite_ind)
-                .input('mprima_limite_ind', sql.Numeric(18, 2), dataPlanRcv.mprima_limite_ind)
-                .input('msuma_apov_mu', sql.Numeric(18, 2), dataPlanRcv.msuma_apov_mu)
-                .input('mapov_mu', sql.Numeric(18, 2), dataPlanRcv.mapov_mu)
-                .input('msuma_apov_in', sql.Numeric(18, 2), dataPlanRcv.msuma_apov_in)
-                .input('mapov_in', sql.Numeric(18, 2), dataPlanRcv.mapov_in)
-                .input('msuma_apov_ga', sql.Numeric(18, 2), dataPlanRcv.msuma_apov_ga)
-                .input('mapov_ga', sql.Numeric(18, 2), dataPlanRcv.mapov_ga)
-                .input('msuma_apov_fu', sql.Numeric(18, 2), dataPlanRcv.msuma_apov_fu)
-                .input('mapov_fu', sql.Numeric(18, 2), dataPlanRcv.mapov_fu)
-                .input('cusuariomodificacion', sql.Int, dataPlanRcv.cusuario)
-                .input('fmodificacion', sql.DateTime, new Date())
-                .query('update PRPLAN_RC_DETALLE set XCLASE = @xclase, XTIPO = @xtipo, XGRUPO = @xgrupo, MSUMA_COSAS_RC = @msuma_cosas_rc, MSUMA_PERSONAS_RC = @msuma_personas_rc, MPRIMA_RC = @mprima_rc, MSUMA_DEFENSA_PER = @msuma_defensa_per, MPRIMA_DEFENSA_PER = @mprima_defensa_per, MSUMA_LIMITE_IND = @msuma_limite_ind, MPRIMA_LIMITE_IND = @mprima_limite_ind, MSUMA_APOV_MU = @msuma_apov_mu, MAPOV_MU = @mapov_mu, MSUMA_APOV_IN = @msuma_apov_in, MAPOV_IN = @mapov_in, MSUMA_APOV_GA = @msuma_apov_ga, MAPOV_GA = @mapov_ga, MSUMA_APOV_FU = @msuma_apov_fu, MAPOV_FU = @mapov_fu, FMODIFICACION = @fmodificacion, CUSUARIOMODIFICACION = @cusuariomodificacion where CPLAN_RC = @cplan_rc AND CTARIFA = @ctarifa');
-                rowsAffected = rowsAffected + update.rowsAffected;
-                if(dataPlanRcv.xplan_rc){
-                    let pool = await sql.connect(config);
-                    let update = await pool.request()
+            for(let i = 0; i < planList.length; i++){
+                let update = await pool.request()
                     .input('cplan_rc', sql.Int, dataPlanRcv.cplan_rc)
-                    .input('xplan_rc', sql.NVarChar, dataPlanRcv.xplan_rc)
-                    .input('cusuariomodificacion', sql.Int, dataPlanRcv.cusuario)
+                    .input('xcobertura', sql.NVarChar, planList[i].xcobertura)
+                    .input('xsoat', sql.NVarChar, planList[i].xsoat)
+                    .input('bactivo', sql.Bit, 1)
+                    .input('cusuariomodificacion', sql.Int, dataPlanRcv.cusuariomodificacion)
                     .input('fmodificacion', sql.DateTime, new Date())
-                    .query('update PRPLAN_RC set XPLAN_RC = @xplan_rc, FMODIFICACION = @fmodificacion, CUSUARIOMODIFICACION = @cusuariomodificacion where CPLAN_RC = @cplan_rc');
-                    rowsAffected = rowsAffected + update.rowsAffected;
-                }
-            //sql.close();
+                    .query('UPDATE POPLAN_RC_DETALLE SET XSOAT = @xsoat, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion WHERE CPLAN_RC = @cplan_rc AND XCOBERTURA = @xcobertura')
+                rowsAffected = rowsAffected + update.rowsAffected;
+            }
             return { result: { rowsAffected: rowsAffected } };
         }catch(err){
             return { error: err.message };
@@ -13966,23 +13954,19 @@ createServicePlanRcvQuery: async(dataList, plan) => {
         return { error: err.message };
     }
 },
-createPlanRcvQuery: async(dataList, rcv, cplan) => {
+createPlanRcvQuery: async(dataPlanRcv) => {
     try{
         let rowsAffected = 0;
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .input('cplan', sql.Int, cplan)
-            .input('mlesioncor', sql.NVarChar, rcv.mlesioncor)
-            .input('mlesioncor_per', sql.NVarChar, rcv.mlesioncor_per)
-            .input('mdanosp_ajena', sql.NVarChar, rcv.mdanosp_ajena)
-            .input('mgastos_medicos', sql.NVarChar, rcv.mgastos_medicos)
-            .input('mmuerte', sql.NVarChar, rcv.mmuerte)
-            .input('mservicios_fune', sql.NVarChar, rcv.mservicios_fune)
-            .input('mprima_sin_rep', sql.NVarChar, rcv.mprima_sin_rep)
-            .input('mimpuesto', sql.NVarChar, rcv.mimpuesto)
-            .input('cusuariocreacion', sql.Int, dataList.cusuario)
+            .input('xdescripcion', sql.NVarChar, dataPlanRcv.xdescripcion)
+            .input('mcosto', sql.NVarChar, dataPlanRcv.mcosto)
+            .input('cmoneda', sql.Int, 2)
+            .input('caseguradora', sql.Int, 1)
+            .input('bactivo', sql.Bit, 1)
+            .input('cusuariocreacion', sql.Int, dataPlanRcv.cusuariocreacion)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('INSERT INTO POCOBERTURAS (CPLAN, MLESIONCOR, MLESIONCOR_PER, MDANOSP_AJENA, MGASTOS_MEDICOS, MMUERTE, MSERVICIOS_FUNE, MPRIMA_SIN_REP, MIMPUESTO, FCREACION, CUSUARIOCREACION) values (@cplan, @mlesioncor, @mlesioncor_per, @mdanosp_ajena, @mgastos_medicos, @mmuerte, @mservicios_fune, @mprima_sin_rep, @mimpuesto, @fcreacion, @cusuariocreacion)')
+            .query('INSERT INTO POPLAN_RC (XDESCRIPCION, MCOSTO, CMONEDA, CASEGURADORA, BACTIVO, FCREACION, CUSUARIOCREACION) values (@xdescripcion, @mcosto, @cmoneda, @caseguradora, @bactivo, @fcreacion, @cusuariocreacion)')
 
             return { result: result};
     }
@@ -14069,8 +14053,9 @@ createContractServiceArysQuery: async(userData) => {
             .input('fdesde_pol', sql.DateTime, userData.fdesde_pol)
             .input('fhasta_pol', sql.DateTime, userData.fhasta_pol)
             .input('fnac', sql.DateTime, userData.fnac)
+            .input('cplan_rc', sql.Int, userData.cplan_rc)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac )')                
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc )')                
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
@@ -15738,6 +15723,62 @@ dataCancellationQuery: async(data) => {
         rowsAffected = rowsAffected + update.rowsAffected;
         //sql.close();
         return { result: { rowsAffected: rowsAffected } };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchCodePlanRcvQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('select MAX(CPLAN_RC) AS CPLAN_RC from POPLAN_RC');
+        //sql.close();
+        console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+createPlanCoverageRcvQuery: async(cplan_rc, planList, dataPlanRcv) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < planList.length; i++){
+            let insert = await pool.request()
+                .input('cplan_rc', sql.Int, cplan_rc)
+                .input('xcobertura', sql.NVarChar, planList[i].xcobertura)
+                .input('xsoat', sql.NVarChar, planList[i].xsoat)
+                .input('bactivo', sql.Bit, 1)
+                .input('cusuariocreacion', sql.Int, dataPlanRcv.cusuariocreacion)
+                .input('fcreacion', sql.DateTime, new Date())
+                .query('insert into POPLAN_RC_DETALLE (CPLAN_RC, XCOBERTURA, XSOAT, BACTIVO, CUSUARIOCREACION, FCREACION) values (@cplan_rc, @xcobertura, @xsoat, @bactivo, @cusuariocreacion, @fcreacion)')
+            rowsAffected = rowsAffected + insert.rowsAffected;
+        }
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        return { error: err.message };
+    }
+},
+searchLastPlanRcvQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('select MAX(CPLAN_RC) AS CPLAN_RC from POPLAN_RC');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+valrepPlanRcvQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('select * from POPLAN_RC');
+        //sql.close();
+        return { result: result };
     }catch(err){
         return { error: err.message };
     }
