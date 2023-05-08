@@ -2811,6 +2811,35 @@ const operationValrepPlanContract = async(authHeader, requestBody) => {
     return { status: true, list: jsonArray }
 }
 
+router.route('/plan-rcv').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationValrepPlanRcv(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationValrepPlanRcv' } });
+        });
+    }
+});
+
+const operationValrepPlanRcv = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    
+    let valrepPlanRcv = await bd.valrepPlanRcvQuery().then((res) => res);
+    if(valrepPlanRcv.error){ return { status: false, code: 500, message: valrepPlanRcv.error }; }
+    let jsonArray = [];
+    for(let i = 0; i < valrepPlanRcv.result.recordset.length; i++){
+        jsonArray.push({ cplan_rc: valrepPlanRcv.result.recordset[i].CPLAN_RC, xplan_rc: valrepPlanRcv.result.recordset[i].XDESCRIPCION});
+    }
+    return { status: true, list: jsonArray }
+}
+
 router.route('/insurer').post((req, res) => {
     if(!req.header('Authorization')){ 
         res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
