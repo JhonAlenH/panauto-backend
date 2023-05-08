@@ -55,6 +55,7 @@ router.route('/create').post((req, res) => {
             }
             res.json({ data: result });
         }).catch((err) => {
+            console.log(err.message)
             res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationCreatePlanType' } });
         });
     }
