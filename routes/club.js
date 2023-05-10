@@ -594,5 +594,50 @@ const UploadDocumentClub = async(requestBody) => {
 
 }
 
+router.route('/upload/mantenimiento/client-agenda').post((req, res) => {
+    UploadMantenimientoClub(req.body).then((result) => {
+        if(!result.status){ 
+            res.status(result.code).json({ data: result });
+            return;
+        }
+        res.json({ data: result });
+    }).catch((err) => {
+        res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'UploadMantenimientoClub' } });
+    });
+});
+
+const UploadMantenimientoClub = async(requestBody) => {
+    let DataDocAgend = {
+        cpropietario: requestBody.cpropietario,
+        fdesde: requestBody.fdesde,
+        xmantenimientoPrevent: requestBody.xmantenimientoPrevent,
+        hora: requestBody.hora,
+        xmantenimientoCorrect: requestBody.xmantenimientoCorrect,
+    };
+
+    let AgendaEventManteniento = await bd.UploadManAgendaClient(DataDocAgend).then((res) => res);
+    if(AgendaEventManteniento.error){ return { status: false, code: 500, message: Agenda.error }; }
+    if(AgendaEventManteniento.result.rowsAffected > 0){
+        let solicitud = [];
+
+        for(let i = 0; i < AgendaEventManteniento.result.recordset.length; i++){
+            solicitud.push({
+                id: AgendaEventManteniento.result.recordset[i].ID, 
+                title: AgendaEventManteniento.result.recordset[i].XTITULO,
+                start: AgendaEventManteniento.result.recordset[i].FDESDE.toISOString().replace(/T.*$/, ''),
+                end: AgendaEventManteniento.result.recordset[i].FHASTA.toISOString().replace(/T.*$/, ''),
+            });
+        }
+        return { 
+            status: true, 
+         
+        };}
+
+    return { 
+    status: false, 
+
+};
+}
+
 
 module.exports = router;
