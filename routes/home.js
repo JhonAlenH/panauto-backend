@@ -107,6 +107,40 @@ const operationArysService = async(authHeader, requestBody) => {
     }
 }
 
+router.route('/user').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationUser(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationUser' } });
+        });
+    }
+});
+
+const operationUser = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let data = {
+        cusuario: requestBody.cusuario,
+    }
+    let dataUser = await bd.dataUserQuery(data).then((res) => res);
+    if(dataUser.error){ return { status: false, code: 500, message: dataUser.error }; }
+    if(dataUser.result.rowsAffected > 0){
+        let nombres = dataUser.result.recordset[0].XNOMBRE + ' ' + dataUser.result.recordset[0].XAPELLIDO;
+        return { status: true, 
+                xusuario: nombres,
+        }
+    }else{ 
+        return { status: false, code: 404, message: 'Coin not found.' }; 
+    }
+}
+
 router.route('/amounts-paid').post((req, res) => {
     if(!req.header('Authorization')){
         res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });

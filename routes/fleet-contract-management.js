@@ -1113,7 +1113,7 @@ const validateIsDate = (date, key, rowLine) => {
 const validateChargeContract = (contract, rowLine) => {
     for (const key in contract) {
         if (contract[key] === null || contract[key] === undefined) {
-            if (key !== 'APELLIDO' && key !== 'FNAC' && key !== 'XTELEFONO1' && key !== 'XTELEFONO2' && key !== 'IFRACCIONAMIENTO') {
+            if (key !== 'FNAC' && key !== 'XTELEFONO_EMP' && key !== 'XDISTRITO' && key !== 'XCORREGIMIENTO') {
                 return {
                     error: `Error, la columna ${key} de la fila ${rowLine + 2} No acepta valores nulos. Por favor arréglelo e intente nuevamente.`
                 }
@@ -1121,7 +1121,7 @@ const validateChargeContract = (contract, rowLine) => {
         }
         let error = "";
         switch (key) {
-            case 'No':
+            case 'XPOLIZA':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1129,30 +1129,14 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'Rif_Cliente':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
+            case 'ICEDULA':
+                if (contract[key] !== 'P' && contract[key] !== 'RUC' && contract[key] !== 'DNI') {
                     return {
-                        error: error
+                        error: `Error, la columna ${key} de la fila ${rowLine + 2} solo admite los valores P, RUC O DNI. Por favor arréglelo e intente nuevamente.`
                     }
                 }
                 break;
-            case 'POLIZA':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'letra':
-                if (contract[key] !== 'V' && contract[key] !== 'J') {
-                    return {
-                        error: `Error, la columna ${key} de la fila ${rowLine + 2} solo admite los valores V o J. Por favor arréglelo e intente nuevamente.`
-                    }
-                }
-                break;
-            case 'CEDULA':
+            case 'XCEDULA':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1170,14 +1154,6 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'CMETODOLOGIAPAGO':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
             case 'CPLAN':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
@@ -1186,7 +1162,7 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'CMARCA':
+            case 'CPLAN_RC':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1194,23 +1170,7 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'CMODELO':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CVERSION':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'AÑO':
+            case 'CANO':
                 error = validateIsInteger(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1233,7 +1193,7 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'FPOLIZA_DES':
+            case 'FDESDE_POL':
                 error = validateIsDate(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1241,7 +1201,7 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'FPOLIZA_HAS':
+            case 'FHASTA_POL':
                 error = validateIsDate(contract[key], key, rowLine).error;
                 if (error) {
                     return {
@@ -1249,110 +1209,13 @@ const validateChargeContract = (contract, rowLine) => {
                     }
                 }
                 break;
-            case 'CPROVINCIA':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CDISTRITO':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CCORREGIMIENTO':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'SUMA ASEGURADORA':
-                error = validateIsFloat(contract[key], key, rowLine).error
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'PRIMA':
+            case 'MPRIMA':
                 if (contract[key]){
                     error = validateIsFloat(contract[key], key, rowLine).error
                     if (error) {
                         return {
                             error: error
                         }
-                    }
-                }
-                break;
-            case 'CASEGURADORA':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CTIPOVEHICULO':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break; 
-            case 'CCLASE':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CUSO':
-            error = validateIsInteger(contract[key], key, rowLine).error;
-            if (error) {
-                return {
-                    error: error
-                }
-            }
-            break;
-            case 'CCORREDOR':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'FCREACION':
-                error = validateIsDate(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            case 'CUSUARIOCREACION':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
-                    }
-                }
-                break;
-            default: break;
-            case 'XZONA_POSTAL':
-                error = validateIsInteger(contract[key], key, rowLine).error;
-                if (error) {
-                    return {
-                        error: error
                     }
                 }
                 break;
@@ -1382,7 +1245,6 @@ router.route('/charge-contracts').post((req, res) => {
 const operationChargeContracts = async(authHeader, requestBody) => { 
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     if (requestBody.parsedData.length < 1) { return { status: false, code: 400, message: 'No puede guardar un archivo vacío' } }
-    console.log(requestBody.parsedData);
     for (let i = 0; i < requestBody.parsedData.length; i++) {
         let error = validateChargeContract(requestBody.parsedData[i], i).error;
         if (error) { console.log(error); return { status: false, code: 400, message: error } };
@@ -1390,6 +1252,8 @@ const operationChargeContracts = async(authHeader, requestBody) => {
     let processCharge = await bd.createChargeQuery(requestBody.parsedData);
     if(processCharge.error){ return { status: false, code: 500, message: processCharge.error }; }
     if(processCharge.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Internal Error.' }; }
+    let deleteCharge = await bd.deleteChargeQuery();
+    if(deleteCharge.error){ return { status: false, code: 500, message: deleteCharge.error }; }
     return {
         status: true,
         code: 200,

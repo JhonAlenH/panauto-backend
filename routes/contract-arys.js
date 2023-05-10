@@ -90,7 +90,8 @@ const operationCreate = async(authHeader, requestBody) => {
         fhasta_pol: requestBody.fhasta_pol,
         ccorredor: requestBody.ccorredor,
         cestatusgeneral: 13,
-        fnac: requestBody.fnac
+        fnac: requestBody.fnac,
+        cplan_rc: requestBody.cplan_rc,
     };
     console.log(userData)
     if(userData){
