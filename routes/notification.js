@@ -567,7 +567,6 @@ const operationDetailNotification = async(authHeader, requestBody) => {
     };
     let getNotificationData = await bd.getNotificationDataQuery(notificationData).then((res) => res);
     if(getNotificationData.error){ return { status: false, code: 500, message: getNotificationData.error }; }
-    console.log(getNotificationData.error)
     if(getNotificationData.result.rowsAffected > 0){
 
         let getFleetContractCompleteData = await bd.getFleetContractCompleteDataQuery(getNotificationData.result.recordset[0].CCONTRATOFLOTA, notificationData).then((res) => res);
@@ -898,6 +897,8 @@ const operationDetailNotification = async(authHeader, requestBody) => {
             xdireccionpropietario: getFleetContractCompleteData.result.recordset[0].XDIRECCION,
             xtelefonocelularpropietario: telefonopropietario,
             xemailpropietario: getFleetContractCompleteData.result.recordset[0].XEMAIL,
+            fdesde_pol: getFleetContractCompleteData.result.recordset[0].FDESDE_POL,
+            fhasta_pol: getFleetContractCompleteData.result.recordset[0].FHASTA_POL,
             thirdpartyVehicles: thirdpartyVehicles,
             notes: notes,
             replacements: replacements,
