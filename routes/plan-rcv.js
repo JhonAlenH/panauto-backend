@@ -66,6 +66,17 @@ const operationDetailPlanRcv = async(authHeader, requestBody) => {
     if(detailPlan.error){ return  { status: false, code: 500, message: detailPlan.error }; }
     let detailPlanRcv = await bd.detailPlanRcvQuery(searchData).then((res) => res);
     if(detailPlanRcv.error){ return  { status: false, code: 500, message: detailPlanRcv.error }; }
+    let servicesTypeList = [];
+    let getPlanServicesData = await bd.getPlanRcvServicesDataQuery(searchData.cplan_rc).then((res) => res);
+    if(getPlanServicesData.error){ return { status: false, code: 500, message: getPlanServicesData.error }; }
+    if(getPlanServicesData.result.rowsAffected > 0){
+        for(let i = 0; i < getPlanServicesData.result.recordset.length; i++){
+            servicesTypeList.push({
+                ctiposervicio: getPlanServicesData.result.recordset[i].CTIPOSERVICIO,
+                xtiposervicio: getPlanServicesData.result.recordset[i].XTIPOSERVICIO,
+            })
+        }
+    }
     let jsonList = [];
     if(detailPlanRcv.result.rowsAffected > 0){
         for(let i = 0; i < detailPlanRcv.result.recordset.length; i++){
@@ -78,7 +89,8 @@ const operationDetailPlanRcv = async(authHeader, requestBody) => {
                     status: true, 
                     list: jsonList, 
                     xplan_rc: detailPlan.result.recordset[0].XDESCRIPCION, 
-                    mcosto: detailPlan.result.recordset[0].MCOSTO
+                    mcosto: detailPlan.result.recordset[0].MCOSTO,
+                    services: servicesTypeList
                 };
 
     }else{ return { status: false, code: 404, message: 'Plan Type not found.' }; }
@@ -172,6 +184,31 @@ const operationCreatePlanRcv = async(authHeader, requestBody) => {
             }
             let createPlanCoverage = await bd.createPlanCoverageRcvQuery(cplan_rc, planList, dataPlanRcv).then((res) => res);
             if(createPlanCoverage.error){ return { status: false, code: 500, message: createPlanCoverage.error }; }
+        }
+
+        if(requestBody.servicesType){
+            //Crea los tipos de servicios del plan
+            let serviceTypeList = [];
+            for(let i = 0; i < requestBody.servicesType.length; i++){
+                serviceTypeList.push({
+                    ctiposervicio: requestBody.servicesType[i].ctiposervicio,
+                })
+            }
+            let createTypeService = await bd.createServiceTypeFromPlanRcvQuery(serviceTypeList, dataPlanRcv, cplan_rc).then((res) => res);
+            if(createTypeService.error){ return  { status: false, code: 500, message: createTypeService.error }; }
+        }
+
+        if(requestBody.quantity){
+            //Crea la cantidad de servicios que presta.
+            let quantityList = [];
+            for(let i = 0; i < requestBody.quantity.length; i++){
+                quantityList.push({
+                    ncantidad: requestBody.quantity[i].ncantidad,
+                    cservicio: requestBody.quantity[i].cservicio,
+                })
+            }
+            let updateServiceFromQuantity = await bd.updateServiceFromQuantityRcvQuery(quantityList, cplan_rc).then((res) => res);
+            if(updateServiceFromQuantity.error){ return  { status: false, code: 500, message: updateServiceFromQuantity.error }; }
         }
     }else{
         return{status: false, code: 404, message: 'Error de Conexión'}
