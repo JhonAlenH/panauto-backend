@@ -12778,7 +12778,6 @@ UploadManAgendaClient: async(DataAgenda) => {
                 .input('cplan_rc', sql.Int, searchData.cplan_rc)
                 .query('select * from POPLAN_RC where CPLAN_RC = @cplan_rc');
             //sql.close();
-            console.log(result)
             return { result: result };
         }catch(err){
             return { error: err.message };
@@ -15845,6 +15844,59 @@ valrepPlanRcvQuery: async() => {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .query('select * from POPLAN_RC');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+createServiceTypeFromPlanRcvQuery: async(serviceTypeList, dataPlanRcv, cplan_rc) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < serviceTypeList.length; i++){
+            let insert = await pool.request()
+                .input('cplan_rc', sql.Int, cplan_rc)
+                .input('ctiposervicio', sql.Int, serviceTypeList[i].ctiposervicio)
+                .input('bactivo', sql.Bit, 1)
+                .input('cusuariocreacion', sql.Int, dataPlanRcv.cusuario)
+                .input('fcreacion', sql.DateTime, new Date())
+                .query('insert into POTIPOSERVICIOS_RC (CPLAN_RC, CTIPOSERVICIO, BACTIVO, CUSUARIOCREACION, FCREACION) values (@cplan_rc, @ctiposervicio, @bactivo, @cusuariocreacion, @fcreacion)')
+            rowsAffected = rowsAffected + insert.rowsAffected;
+        }
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+updateServiceFromQuantityRcvQuery: async(quantityList, cplan_rc) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < quantityList.length; i++){
+            let update = await pool.request()
+                .input('cplan_rc', sql.Int, cplan_rc)
+                .input('ncantidad', sql.Int, quantityList[i].ncantidad)
+                .input('cservicio', sql.Int, quantityList[i].cservicio)
+                .query('UPDATE POSERVICIOS_RC SET NCANTIDAD = @ncantidad WHERE CPLAN_RC = @cplan_rc AND CSERVICIO = @cservicio')
+            rowsAffected = rowsAffected + update.rowsAffected;
+        }
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        return { error: err.message };
+    }
+},
+getPlanRcvServicesDataQuery: async(cplan_rc) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan_rc', sql.Int, cplan_rc)
+            .query('select * from VWBUSCARTIPOSERVICIOSXPLANRC where CPLAN_RC = @cplan_rc');
         //sql.close();
         return { result: result };
     }catch(err){

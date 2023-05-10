@@ -2837,6 +2837,7 @@ const operationValrepPlanRcv = async(authHeader, requestBody) => {
     for(let i = 0; i < valrepPlanRcv.result.recordset.length; i++){
         jsonArray.push({ cplan_rc: valrepPlanRcv.result.recordset[i].CPLAN_RC, xplan_rc: valrepPlanRcv.result.recordset[i].XDESCRIPCION});
     }
+    console.log(jsonArray)
     return { status: true, list: jsonArray }
 }
 
