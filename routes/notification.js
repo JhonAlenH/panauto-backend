@@ -1375,4 +1375,118 @@ const operationSearchServiceFromServiceOrder = async(authHeader, requestBody) =>
     }else{ return { status: false, code: 404, message: 'Replacement not found.' }; }
 }
 
+router.route('/search-quote-request').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationSearchQuoteRequest(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchQuoteRequest' } });
+        });
+    }
+});
+
+const operationSearchQuoteRequest = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cproveedor: requestBody.cproveedor,
+        fcreacion: requestBody.fcreacion ? requestBody.fcreacion : undefined
+    };
+    let cproveedor = [];
+    for(let i = 0; i < searchData.cproveedor.length; i++){
+        cproveedor.push({
+            cproveedor: searchData.cproveedor[i].cproveedor
+        })
+    }
+    let searchQuoteRequest = await bd.searchQuoteRequestNotificationQuery(cproveedor, searchData).then((res) => res);
+    if(searchQuoteRequest.error){ return  { status: false, code: 500, message: searchQuoteRequest.error }; }
+    if(searchQuoteRequest.result.rowsAffected > 0){
+        let jsonList = [];
+        for(let i = 0; i < searchQuoteRequest.result.recordset.length; i++){
+            jsonList.push({
+                ccotizacion: searchQuoteRequest.result.recordset[i].CCOTIZACION,
+                fcreacion: searchQuoteRequest.result.recordset[i].FCREACION,
+                xobservacion: searchQuoteRequest.result.recordset[i].XOBSERVACION,
+                bcerrada: searchQuoteRequest.result.recordset[i].BCERRADA
+            });
+        }
+        return { status: true, list: jsonList };
+    }else{ return { status: false, code: 404, message: 'Quote Request not found.' }; }
+}
+
+router.route('/detail-quote-request').post((req, res) => {
+    if(!req.header('Authorization')){
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
+        return;
+    }else{
+        operationDetailQuoteRequest(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationDetailQuoteRequest' } });
+        });
+    }
+});
+
+const operationDetailQuoteRequest = async(authHeader, requestBody) => { 
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    //if(!helper.validateRequestObj(requestBody, ['ccotizacion', 'cproveedor'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
+    let quoteRequestData = {
+        cproveedor: requestBody.cproveedor,
+        ccotizacion: requestBody.ccotizacion
+    };
+    let cproveedor = [];
+    for(let i = 0; i < quoteRequestData.cproveedor.length; i++){
+        cproveedor.push({
+            cproveedor: quoteRequestData.cproveedor[i].cproveedor
+        })
+    }
+    let getQuoteRequestData = await bd.getQuoteRequestNotificationDataQuery(cproveedor, quoteRequestData).then((res) => res);
+    if(getQuoteRequestData.error){ return { status: false, code: 500, message: getQuoteRequestData.error }; }
+    if(getQuoteRequestData.result.rowsAffected > 0){
+        let replacements = [];
+        let getQuoteRequestReplacementsData = await bd.getReplacementsProviderNotificationDataQuery(quoteRequestData.ccotizacion).then((res) => res);
+        if(getQuoteRequestReplacementsData.error){ return { status: false, code: 500, message: getQuoteRequestReplacementsData.error }; }
+        if(getQuoteRequestReplacementsData.result.rowsAffected > 0){
+            for(let i = 0; i < getQuoteRequestReplacementsData.result.recordset.length; i++){
+                let replacement = {
+                    crepuestocotizacion: getQuoteRequestReplacementsData.result.recordset[i].CREPUESTOCOTIZACION,
+                    crepuesto: getQuoteRequestReplacementsData.result.recordset[i].CREPUESTO,
+                    xrepuesto: getQuoteRequestReplacementsData.result.recordset[i].XREPUESTO,
+                    ctiporepuesto: getQuoteRequestReplacementsData.result.recordset[i].CTIPOREPUESTO,
+                    ncantidad: getQuoteRequestReplacementsData.result.recordset[i].NCANTIDAD,
+                    cniveldano: getQuoteRequestReplacementsData.result.recordset[i].CNIVELDANO,
+                    bdisponible: getQuoteRequestReplacementsData.result.recordset[i].BDISPONIBLE ? getQuoteRequestReplacementsData.result.recordset[i].BDISPONIBLE : undefined,
+                    munitariorepuesto: getQuoteRequestReplacementsData.result.recordset[i].MUNITARIOREPUESTO ? getQuoteRequestReplacementsData.result.recordset[i].MUNITARIOREPUESTO : undefined,
+                    bdescuento: getQuoteRequestReplacementsData.result.recordset[i].BDESCUENTO ? getQuoteRequestReplacementsData.result.recordset[i].BDESCUENTO : undefined,
+                    mtotalrepuesto: getQuoteRequestReplacementsData.result.recordset[i].MTOTALREPUESTO ? getQuoteRequestReplacementsData.result.recordset[i].MTOTALREPUESTO : undefined,
+                    cmoneda: getQuoteRequestReplacementsData.result.recordset[i].CMONEDA,
+                    xmoneda: getQuoteRequestReplacementsData.result.recordset[i].xmoneda
+                }
+                replacements.push(replacement);
+            }
+        }
+        return {
+            status: true,
+            ccotizacion: quoteRequestData.ccotizacion,
+            xobservacion: getQuoteRequestData.result.recordset[0].XOBSERVACION,
+            mtotalcotizacion: getQuoteRequestData.result.recordset[0].MTOTALCOTIZACION,
+            bcerrada: getQuoteRequestData.result.recordset[0].BCERRADA,
+            baceptacion: getQuoteRequestData.result.recordset[0].BACEPTACION,
+            cmoneda: getQuoteRequestData.result.recordset[0].CMONEDA,
+            xmoneda: getQuoteRequestData.result.recordset[0].xmoneda,
+            replacements: replacements
+        }
+    }else{ return { status: false, code: 404, message: 'Quote Request not found.' }; }
+}
+
 module.exports = router;
