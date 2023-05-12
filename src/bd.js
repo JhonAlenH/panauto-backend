@@ -15930,5 +15930,48 @@ getPlanRcvServicesDataQuery: async(cplan_rc) => {
         return { error: err.message };
     }
 },
+searchQuoteRequestNotificationQuery: async(cproveedor, searchData) => {
+    try{
+        let query = `select * from EVCOTIZACIONNOTIFICACION where CPROVEEDOR = @cproveedor${ searchData.fcreacion ? " and datediff(day, FCREACION, @fcreacion) = 0" : '' }`;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < cproveedor.length; i++){
+            let result = await pool.request()
+            .input('cproveedor', sql.Int, cproveedor[i].cproveedor)
+            .input('fcreacion', sql.DateTime, searchData.fcreacion ? searchData.fcreacion : '01/01/2000')
+            .query(query);
+        //sql.close();
+        return { result: result };
+        }
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getQuoteRequestNotificationDataQuery: async(cproveedor, quoteRequestData) => {
+    try{
+        let pool = await sql.connect(config);
+        for(let i = 0; i < cproveedor.length; i++){
+            let result = await pool.request()
+                .input('ccotizacion', sql.Int, quoteRequestData.ccotizacion)
+                .input('cproveedor', sql.Int, cproveedor[i].cproveedor)
+                .query('select * from VWBUSCARPROVEEDORXNOTIFICACIONDATA where CCOTIZACION = @ccotizacion and CPROVEEDOR = @cproveedor');
+            //sql.close();
+            return { result: result };
+        }
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getReplacementsProviderNotificationDataQuery: async(ccotizacion) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccotizacion', sql.Int, ccotizacion)
+            .query('select * from VWBUSCARREPUESTOXCOTIZACIONDATA where CCOTIZACION = @ccotizacion');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
 }
 
