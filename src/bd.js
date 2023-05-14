@@ -15878,5 +15878,54 @@ getReplacementsProviderNotificationDataQuery: async(ccotizacion) => {
         return { error: err.message };
     }
 },
+updateQuoteRequestNotificationQuery: async(quotesProviders) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < quotesProviders.length; i++){
+            let update = await pool.request()
+            .input('cproveedor', sql.Int, quotesProviders[i].cproveedor)
+            .input('ccotizacion', sql.Int, quotesProviders[i].ccotizacion)
+            .input('mtotalcotizacion', sql.Numeric(11, 2), quotesProviders[i].mtotalcotizacion ? quotesProviders[i].mtotalcotizacion : null)
+            .input('bcerrada', sql.Bit, quotesProviders[i].bcerrada)
+            .input('cusuariomodificacion', sql.Int, quotesProviders[i].cusuariomodificacion)
+            .input('baceptacion', sql.Bit, false)
+            .input('cmoneda', sql.Int, quotesProviders[i].cmoneda)
+            .input('fmodificacion', sql.DateTime, new Date())
+            .query('update EVCOTIZACIONNOTIFICACION set MTOTALCOTIZACION = @mtotalcotizacion, BCERRADA = @bcerrada, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion, BACEPTACION = @baceptacion, CMONEDA = @cmoneda where CCOTIZACION = @ccotizacion and CPROVEEDOR = @cproveedor');
+            rowsAffected = rowsAffected + update.rowsAffected;
+        }
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+updateReplacementsByQuoteRequestNotificationUpdateQuery: async(quotesProviders) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < quotesProviders.length; i++){
+            let update = await pool.request()
+                .input('ccotizacion', sql.Int, quotesProviders[i].ccotizacion)
+                .input('crepuestocotizacion', sql.Int, quotesProviders[i].crepuestocotizacion)
+                .input('bdisponible', sql.Bit, quotesProviders[i].bdisponible)
+                .input('bdescuento', sql.Bit, quotesProviders[i].bdescuento)
+                .input('munitariorepuesto', sql.Numeric(11, 2), quotesProviders[i].munitariorepuesto ? quotesProviders[i].munitariorepuesto : null)
+                .input('mtotalrepuesto', sql.Numeric(11, 2), quotesProviders[i].mtotalrepuesto ? quotesProviders[i].mtotalrepuesto : null)
+                .input('cusuariomodificacion', sql.Int, quotesProviders[i].cusuariomodificacion)
+                .input('cmoneda', sql.Int, quotesProviders[i].cmoneda)
+                .input('fmodificacion', sql.DateTime, new Date())
+                .query('update EVREPUESTOCOTIZACION set BDISPONIBLE = @bdisponible, BDESCUENTO = @bdescuento, MUNITARIOREPUESTO = @munitariorepuesto, MTOTALREPUESTO = @mtotalrepuesto, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion, CMONEDA = @cmoneda where CREPUESTOCOTIZACION = @crepuestocotizacion and CCOTIZACION = @ccotizacion');
+            rowsAffected = rowsAffected + update.rowsAffected;
+        }
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        return { error: err.message };
+    }
+},
 }
 
