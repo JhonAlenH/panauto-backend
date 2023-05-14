@@ -291,7 +291,6 @@ const operationSearchProvider = async(authHeader, requestBody) => {
                     xtelefonoproveedor: getProvidersByServicesData.result.recordset[i].XTELEFONO,
                 });
             }
-            console.log(jsonList)
             return { status: true, list: jsonList };
         }else{ return { status: false, code: 404, message: 'Provider not found.' }; }
     }else{ return { status: false, code: 404, message: 'Notification Type Services not found.' }; }
@@ -551,7 +550,6 @@ router.route('/detail').post((req, res) => {
             }
             res.json({ data: result });
         }).catch((err) => {
-            console.log(err.message)
             res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationDetailNotification' } });
         });
     }
@@ -828,7 +826,6 @@ const operationDetailNotification = async(authHeader, requestBody) => {
         let serviceOrder = [];
         let getNotificationServiceOrderData = await bd.getNotificationServiceOrderDataQuery(notificationData.cnotificacion).then((res) => res);
         if(getNotificationServiceOrderData.error){ return { status: false, code: 500, message: getNotificationServiceOrderData.error }; }
-        console.log(getNotificationServiceOrderData.error)
         if(getNotificationServiceOrderData.result.rowsAffected > 0){
             for(let i = 0; i < getNotificationServiceOrderData.result.recordset.length; i++){
                 let serviceOrderList = {
@@ -849,7 +846,6 @@ const operationDetailNotification = async(authHeader, requestBody) => {
                 serviceOrder.push(serviceOrderList);
             }
         }
-        // console.log(err.message)
         return {
             status: true,
             cnotificacion: notificationData.cnotificacion,
@@ -925,7 +921,6 @@ router.route('/update').post((req, res) => {
             }
             res.json({ data: result });
         }).catch((err) => {
-            console.log(err.message)
             res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationUpdateNotification' } });
         });
     }
@@ -938,7 +933,8 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
         cpais: requestBody.cpais,
         ccompania: requestBody.ccompania,
         cnotificacion: requestBody.cnotificacion,
-        cusuariomodificacion: requestBody.cusuariomodificacion
+        cusuariomodificacion: requestBody.cusuariomodificacion,
+        quotesProviders: requestBody.quotesProviders,
     }
     if(requestBody.notes){
         if(requestBody.notes.create && requestBody.notes.create.length > 0){
@@ -1109,7 +1105,6 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
                 cestatusgeneral: requestBody.serviceOrder.create[i].cestatusgeneral,
                 ccausaanulacion: requestBody.serviceOrder.create[i].ccausaanulacion
                 })
-                console.log(serviceOrderCreateList)
             }
 
             let createServiceOrderByNotificationUpdate = await bd.createServiceOrderByNotificationUpdateQuery(serviceOrderCreateList, notificationData).then((res) => res);
@@ -1154,6 +1149,28 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
           if(updateServiceOrderBySettlementUpdate.result.rowsAffected < 0){ return { status: false, code: 404, message: 'Note not found.' }; }
         }
       }
+    }
+    let quotesProviders = [];
+    if(notificationData.quotesProviders){
+        for(let i = 0; i < notificationData.quotesProviders.length; i++ ){
+            quotesProviders.push({
+                cproveedor: notificationData.quotesProviders[i].cproveedor,
+                ccotizacion: notificationData.quotesProviders[i].ccotizacion,
+                crepuesto: notificationData.quotesProviders[i].crepuesto,
+                mtotalrepuesto: notificationData.quotesProviders[i].mtotalrepuesto,
+                crepuestocotizacion: notificationData.quotesProviders[i].crepuestocotizacion,
+                bdisponible: notificationData.quotesProviders[i].bdisponible,
+                bdescuento: notificationData.quotesProviders[i].bdescuento,
+                munitariorepuesto: notificationData.quotesProviders[i].munitariorepuesto,
+                bcerrada: notificationData.quotesProviders[i].bcerrada,
+                cmoneda: notificationData.quotesProviders[i].cmoneda,
+                mtotalcotizacion: notificationData.quotesProviders[i].mtotalcotizacion,
+            })
+        }
+        let updateQuoteRequest = await bd.updateQuoteRequestNotificationQuery(quotesProviders).then((res) => res);
+        if(updateQuoteRequest.error){ return { status: false, code: 500, message: updateQuoteRequest.error }; }
+        let updateReplacementsByQuoteRequestUpdate = await bd.updateReplacementsByQuoteRequestNotificationUpdateQuery(quotesProviders).then((res) => res);
+        if(updateReplacementsByQuoteRequestUpdate.error){ return { status: false, code: 500, message: updateReplacementsByQuoteRequestUpdate.error }; }
     }
     return { status: true, cnotificacion: notificationData.cnotificacion };
 }
@@ -1231,7 +1248,6 @@ const operationDetailSettlement = async(authHeader, requestBody) => {
     }
     let detailSettlement = await bd.detailSettlementQuery(searchData).then((res) => res);
     if(detailSettlement.error){ return { status: false, code: 500, message: detailSettlement.error }; }
-    console.log(detailSettlement.error)
     if(detailSettlement.result.rowsAffected > 0){
         let nombres = detailSettlement.result.recordset[0].XNOMBRE + ' ' + detailSettlement.result.recordset[0].XAPELLIDO;
         return {
@@ -1300,7 +1316,6 @@ const operationServiceOrderFromSettlement = async(authHeader, requestBody) => {
     for(let i = 0; i < query.result.recordset.length; i++){
         jsonArray.push({ corden: query.result.recordset[i].CORDEN, cservicio: query.result.recordset[i].CSERVICIO, xservicio: query.result.recordset[i].XSERVICIO, xdanos: query.result.recordset[i].XDANOS, xservicioadicional: query.result.recordset[i].XSERVICIOADICIONAL });
     }
-    console.log(jsonArray)
     return { status: true, list: jsonArray }
 }
 
