@@ -6300,12 +6300,12 @@ module.exports = {
             return { error: err.message };
         }
     },
-    providerValrepQuery: async(cproveedor) => {
+    providerNotificationValrepQuery: async(cproveedor) => {
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('cproveedor', sql.Int, cproveedor)
-                .query('select * from VWBUSCARPROVEEDORXSERVICIO WHERE CPROVEEDOR = @cproveedor');
+                .query('select * from PRPROVEEDORES WHERE CPROVEEDOR = @cproveedor');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -9777,6 +9777,7 @@ module.exports = {
         }
     },
     claimCauseValrepQuery: async(searchData) => {
+        console.log(searchData)
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -15852,16 +15853,28 @@ searchQuoteRequestNotificationQuery: async(cproveedor, searchData) => {
     }
 },
 getQuoteRequestNotificationDataQuery: async(cproveedor, quoteRequestData) => {
+    // try{
+    //     let pool = await sql.connect(config);
+    //     for(let i = 0; i < cproveedor.length; i++){
+    //         let result = await pool.request()
+    //             .input('ccotizacion', sql.Int, quoteRequestData.ccotizacion)
+    //             .input('cproveedor', sql.Int, cproveedor[i].cproveedor)
+    //             .query('select * from VWBUSCARPROVEEDORXNOTIFICACIONDATA where CCOTIZACION = @ccotizacion and CPROVEEDOR = @cproveedor');
+    //         //sql.close();
+    //         console.log(result)
+    //         return { result: result };
+    //     }
+    // }catch(err){
+    //     return { error: err.message };
+    // }
     try{
         let pool = await sql.connect(config);
-        for(let i = 0; i < cproveedor.length; i++){
-            let result = await pool.request()
-                .input('ccotizacion', sql.Int, quoteRequestData.ccotizacion)
-                .input('cproveedor', sql.Int, cproveedor[i].cproveedor)
-                .query('select * from VWBUSCARPROVEEDORXNOTIFICACIONDATA where CCOTIZACION = @ccotizacion and CPROVEEDOR = @cproveedor');
-            //sql.close();
-            return { result: result };
-        }
+        let result = await pool.request()
+            .input('ccotizacion', sql.Int, quoteRequestData.ccotizacion)
+            .input('cproveedor', sql.Int, cproveedor)
+            .query('select * from VWBUSCARPROVEEDORXNOTIFICACIONDATA where CCOTIZACION = @ccotizacion and CPROVEEDOR = @cproveedor');
+        //sql.close();
+        return { result: result };
     }catch(err){
         return { error: err.message };
     }

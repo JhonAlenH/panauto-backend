@@ -291,6 +291,7 @@ const operationSearchProvider = async(authHeader, requestBody) => {
                     xtelefonoproveedor: getProvidersByServicesData.result.recordset[i].XTELEFONO,
                 });
             }
+            console.log(jsonList)
             return { status: true, list: jsonList };
         }else{ return { status: false, code: 404, message: 'Provider not found.' }; }
     }else{ return { status: false, code: 404, message: 'Notification Type Services not found.' }; }
@@ -1426,6 +1427,7 @@ const operationSearchQuoteRequest = async(authHeader, requestBody) => {
         for(let i = 0; i < searchQuoteRequest.result.recordset.length; i++){
             jsonList.push({
                 ccotizacion: searchQuoteRequest.result.recordset[i].CCOTIZACION,
+                cproveedor: searchQuoteRequest.result.recordset[i].CPROVEEDOR,
                 fcreacion: searchQuoteRequest.result.recordset[i].FCREACION,
                 xobservacion: searchQuoteRequest.result.recordset[i].XOBSERVACION,
                 bcerrada: searchQuoteRequest.result.recordset[i].BCERRADA
@@ -1459,13 +1461,13 @@ const operationDetailQuoteRequest = async(authHeader, requestBody) => {
         cproveedor: requestBody.cproveedor,
         ccotizacion: requestBody.ccotizacion
     };
-    let cproveedor = [];
-    for(let i = 0; i < quoteRequestData.cproveedor.length; i++){
-        cproveedor.push({
-            cproveedor: quoteRequestData.cproveedor[i].cproveedor
-        })
-    }
-    let getQuoteRequestData = await bd.getQuoteRequestNotificationDataQuery(cproveedor, quoteRequestData).then((res) => res);
+    // let cproveedor = [];
+    // for(let i = 0; i < quoteRequestData.cproveedor.length; i++){
+    //     cproveedor.push({
+    //         cproveedor: quoteRequestData.cproveedor[i].cproveedor
+    //     })
+    // }
+    let getQuoteRequestData = await bd.getQuoteRequestNotificationDataQuery(quoteRequestData.cproveedor, quoteRequestData).then((res) => res);
     if(getQuoteRequestData.error){ return { status: false, code: 500, message: getQuoteRequestData.error }; }
     if(getQuoteRequestData.result.rowsAffected > 0){
         let replacements = [];
