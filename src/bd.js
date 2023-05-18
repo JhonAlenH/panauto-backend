@@ -21,6 +21,7 @@ module.exports = {
                 .input('xemail', sql.NVarChar, xemail)
                 .input('bactivo', sql.Bit, true)
                 .query('select * from VWAUTENTICACIONUSUARIO where XEMAIL = @xemail and BACTIVO = @bactivo');
+                console.log(result)
             return { result: result };
         }
         catch(err){
@@ -13889,6 +13890,7 @@ getLastQuoteQuery: async() => {
     }
 },
 searchPlanQuery: async(searchData) => {
+    console.log(searchData)
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
@@ -13900,6 +13902,7 @@ searchPlanQuery: async(searchData) => {
         //sql.close();
         return { result: result };
     }catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
