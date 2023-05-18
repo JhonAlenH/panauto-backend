@@ -481,7 +481,7 @@ const SearcheAgenda = async(requestBody) => {
 
             const datebirtday = BirthdayEvent.result.recordset[0].FNACIMIENTO
             const dateprocess = datebirtday.toLocaleDateString('en-us', { day:"numeric", month:"numeric"})
-            // valida en comparacion con la fecha actual si el usuario esta de cumpleaños o no
+            // valida en comparacion con la fecha actual si el usuario esta de cumpleañosarre
             if(dateprocess == DateNow){
                     const name = BirthdayEvent.result.recordset[0].XNOMBRE 
                     const apellido = BirthdayEvent.result.recordset[0].XAPELLIDO
