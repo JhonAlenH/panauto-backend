@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const helper = require('../src/helper');
 const bd = require('../src/bd');
+const { number } = require('joi');
 
 router.route('/city').post((req, res) => {
     operationValrepCity(req.body).then((result) => {
@@ -389,10 +390,9 @@ router.route('/client-agenda').post((req, res) => {
 const CreateAgenda = async(requestBody) => {
     let DataAgenda = {
         cpropietario: requestBody.cpropietario,
-        id: requestBody.id,
         xtitulo: requestBody.title,
-        fdesde: requestBody.start,
-        fhasta: requestBody.end,
+        fdesde: requestBody.fdesde + 'T' + requestBody.hora + ':00',
+        fhasta: requestBody.fhasta + 'T' + requestBody.hora + ':00',
         condicion: requestBody.allDay,
     };
     let Agenda = await bd.DataCreateAgendaClient(DataAgenda).then((res) => res);
@@ -441,7 +441,6 @@ const SearcheAgenda = async(requestBody) => {
     let Agenda = await bd.DataAgendaClient(DataAgenda).then((res) => res); //busqueda de eventos de la agenda
 
     let BirthdayEvent = await bd.BirthdayClient(DataAgenda).then((res) => res); //busqueda de fecha de nacimiento
-
     //obtener fecha actual
 
     const DateNow = new Date().toLocaleDateString('en-us', { day:"numeric", month:"numeric"})
@@ -461,7 +460,6 @@ const SearcheAgenda = async(requestBody) => {
                 title: Agenda.result.recordset[i].XTITULO,
                 start: Agenda.result.recordset[i].FDESDE.toISOString().replace(/T.*$/, ''),
                 end: Agenda.result.recordset[i].FHASTA.toISOString().replace(/T.*$/, ''),
-                allDay : Agenda.result.recordset[i].XCONDICION
             });
         }
 
@@ -511,6 +509,11 @@ const SearcheAgenda = async(requestBody) => {
                     }; 
             }   
         }
+
+        return { 
+            status: true, 
+            list: datagenda
+        }; 
     }
     // sino entra en la busqueda de eventos de la agenda (busca eventos y fecha de nacimiento)
      else{
@@ -609,14 +612,13 @@ router.route('/upload/mantenimiento/client-agenda').post((req, res) => {
 const UploadMantenimientoClub = async(requestBody) => {
     let DataDocAgend = {
         cpropietario: requestBody.cpropietario,
-        fdesde: requestBody.fdesde,
+        fdesde: requestBody.fdesde + 'T' + requestBody.hora + ':00',
         xmantenimientoPrevent: requestBody.xmantenimientoPrevent,
-        hora: requestBody.hora,
         xmantenimientoCorrect: requestBody.xmantenimientoCorrect,
     };
 
     let AgendaEventManteniento = await bd.UploadManAgendaClient(DataDocAgend).then((res) => res);
-    if(AgendaEventManteniento.error){ return { status: false, code: 500, message: Agenda.error }; }
+    if(AgendaEventManteniento.error){ return { status: false, code: 500, message: AgendaEventManteniento.error }; }
     if(AgendaEventManteniento.result.rowsAffected > 0){
         let solicitud = [];
 
@@ -639,5 +641,67 @@ const UploadMantenimientoClub = async(requestBody) => {
 };
 }
 
+router.route('/count/service').post((req, res) => {
+    CountServiceClub(req.body).then((result) => {
+        if(!result.status){ 
+            res.status(result.code).json({ data: result });
+            return;
+        }
+        res.json({ data: result });
+    }).catch((err) => {
+        res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'CountServiceClub' } });
+    });
+});
 
+const CountServiceClub = async(requestBody) => {
+    let DataAgenda = {
+        cpropietario: requestBody.cpropietario,
+    };
+    let AgendaClientCount = await bd.CountAgendaClient(DataAgenda).then((res) => res);
+    if(AgendaClientCount.error){ return { status: false, code: 500, message: AgendaClientCount.error }; }
+    if(AgendaClientCount.result.rowsAffected > 0){
+        let count = AgendaClientCount.result.recordset[0].CSOLICITUDSERVICIO
+        return { 
+            status: true, 
+            count: count
+        };}
+
+    return { 
+    status: false, 
+
+};
+}
+
+router.route('/deleteventagend').post((req, res) => {
+   DeleteEventAgend(req.body).then((result) => {
+        if(!result.status){ 
+            res.status(result.code).json({ data: result });
+            return;
+        }
+        res.json({ data: result });
+    }).catch((err) => {
+        res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'DeleteEventAgend' } });
+    });
+});
+
+const DeleteEventAgend = async(requestBody) => {
+    let DataAgenda = {
+        cpropietario: requestBody.cpropietario,
+        id :  requestBody.id,
+    };
+
+    let AgendaDeleteEvent = await bd.UpdateAgenda(DataAgenda).then((res) => res);
+    if(AgendaDeleteEvent.error){ return { status: false, code: 500, message: AgendaDeleteEvent.error }; }
+    if(AgendaDeleteEvent.result.rowsAffected > 0){
+        return { 
+            status: true, 
+            message: 'Evento eliminado'
+         
+        };}
+
+    return { 
+    status: false, 
+
+};
+}
 module.exports = router;
