@@ -21,10 +21,10 @@ module.exports = {
                 .input('xemail', sql.NVarChar, xemail)
                 .input('bactivo', sql.Bit, true)
                 .query('select * from VWAUTENTICACIONUSUARIO where XEMAIL = @xemail and BACTIVO = @bactivo');
-                console.log(result)
             return { result: result };
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message};
         }
     },
@@ -12767,7 +12767,7 @@ module.exports = {
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
-                .query('select * from PRPLAN_RC');
+                .query('select * from POPLAN_RC');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -13917,7 +13917,6 @@ getLastQuoteQuery: async() => {
     }
 },
 searchPlanQuery: async(searchData) => {
-    console.log(searchData)
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
@@ -14122,6 +14121,9 @@ createContractServiceArysQuery: async(userData) => {
             .input('cmarca', sql.Int, userData.cmarca)
             .input('cmodelo', sql.Int, userData.cmodelo)
             .input('cversion', sql.Int, userData.cversion)
+            .input('xmarca', sql.NVarChar, userData.xmarca)
+            .input('xmodelo', sql.NVarChar, userData.xmodelo)
+            .input('xversion', sql.NVarChar, userData.xversion)
             .input('xrif_cliente', sql.NVarChar, userData.xrif_cliente)
             .input('email', sql.NVarChar, userData.email)
             .input('xtelefono_prop', sql.NVarChar , userData.xtelefono_prop)
@@ -14153,7 +14155,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('fnac', sql.DateTime, userData.fnac)
             .input('cplan_rc', sql.Int, userData.cplan_rc)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc )')                
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion )')                
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
@@ -15696,7 +15698,7 @@ searchContractArysQuery: async() => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT * FROM VWBUSCARCONTRATOSSERVICIOSARYS');
+            .query('SELECT * FROM VWBUSCARCONTRATOSSERVICIOSARYS WHERE CESTATUSGENERAL <> 22');
         //sql.close();
         return { result: result };
     }catch(err){
@@ -16035,6 +16037,42 @@ updateReplacementsByQuoteRequestNotificationUpdateQuery: async(quotesProviders) 
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
+        return { error: err.message };
+    }
+},
+searchContractQuery: async(searchData) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('fdesde', sql.DateTime, searchData.fdesde)
+            .input('fhasta', sql.DateTime, searchData.fhasta)
+            .query(`SELECT * FROM VWBUSCARCONTRATOSXRENOVACIONES WHERE FHASTA_POL >= @fdesde AND FHASTA_POL <= @fhasta AND CESTATUSGENERAL <> 22`);
+        //sql.close();
+        console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+createRenovationQuery: async(renovationList) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        
+        let insert = await pool.request()
+            .input('ccarga', sql.Int, renovationList.ccarga)
+            .input('cplan', sql.Int, renovationList.cplan)
+            .input('cplan_rc', sql.Int, renovationList.cplan_rc)
+            .input('xplaca', sql.NVarChar, renovationList.xplaca)
+            .input('cusuariocreacion', sql.Int, renovationList.cusuariocreacion)
+            .query('insert into TMRENOVACION (CPLAN, CPLAN_RC, CCARGA, XPLACA, CUSUARIOCREACION) values (@cplan, @cplan_rc, @ccarga, @xplaca, @cusuariocreacion)')
+        rowsAffected = rowsAffected + insert.rowsAffected;
+        
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },

@@ -10,6 +10,11 @@
         "route": "/api/takers"
     },
     {
+        "name": "Renovations Route",
+        "router": "../routes/renovations",
+        "route": "/api/renovations"
+    },
+    {
         "name": "Clauses Route",
         "router": "../routes/clauses",
         "route": "/api/clauses"
