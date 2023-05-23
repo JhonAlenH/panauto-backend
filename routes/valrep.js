@@ -1694,7 +1694,7 @@ const operationValrepPlanRcvType = async(authHeader, requestBody) => {
     if(query.error){ return { status: false, code: 500, message: query.error }; }
     let jsonArray = [];
     for(let i = 0; i < query.result.recordset.length; i++){
-        jsonArray.push({ cplan_rc: query.result.recordset[i].CPLAN_RC, xplan_rc: query.result.recordset[i].XPLAN_RC, bactivo: query.result.recordset[i].BACTIVO });
+        jsonArray.push({ cplan_rc: query.result.recordset[i].CPLAN_RC, xplan_rc: query.result.recordset[i].XDESCRIPCION, bactivo: query.result.recordset[i].BACTIVO });
     }
     return { status: true, list: jsonArray }
 }
