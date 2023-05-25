@@ -5221,7 +5221,7 @@ module.exports = {
                 .input('cpais', sql.Numeric(4, 0), brokerData.cpais)
                 .input('ccompania', sql.Int, brokerData.ccompania)
                 .input('ncorredor', sql.NVarChar, brokerData.ncorredor)
-                .query('select * from TRCORREDOR where NCORREDOR = @ncorredor and CPAIS = @cpais and CCOMPANIA = @ccompania');
+                .query('select * from MACORREDORES where NCORREDOR = @ncorredor and CPAIS = @cpais and CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -5236,7 +5236,7 @@ module.exports = {
                 .input('ccompania', sql.Int, brokerData.ccompania)
                 .input('ctipodocidentidad', sql.Int, brokerData.ctipodocidentidad)
                 .input('xdocidentidad', sql.NVarChar, brokerData.xdocidentidad)
-                .query('select * from TRCORREDOR where XDOCIDENTIDAD = @xdocidentidad and CTIPODOCIDENTIDAD = @ctipodocidentidad and CPAIS = @cpais and CCOMPANIA = @ccompania');
+                .query('select * from MACORREDORES where XDOCIDENTIDAD = @xdocidentidad and CTIPODOCIDENTIDAD = @ctipodocidentidad and CPAIS = @cpais and CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -5254,8 +5254,7 @@ module.exports = {
                 .input('cestado', sql.Int, brokerData.cestado)
                 .input('cciudad', sql.Int, brokerData.cciudad)
                 .input('ncorredor', sql.NVarChar, brokerData.ncorredor)
-                .input('xnombre', sql.NVarChar, brokerData.xnombre)
-                .input('xapellido', sql.NVarChar, brokerData.xapellido)
+                .input('xcorredor', sql.NVarChar, brokerData.xnombre)
                 .input('xdocidentidad', sql.NVarChar, brokerData.xdocidentidad)
                 .input('xtelefono', sql.NVarChar, brokerData.xtelefono)
                 .input('xemail', sql.NVarChar, brokerData.xemail)
@@ -5263,7 +5262,7 @@ module.exports = {
                 .input('bactivo', sql.Bit, brokerData.bactivo)
                 .input('cusuariocreacion', sql.Int, brokerData.cusuariocreacion)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into TRCORREDOR (CACTIVIDADEMPRESA, CTIPODOCIDENTIDAD, CESTADO, CCIUDAD, NCORREDOR, XNOMBRE, XAPELLIDO, XDOCIDENTIDAD, XTELEFONO, XEMAIL, XDIRECCION, CPAIS, CCOMPANIA, BACTIVO, CUSUARIOCREACION, FCREACION) values (@cactividadempresa, @ctipodocidentidad, @cestado, @cciudad, @ncorredor, @xnombre, @xapellido, @xdocidentidad, @xtelefono, @xemail, @xdireccion, @cpais, @ccompania, @bactivo, @cusuariocreacion, @fcreacion)');
+                .query('insert into MACORREDORES (CACTIVIDADEMPRESA, CTIPODOCIDENTIDAD, CESTADO, CCIUDAD, NCORREDOR, XCORREDOR, XDOCIDENTIDAD, XTELEFONO, XEMAIL, XDIRECCION, CPAIS, CCOMPANIA, BACTIVO, CUSUARIOCREACION, FCREACION) values (@cactividadempresa, @ctipodocidentidad, @cestado, @cciudad, @ncorredor, @xcorredor, @xdocidentidad, @xtelefono, @xemail, @xdireccion, @cpais, @ccompania, @bactivo, @cusuariocreacion, @fcreacion)');
             if(result.rowsAffected > 0){
                 let query = await pool.request()
                     .input('cpais', sql.Numeric(4, 0), brokerData.cpais)
@@ -5324,7 +5323,7 @@ module.exports = {
                 .input('cpais', sql.Numeric(4, 0), brokerData.cpais)
                 .input('ccompania', sql.Int, brokerData.ccompania)
                 .input('ccorredor', sql.Int, brokerData.ccorredor)
-                .query('select * from TRCORREDOR where CCORREDOR = @ccorredor and CPAIS = @cpais and CCOMPANIA = @ccompania');
+                .query('select * from MACORREDORES where CCORREDOR = @ccorredor and CPAIS = @cpais and CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -5351,7 +5350,7 @@ module.exports = {
                 .input('ccompania', sql.Int, brokerData.ccompania)
                 .input('ncorredor', sql.NVarChar, brokerData.ncorredor)
                 .input('ccorredor', sql.Int, brokerData.ccorredor)
-                .query('select * from TRCORREDOR where NCORREDOR = @ncorredor and CPAIS = @cpais and CCOMPANIA = @ccompania and CCORREDOR != @ccorredor');
+                .query('select * from MACORREDORES where NCORREDOR = @ncorredor and CPAIS = @cpais and CCOMPANIA = @ccompania and CCORREDOR != @ccorredor');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -5367,7 +5366,7 @@ module.exports = {
                 .input('ccorredor', sql.NVarChar, brokerData.ccorredor)
                 .input('ctipodocidentidad', sql.Int, brokerData.ctipodocidentidad)
                 .input('xdocidentidad', sql.NVarChar, brokerData.xdocidentidad)
-                .query('select * from TRCORREDOR where XDOCIDENTIDAD = @xdocidentidad and CTIPODOCIDENTIDAD = @ctipodocidentidad and CPAIS = @cpais and CCOMPANIA = @ccompania and CCORREDOR != @ccorredor');
+                .query('select * from MACORREDORES where XDOCIDENTIDAD = @xdocidentidad and CTIPODOCIDENTIDAD = @ctipodocidentidad and CPAIS = @cpais and CCOMPANIA = @ccompania and CCORREDOR != @ccorredor');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -5386,8 +5385,7 @@ module.exports = {
                 .input('cestado', sql.Int, brokerData.cestado)
                 .input('cciudad', sql.Int, brokerData.cciudad)
                 .input('ncorredor', sql.NVarChar, brokerData.ncorredor)
-                .input('xnombre', sql.NVarChar, brokerData.xnombre)
-                .input('xapellido', sql.NVarChar, brokerData.xapellido)
+                .input('xcorredor', sql.NVarChar, brokerData.xnombre)
                 .input('xdocidentidad', sql.NVarChar, brokerData.xdocidentidad)
                 .input('xtelefono', sql.NVarChar, brokerData.xtelefono)
                 .input('xemail', sql.NVarChar, brokerData.xemail)
@@ -5395,10 +5393,11 @@ module.exports = {
                 .input('bactivo', sql.Bit, brokerData.bactivo)
                 .input('cusuariomodificacion', sql.Int, brokerData.cusuariomodificacion)
                 .input('fmodificacion', sql.DateTime, new Date())
-                .query('update TRCORREDOR set CACTIVIDADEMPRESA = @cactividadempresa, CTIPODOCIDENTIDAD = @ctipodocidentidad, CESTADO = @cestado, CCIUDAD = @cciudad, NCORREDOR = @ncorredor, XNOMBRE = @xnombre, XAPELLIDO = @xapellido, XDOCIDENTIDAD = @xdocidentidad, XTELEFONO = @xtelefono, XEMAIL = @xemail, XDIRECCION = @xdireccion, BACTIVO = @bactivo, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CCORREDOR = @ccorredor and CPAIS = @cpais and CCOMPANIA = @ccompania');
+                .query('update MACORREDORES set CACTIVIDADEMPRESA = @cactividadempresa, CTIPODOCIDENTIDAD = @ctipodocidentidad, CESTADO = @cestado, CCIUDAD = @cciudad, NCORREDOR = @ncorredor, XCORREDOR = @xcorredor, XDOCIDENTIDAD = @xdocidentidad, XTELEFONO = @xtelefono, XEMAIL = @xemail, XDIRECCION = @xdireccion, BACTIVO = @bactivo, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CCORREDOR = @ccorredor and CPAIS = @cpais and CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
