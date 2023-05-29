@@ -208,6 +208,7 @@ const operationCreatePlan = async(authHeader, requestBody) => {
                 for(let i = 0; i < requestBody.servicesType.length; i++){
                     serviceTypeList.push({
                         ctiposervicio: requestBody.servicesType[i].ctiposervicio,
+                        baceptado: requestBody.servicesType[i].baceptado,
                     })
                 }
                 let createTypeService = await bd.createServiceTypeFromPlanQuery(serviceTypeList, dataList, cplan).then((res) => res);
@@ -220,11 +221,22 @@ const operationCreatePlan = async(authHeader, requestBody) => {
                     quantityList.push({
                         ncantidad: requestBody.quantity[i].ncantidad,
                         cservicio: requestBody.quantity[i].cservicio,
+                        baceptado: requestBody.quantity[i].baceptado,
                     })
                 }
                 let updateServiceFromQuantity = await bd.updateServiceFromQuantityQuery(quantityList, cplan).then((res) => res);
                 if(updateServiceFromQuantity.error){ return  { status: false, code: 500, message: updateServiceFromQuantity.error }; }
+                if(updateServiceFromQuantity.result.rowsAffected > 0){
+                    let searchPlanService = await bd.searchPlanServiceQuery(cplan).then((res) => res);
+                    if(searchPlanService.error){ return  { status: false, code: 500, message: searchPlanService.error }; }
+                    if(searchPlanService.result.rowsAffected > 0){
+                        let baceptado = 0;
+                        let updateAceptepService = await bd.updateAceptepServiceQuery(baceptado, cplan).then((res) => res);
+                        if(updateAceptepService.error){ return  { status: false, code: 500, message: updateAceptepService.error }; }
+                    }
+                }
             }
+            
             if(requestBody.rcv){
                 let rcv = requestBody.rcv
                 let createPlanRcv = await bd.createPlanRcvQuery(dataList, rcv, cplan).then((res) => res);
@@ -442,6 +454,81 @@ const operationUpdatePlan = async(authHeader, requestBody) => {
     }
 
     return{status: true, cplan: dataList.cplan}
+}
+
+router.route('/search-type-service-selected').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationSearchTypeServicePlan(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchTypeServicePlan' } });
+        });
+    }
+});
+
+const operationSearchTypeServicePlan = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cplan: requestBody.cplan,
+        baceptado: requestBody.baceptado
+    };
+    let searchTypeServicePlan = await bd.searchTypeServicePlanQuery(searchData).then((res) => res);
+    if(searchTypeServicePlan.error){ return  { status: false, code: 500, message: searchTypeServicePlan.error }; }
+    if(searchTypeServicePlan.result.rowsAffected == 0){ return { status: false, code: 404, message: 'Plan not found.' }; }
+    let jsonList = [];
+    for(let i = 0; i < searchTypeServicePlan.result.recordset.length; i++){
+        jsonList.push({
+            ctiposervicio: searchTypeServicePlan.result.recordset[i].CTIPOSERVICIO,
+            xtiposervicio: searchTypeServicePlan.result.recordset[i].XTIPOSERVICIO,
+        });
+    }
+    return { status: true, list: jsonList };
+}
+
+router.route('/search-service-selected').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationSearchServicePlan(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchServicePlan' } });
+        });
+    }
+});
+
+const operationSearchServicePlan = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cplan: requestBody.cplan,
+        baceptado: requestBody.baceptado
+    };
+    let searchServicePlan = await bd.searchServicePlanQuery(searchData).then((res) => res);
+    if(searchServicePlan.error){ return  { status: false, code: 500, message: searchServicePlan.error }; }
+    if(searchServicePlan.result.rowsAffected == 0){ return { status: false, code: 404, message: 'Plan not found.' }; }
+    let jsonList = [];
+    for(let i = 0; i < searchServicePlan.result.recordset.length; i++){
+        jsonList.push({
+            cservicio: searchServicePlan.result.recordset[i].CSERVICIO,
+            xservicio: searchServicePlan.result.recordset[i].XSERVICIO,
+            ncantidad: searchServicePlan.result.recordset[i].NCANTIDAD,
+        });
+    }
+    return { status: true, list: jsonList };
 }
 
 module.exports = router;
