@@ -14164,8 +14164,11 @@ updateServiceFromQuantityQuery: async(quantityList, cplan) => {
                 .input('cplan', sql.Int, cplan)
                 .input('baceptado', sql.Bit, quantityList[i].baceptado)
                 .input('ncantidad', sql.Int, quantityList[i].ncantidad)
+                .input('pservicio', sql.Numeric(5, 2), quantityList[i].pservicio)
+                .input('mmaximocobertura', sql.Numeric(18, 2), quantityList[i].mmaximocobertura)
+                .input('mdeducible', sql.Numeric(18, 2), quantityList[i].mdeducible)
                 .input('cservicio', sql.Int, quantityList[i].cservicio)
-                .query('UPDATE POSERVICIOS SET NCANTIDAD = @ncantidad, BACEPTADO = @baceptado WHERE CPLAN = @cplan AND CSERVICIO = @cservicio')
+                .query('UPDATE POSERVICIOS SET NCANTIDAD = @ncantidad, PSERVICIO = @pservicio, MMAXIMOCOBERTURA = @mmaximocobertura, MDEDUCIBLE = @mdeducible, BACEPTADO = @baceptado WHERE CPLAN = @cplan AND CSERVICIO = @cservicio')
             rowsAffected = rowsAffected + update.rowsAffected;
         }
         //sql.close();
@@ -16098,6 +16101,19 @@ searchServicePlanQuery: async(searchData) => {
             .input('cplan', sql.Int, searchData.cplan)
             .input('baceptado', sql.Bit, searchData.baceptado)
             .query(`select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan AND BACEPTADO = @baceptado`);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchQuantityPlanQuery: async(searchData) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan', sql.Int, searchData.cplan)
+            .input('cservicio', sql.Int, searchData.cservicio)
+            .query(`select * from POSERVICIOS where CPLAN = @cplan AND CSERVICIO = @cservicio`);
         //sql.close();
         return { result: result };
     }catch(err){

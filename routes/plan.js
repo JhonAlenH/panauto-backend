@@ -220,6 +220,9 @@ const operationCreatePlan = async(authHeader, requestBody) => {
                 for(let i = 0; i < requestBody.quantity.length; i++){
                     quantityList.push({
                         ncantidad: requestBody.quantity[i].ncantidad,
+                        pservicio: requestBody.quantity[i].pservicio,
+                        mmaximocobertura: requestBody.quantity[i].mmaximocobertura,
+                        mdeducible: requestBody.quantity[i].mdeducible,
                         cservicio: requestBody.quantity[i].cservicio,
                         baceptado: requestBody.quantity[i].baceptado,
                     })
@@ -529,6 +532,47 @@ const operationSearchServicePlan = async(authHeader, requestBody) => {
         });
     }
     return { status: true, list: jsonList };
+}
+
+router.route('/search-quantity').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationSearchQuantity(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchQuantity' } });
+        });
+    }
+});
+
+const operationSearchQuantity = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cplan: requestBody.cplan,
+        cservicio: requestBody.cservicio
+    };
+    let searchQuantityPlan = await bd.searchQuantityPlanQuery(searchData).then((res) => res);
+    if(searchQuantityPlan.error){ return  { status: false, code: 500, message: searchServicePlan.error }; }
+    if(searchQuantityPlan.result.rowsAffected > 0){ 
+        return { 
+            status: true, 
+            ncantidad: searchQuantityPlan.result.recordset[0].NCANTIDAD,
+            pservicio: searchQuantityPlan.result.recordset[0].PSERVICIO, 
+            mmaximocobertura: searchQuantityPlan.result.recordset[0].MMAXIMOCOBERTURA, 
+            mdeducible: searchQuantityPlan.result.recordset[0].MDEDUCIBLE,  
+            cplan: searchQuantityPlan.result.recordset[0].CPLAN, 
+            cservicio: searchQuantityPlan.result.recordset[0].CSERVICIO,  
+        };
+    }
+
+    
 }
 
 module.exports = router;
