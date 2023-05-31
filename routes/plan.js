@@ -399,61 +399,28 @@ const operationUpdatePlan = async(authHeader, requestBody) => {
         cplan: requestBody.cplan,
         ctipoplan: requestBody.ctipoplan,
         xplan: requestBody.xplan,
-        paseguradora: requestBody.paseguradora ? requestBody.paseguradora: 0,
-        parys: requestBody.parys ? requestBody.parys: 100,
         mcosto: requestBody.mcosto,
-        brcv: requestBody.brcv,
-        bactivo: requestBody.bactivo,
         cpais: requestBody.cpais,
         ccompania: requestBody.ccompania,
         cusuario: requestBody.cusuario,
         cmoneda: requestBody.cmoneda,
-        ptasa_casco: requestBody.ptasa_casco ? requestBody.ptasa_casco: 0,
-        ptasa_catastrofico: requestBody.ptasa_catastrofico ? requestBody.ptasa_catastrofico: 0,
-        msuma_recuperacion: requestBody.msuma_recuperacion ? requestBody.msuma_recuperacion: 0,
-        mprima_recuperacion: requestBody.mprima_recuperacion ? requestBody.mprima_recuperacion: 0,
-        mdeducible: requestBody.mdeducible ? requestBody.mdeducible: 0,
-        apov: requestBody.apov,
-        exceso: requestBody.exceso
+        bactivo: requestBody.bactivo,
     }
     let updatePlan = await bd.updatePlanQuery(dataList).then((res) => res);
     if(updatePlan.error){return { status: false, code: 500, message: updatePlan.error }; }
-
-    if(dataList.apov){
-        let apovList = [];
-
-        for(let i = 0; i < dataList.apov.length; i++){  
-            apovList.push({
-                cplan: dataList.apov[i].cplan,
-                ccobertura: dataList.apov[i].ccobertura,
-                xcobertura: dataList.apov[i].xcobertura,
-                msuma_aseg: dataList.apov[i].msuma_aseg,
-                ptasa_par_rus: dataList.apov[i].ptasa_par_rus,
-                mprima_par_rus: dataList.apov[i].mprima_par_rus,
-                ptasa_carga: dataList.apov[i].ptasa_carga,
-                mprima_carga: dataList.apov[i].mprima_carga
+    if(requestBody.quantity){
+        let updateQuatityList = [];
+        for(let i = 0; i < requestBody.quantity.length; i++){  
+            updateQuatityList.push({
+                ncantidad: requestBody.quantity[i].ncantidad,
+                cservicio: requestBody.quantity[i].cservicio,
+                pservicio: requestBody.quantity[i].pservicio,
+                mmaximocobertura: requestBody.quantity[i].mmaximocobertura,
+                mdeducible: requestBody.quantity[i].mdeducible,
             })
         }
-        let updateApovFromPlan = await bd.updateApovFromPlanQuery(apovList).then((res) => res);
-        if(updateApovFromPlan.error){return { status: false, code: 500, message: updateApovFromPlan.error }; }
-    }
-
-    if(dataList.exceso){
-        let excesoList = [];
-
-        for(let i = 0; i < dataList.exceso.length; i++){  
-            excesoList.push({
-                cplan: dataList.exceso[i].cplan,
-                ctarifa: dataList.exceso[i].ctarifa,
-                cmoneda: dataList.exceso[i].cmoneda,
-                ms_defensa_penal: dataList.exceso[i].ms_defensa_penal,
-                mp_defensa_penal: dataList.exceso[i].mp_defensa_penal,
-                ms_exceso_limite: dataList.exceso[i].ms_exceso_limite,
-                mp_exceso_limite: dataList.exceso[i].mp_exceso_limite
-            })
-        }
-        let updateExcesoFromPlan = await bd.updateExcesoFromPlanQuery(excesoList).then((res) => res);
-        if(updateExcesoFromPlan.error){return { status: false, code: 500, message: updateExcesoFromPlan.error }; }
+        let updateQuatityFromPlan = await bd.updateQuatityFromPlanQuery(updateQuatityList, dataList).then((res) => res);
+        if(updateQuatityFromPlan.error){return { status: false, code: 500, message: updateQuatityFromPlan.error }; }
     }
 
     return{status: true, cplan: dataList.cplan}
