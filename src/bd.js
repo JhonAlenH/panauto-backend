@@ -14212,48 +14212,43 @@ updatePlanQuery: async(dataList) => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .input('cpais', sql.Numeric(4, 0), dataList.cpais)
+            .input('cpais', sql.Int, dataList.cpais)
             .input('ccompania', sql.Int, dataList.ccompania)
             .input('cplan', sql.Int, dataList.cplan)
             .input('ctipoplan', sql.Int, dataList.ctipoplan)
             .input('xplan', sql.NVarChar, dataList.xplan)
+            .input('mcosto', sql.Numeric(18, 2), dataList.mcosto)
+            .input('cmoneda', sql.Int, dataList.cmoneda)
             .input('bactivo', sql.Bit, dataList.bactivo)
-            .input('parys', sql.Numeric(18, 2), dataList.parys)
-            .input('paseguradora', sql.Numeric(18, 2), dataList.paseguradora)
-            .input('ptasa_casco', sql.Numeric(18, 2), dataList.ptasa_casco)
-            .input('ptasa_catastrofico', sql.Numeric(18, 2), dataList.ptasa_catastrofico)
-            .input('msuma_recuperacion', sql.Numeric(18, 2), dataList.msuma_recuperacion)
-            .input('mprima_recuperacion', sql.Numeric(18, 2), dataList.mprima_recuperacion)
-            .input('mdeducible', sql.Numeric(18, 2), dataList.mdeducible)
             .input('cusuariomodificacion', sql.Int, dataList.cusuariomodificacion)
             .input('fmodificacion', sql.DateTime, new Date())
-            .query('update POPLAN set XPLAN = @xplan, CTIPOPLAN = @ctipoplan, PTASA_CASCO = @ptasa_casco, PTASA_CATASTROFICO = @ptasa_catastrofico, MSUMA_RECUPERACION = @msuma_recuperacion, MPRIMA_RECUPERACION = @mprima_recuperacion, MDEDUCIBLE = @mdeducible, BACTIVO = @bactivo, PARYS = @parys, PASEGURADORA = @paseguradora, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CPLAN = @cplan and CPAIS = @cpais and CCOMPANIA = @ccompania');
+            .query('update POPLAN set XPLAN = @xplan, CTIPOPLAN = @ctipoplan, MCOSTO = @mcosto, CMONEDA = @cmoneda, BACTIVO = @bactivo, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CPLAN = @cplan and CPAIS = @cpais and CCOMPANIA = @ccompania');
         //sql.close();
         return { result: result };
     }catch(err){
         return { error: err.message };
     }
 },
-updateApovFromPlanQuery: async(apovList) => {
+updateQuatityFromPlanQuery: async(updateQuatityList, dataList) => {
     try{
         let rowsAffected = 0;
         let pool = await sql.connect(config);
-        for(let i = 0; i < apovList.length; i++){
+        for(let i = 0; i < updateQuatityList.length; i++){
             let update = await pool.request()
-                .input('cplan', sql.Int, apovList[i].cplan)
-                .input('ccobertura', sql.Int, apovList[i].ccobertura)
-                .input('msuma_aseg', sql.Numeric(18, 2), apovList[i].msuma_aseg)
-                .input('ptasa_par_rus', sql.Numeric(18, 2), apovList[i].ptasa_par_rus)
-                .input('mprima_par_rus', sql.Numeric(18, 2), apovList[i].mprima_par_rus)
-                .input('ptasa_carga', sql.Numeric(18, 2), apovList[i].ptasa_carga)
-                .input('mprima_carga', sql.Numeric(18, 2), apovList[i].mprima_carga)
-                .query('UPDATE POTASAS_APOV SET MSUMA_ASEG = @msuma_aseg, PTASA_PAR_RUS = @ptasa_par_rus, MPRIMA_PAR_RUS = @mprima_par_rus, PTASA_CARGA = @ptasa_carga, MPRIMA_CARGA = @mprima_carga WHERE CPLAN = @cplan AND CCOBERTURA = @ccobertura')
+                .input('cplan', sql.Int, dataList.cplan)
+                .input('ncantidad', sql.Int, updateQuatityList[i].ncantidad)
+                .input('cservicio', sql.Int, updateQuatityList[i].cservicio)
+                .input('pservicio', sql.Numeric(18, 2), updateQuatityList[i].pservicio)
+                .input('mmaximocobertura', sql.Numeric(18, 2), updateQuatityList[i].mmaximocobertura)
+                .input('mdeducible', sql.Numeric(18, 2), updateQuatityList[i].mdeducible)
+                .query('UPDATE POSERVICIOS SET NCANTIDAD = @ncantidad, PSERVICIO = @pservicio, MMAXIMOCOBERTURA = @mmaximocobertura, MDEDUCIBLE = @mdeducible WHERE CPLAN = @cplan AND CSERVICIO = @cservicio')
             rowsAffected = rowsAffected + update.rowsAffected;
         }
         //sql.close();
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
