@@ -501,6 +501,81 @@ const operationSearchServicePlan = async(authHeader, requestBody) => {
     return { status: true, list: jsonList };
 }
 
+router.route('/search-type-service-selected-rcv').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationSearchTypeServicePlanRcv(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchTypeServicePlanRcv' } });
+        });
+    }
+});
+
+const operationSearchTypeServicePlanRcv = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cplan_rc: requestBody.cplan_rc,
+        baceptado: requestBody.baceptado
+    };
+    let searchTypeServicePlan = await bd.searchTypeServicePlanRcvQuery(searchData).then((res) => res);
+    if(searchTypeServicePlan.error){ return  { status: false, code: 500, message: searchTypeServicePlan.error }; }
+    if(searchTypeServicePlan.result.rowsAffected == 0){ return { status: false, code: 404, message: 'Plan not found.' }; }
+    let jsonList = [];
+    for(let i = 0; i < searchTypeServicePlan.result.recordset.length; i++){
+        jsonList.push({
+            ctiposervicio: searchTypeServicePlan.result.recordset[i].CTIPOSERVICIO,
+            xtiposervicio: searchTypeServicePlan.result.recordset[i].XTIPOSERVICIO,
+        });
+    }
+    return { status: true, list: jsonList };
+}
+
+router.route('/search-service-selected-rcv').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationSearchServicePlanRcv(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchServicePlanRcv' } });
+        });
+    }
+});
+
+const operationSearchServicePlanRcv = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cplan_rc: requestBody.cplan_rc,
+        baceptado: requestBody.baceptado
+    };
+    let searchServicePlan = await bd.searchServicePlanRcvQuery(searchData).then((res) => res);
+    if(searchServicePlan.error){ return  { status: false, code: 500, message: searchServicePlan.error }; }
+    if(searchServicePlan.result.rowsAffected == 0){ return { status: false, code: 404, message: 'Plan not found.' }; }
+    let jsonList = [];
+    for(let i = 0; i < searchServicePlan.result.recordset.length; i++){
+        jsonList.push({
+            cservicio: searchServicePlan.result.recordset[i].CSERVICIO,
+            xservicio: searchServicePlan.result.recordset[i].XSERVICIO,
+            ncantidad: searchServicePlan.result.recordset[i].NCANTIDAD,
+        });
+    }
+    return { status: true, list: jsonList };
+}
+
 router.route('/search-quantity').post((req, res) => {
     if(!req.header('Authorization')){ 
         res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
@@ -538,8 +613,45 @@ const operationSearchQuantity = async(authHeader, requestBody) => {
             cservicio: searchQuantityPlan.result.recordset[0].CSERVICIO,  
         };
     }
+}
 
-    
+router.route('/search-quantity-rcv').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationSearchQuantityRcv(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchQuantityRcv' } });
+        });
+    }
+});
+
+const operationSearchQuantityRcv = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+    let searchData = {
+        cplan_rc: requestBody.cplan_rc,
+        cservicio: requestBody.cservicio
+    };
+    let searchQuantityPlan = await bd.searchQuantityPlanRcvQuery(searchData).then((res) => res);
+    if(searchQuantityPlan.error){ return  { status: false, code: 500, message: searchServicePlan.error }; }
+    if(searchQuantityPlan.result.rowsAffected > 0){ 
+        return { 
+            status: true, 
+            ncantidad: searchQuantityPlan.result.recordset[0].NCANTIDAD,
+            pservicio: searchQuantityPlan.result.recordset[0].PSERVICIO, 
+            mmaximocobertura: searchQuantityPlan.result.recordset[0].MMAXIMOCOBERTURA, 
+            mdeducible: searchQuantityPlan.result.recordset[0].MDEDUCIBLE,  
+            cplan_rc: searchQuantityPlan.result.recordset[0].CPLAN_RC, 
+            cservicio: searchQuantityPlan.result.recordset[0].CSERVICIO,  
+        };
+    }
 }
 
 module.exports = router;
