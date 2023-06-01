@@ -307,6 +307,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                     xservicio: getServiceFromPlan.result.recordset[i].XSERVICIO,
                 })
             }
+            console.log(serviceList)
         }
         return {
             status: true,

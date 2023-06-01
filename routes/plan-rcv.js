@@ -134,9 +134,23 @@ const operationUpdatePlanRcv = async(authHeader, requestBody) => {
     }
     let updatePlanRcvDetail = await bd.updatePlanRcvQuery(dataPlanRcv, planList).then((res) => res);
     if(updatePlanRcvDetail.error){ return { status: false, code: 500, message: updatePlanRcvDetail.error }; }
-    console.log(updatePlanRcvDetail.result.rowsAffected)
-    if(updatePlanRcvDetail.result.rowsAffected > 0){ return { status: true, cplan_rc: dataPlanRcv.cplan_rc }; }
-    else{ return { status: false, code: 404, message: 'Service Order not found.' }; }
+
+    if(requestBody.quantity){
+        let updateQuatityList = [];
+        for(let i = 0; i < requestBody.quantity.length; i++){  
+            updateQuatityList.push({
+                ncantidad: requestBody.quantity[i].ncantidad,
+                cservicio: requestBody.quantity[i].cservicio,
+                pservicio: requestBody.quantity[i].pservicio,
+                mmaximocobertura: requestBody.quantity[i].mmaximocobertura,
+                mdeducible: requestBody.quantity[i].mdeducible,
+            })
+        }
+        let updateQuatityFromPlan = await bd.updateQuatityFromPlanRcvQuery(updateQuatityList, dataPlanRcv).then((res) => res);
+        if(updateQuatityFromPlan.error){return { status: false, code: 500, message: updateQuatityFromPlan.error }; }
+    }
+
+    return{status: true, cplan: dataPlanRcv.cplan_rc}
 }
 
 
