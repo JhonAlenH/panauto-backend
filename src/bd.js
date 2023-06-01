@@ -14252,6 +14252,29 @@ updateQuatityFromPlanQuery: async(updateQuatityList, dataList) => {
         return { error: err.message };
     }
 },
+updateQuatityFromPlanRcvQuery: async(updateQuatityList, dataPlanRcv) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        for(let i = 0; i < updateQuatityList.length; i++){
+            let update = await pool.request()
+                .input('cplan_rc', sql.Int, dataPlanRcv.cplan_rc)
+                .input('ncantidad', sql.Int, updateQuatityList[i].ncantidad)
+                .input('cservicio', sql.Int, updateQuatityList[i].cservicio)
+                .input('pservicio', sql.Numeric(18, 2), updateQuatityList[i].pservicio)
+                .input('mmaximocobertura', sql.Numeric(18, 2), updateQuatityList[i].mmaximocobertura)
+                .input('mdeducible', sql.Numeric(18, 2), updateQuatityList[i].mdeducible)
+                .query('UPDATE POSERVICIOS_RC SET NCANTIDAD = @ncantidad, PSERVICIO = @pservicio, MMAXIMOCOBERTURA = @mmaximocobertura, MDEDUCIBLE = @mdeducible WHERE CPLAN_RC = @cplan_rc AND CSERVICIO = @cservicio')
+            rowsAffected = rowsAffected + update.rowsAffected;
+        }
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
 updateExcesoFromPlanQuery: async(excesoList) => {
     try{
         let rowsAffected = 0;
@@ -15756,7 +15779,7 @@ getServiceFromPlanQuery: async(cplan) => {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('cplan', sql.Int, cplan)
-            .query('select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan');
+            .query('select * from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan AND BACEPTADO = 1');
         //sql.close();
         
         return { result: result };
@@ -16109,6 +16132,45 @@ searchQuantityPlanQuery: async(searchData) => {
             .input('cplan', sql.Int, searchData.cplan)
             .input('cservicio', sql.Int, searchData.cservicio)
             .query(`select * from POSERVICIOS where CPLAN = @cplan AND CSERVICIO = @cservicio`);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchTypeServicePlanRcvQuery: async(searchData) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan_rc', sql.Int, searchData.cplan_rc)
+            .input('baceptado', sql.Bit, searchData.baceptado)
+            .query(`select * from VWBUSCARTIPOSERVICIOSXPLANRC where CPLAN_RC = @cplan_rc AND BACEPTADO = @baceptado`);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchServicePlanRcvQuery: async(searchData) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan_rc', sql.Int, searchData.cplan_rc)
+            .input('baceptado', sql.Bit, searchData.baceptado)
+            .query(`select * from VWBUSCARSERVICIOSXPLANRC where CPLAN_RC = @cplan_rc AND BACEPTADO = @baceptado`);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchQuantityPlanRcvQuery: async(searchData) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan_rc', sql.Int, searchData.cplan_rc)
+            .input('cservicio', sql.Int, searchData.cservicio)
+            .query(`select * from POSERVICIOS_RC where CPLAN_RC = @cplan_rc AND CSERVICIO = @cservicio`);
         //sql.close();
         return { result: result };
     }catch(err){
