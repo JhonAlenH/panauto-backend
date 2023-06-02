@@ -206,6 +206,7 @@ const operationCreatePlanRcv = async(authHeader, requestBody) => {
             for(let i = 0; i < requestBody.servicesType.length; i++){
                 serviceTypeList.push({
                     ctiposervicio: requestBody.servicesType[i].ctiposervicio,
+                    baceptado: requestBody.servicesType[i].baceptado,
                 })
             }
             let createTypeService = await bd.createServiceTypeFromPlanRcvQuery(serviceTypeList, dataPlanRcv, cplan_rc).then((res) => res);
@@ -218,16 +219,28 @@ const operationCreatePlanRcv = async(authHeader, requestBody) => {
             for(let i = 0; i < requestBody.quantity.length; i++){
                 quantityList.push({
                     ncantidad: requestBody.quantity[i].ncantidad,
+                    pservicio: requestBody.quantity[i].pservicio,
+                    mmaximocobertura: requestBody.quantity[i].mmaximocobertura,
+                    mdeducible: requestBody.quantity[i].mdeducible,
                     cservicio: requestBody.quantity[i].cservicio,
+                    baceptado: requestBody.quantity[i].baceptado,
                 })
             }
             let updateServiceFromQuantity = await bd.updateServiceFromQuantityRcvQuery(quantityList, cplan_rc).then((res) => res);
             if(updateServiceFromQuantity.error){ return  { status: false, code: 500, message: updateServiceFromQuantity.error }; }
+            if(updateServiceFromQuantity.result.rowsAffected > 0){
+                let searchPlanService = await bd.searchPlanRcvServiceQuery(cplan_rc).then((res) => res);
+                if(searchPlanService.error){ console.log(searchPlanService.error);return  { status: false, code: 500, message: searchPlanService.error }; }
+                if(searchPlanService.result.rowsAffected > 0){
+                    let baceptado = 0;
+                    let updateAceptepService = await bd.updateAceptepServiceRcvQuery(baceptado, cplan_rc).then((res) => res);
+                    if(updateAceptepService.error){ console.log(updateAceptepService.error);return  { status: false, code: 500, message: updateAceptepService.error }; }
+                }
+            }
         }
     }else{
         return{status: false, code: 404, message: 'Error de Conexión'}
     }
-
     let searchLastPlanRcv = await bd.searchLastPlanRcvQuery().then((res) => res);
     if(searchLastPlanRcv.error){ return  { status: false, code: 500, message: searchLastPlanRcv.error }; }
     if(searchLastPlanRcv.result.rowsAffected > 0){return {status: true, cplan_rc: searchLastPlanRcv.result.recordset[0].CPLAN_RC}} 
