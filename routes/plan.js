@@ -200,7 +200,7 @@ const operationCreatePlan = async(authHeader, requestBody) => {
         let apovList = [];
 
         let createPlan = await bd.createPlanQuery(dataList, cplan).then((res) => res);
-        if(createPlan.error){return { status: false, code: 500, message: createPlan.error }; }
+        if(createPlan.error){console.log(createPlan.error); return { status: false, code: 500, message: createPlan.error }; }
         if(createPlan.result.rowsAffected > 0){  
             if(requestBody.servicesType){
                 //Crea los tipos de servicios del plan
@@ -212,7 +212,7 @@ const operationCreatePlan = async(authHeader, requestBody) => {
                     })
                 }
                 let createTypeService = await bd.createServiceTypeFromPlanQuery(serviceTypeList, dataList, cplan).then((res) => res);
-                if(createTypeService.error){ return  { status: false, code: 500, message: createTypeService.error }; }
+                if(createTypeService.error){ console.log(createTypeService.error);return  { status: false, code: 500, message: createTypeService.error }; }
             }
             if(requestBody.quantity){
                 //Crea la cantidad de servicios que presta.
@@ -228,25 +228,19 @@ const operationCreatePlan = async(authHeader, requestBody) => {
                     })
                 }
                 let updateServiceFromQuantity = await bd.updateServiceFromQuantityQuery(quantityList, cplan).then((res) => res);
-                if(updateServiceFromQuantity.error){ return  { status: false, code: 500, message: updateServiceFromQuantity.error }; }
+                if(updateServiceFromQuantity.error){ console.log(updateServiceFromQuantity.error);return  { status: false, code: 500, message: updateServiceFromQuantity.error }; }
                 if(updateServiceFromQuantity.result.rowsAffected > 0){
                     let searchPlanService = await bd.searchPlanServiceQuery(cplan).then((res) => res);
-                    if(searchPlanService.error){ return  { status: false, code: 500, message: searchPlanService.error }; }
+                    if(searchPlanService.error){ console.log(searchPlanService.error);return  { status: false, code: 500, message: searchPlanService.error }; }
                     if(searchPlanService.result.rowsAffected > 0){
                         let baceptado = 0;
                         let updateAceptepService = await bd.updateAceptepServiceQuery(baceptado, cplan).then((res) => res);
-                        if(updateAceptepService.error){ return  { status: false, code: 500, message: updateAceptepService.error }; }
+                        if(updateAceptepService.error){ console.log(updateAceptepService.error);return  { status: false, code: 500, message: updateAceptepService.error }; }
                     }
                 }
             }
-            
-            if(requestBody.rcv){
-                let rcv = requestBody.rcv
-                let createPlanRcv = await bd.createPlanRcvQuery(dataList, rcv, cplan).then((res) => res);
-                if(createPlanRcv.error){ return  { status: false, code: 500, message: createPlanRcv.error }; }
-            }
             let searchLastPlan = await bd.searchLastPlanQuery().then((res) => res);
-            if(searchLastPlan.error){ return  { status: false, code: 500, message: searchLastPlan.error }; }
+            if(searchLastPlan.error){ console.log(searchLastPlan.error);return  { status: false, code: 500, message: searchLastPlan.error }; }
             if(createPlan.result.rowsAffected > 0){return {status: true, cplan: searchLastPlan.result.recordset[0].CPLAN, list: apovList}}
         }
         else{ return { status: false, code: 500, message: 'Server Internal Error.', hint: 'createPlan' }; }
@@ -562,6 +556,7 @@ const operationSearchServicePlanRcv = async(authHeader, requestBody) => {
         cplan_rc: requestBody.cplan_rc,
         baceptado: requestBody.baceptado
     };
+    console.log(searchData)
     let searchServicePlan = await bd.searchServicePlanRcvQuery(searchData).then((res) => res);
     if(searchServicePlan.error){ return  { status: false, code: 500, message: searchServicePlan.error }; }
     if(searchServicePlan.result.rowsAffected == 0){ return { status: false, code: 404, message: 'Plan not found.' }; }

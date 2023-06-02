@@ -13993,6 +13993,7 @@ createPlanQuery: async(dataList, cplan) => {
             return { result: result, cplan};
     }
     catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14148,7 +14149,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('fnac', sql.DateTime, userData.fnac)
             .input('cplan_rc', sql.Int, userData.cplan_rc)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion )')                
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p )')                
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
@@ -15888,10 +15889,11 @@ createServiceTypeFromPlanRcvQuery: async(serviceTypeList, dataPlanRcv, cplan_rc)
             let insert = await pool.request()
                 .input('cplan_rc', sql.Int, cplan_rc)
                 .input('ctiposervicio', sql.Int, serviceTypeList[i].ctiposervicio)
+                .input('baceptado', sql.Bit, serviceTypeList[i].baceptado)
                 .input('bactivo', sql.Bit, 1)
                 .input('cusuariocreacion', sql.Int, dataPlanRcv.cusuario)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into POTIPOSERVICIOS_RC (CPLAN_RC, CTIPOSERVICIO, BACTIVO, CUSUARIOCREACION, FCREACION) values (@cplan_rc, @ctiposervicio, @bactivo, @cusuariocreacion, @fcreacion)')
+                .query('insert into POTIPOSERVICIOS_RC (CPLAN_RC, CTIPOSERVICIO, BACEPTADO, BACTIVO, CUSUARIOCREACION, FCREACION) values (@cplan_rc, @ctiposervicio, @baceptado, @bactivo, @cusuariocreacion, @fcreacion)')
             rowsAffected = rowsAffected + insert.rowsAffected;
         }
         //sql.close();
@@ -15907,16 +15909,21 @@ updateServiceFromQuantityRcvQuery: async(quantityList, cplan_rc) => {
         let pool = await sql.connect(config);
         for(let i = 0; i < quantityList.length; i++){
             let update = await pool.request()
-                .input('cplan_rc', sql.Int, cplan_rc)
-                .input('ncantidad', sql.Int, quantityList[i].ncantidad)
-                .input('cservicio', sql.Int, quantityList[i].cservicio)
-                .query('UPDATE POSERVICIOS_RC SET NCANTIDAD = @ncantidad WHERE CPLAN_RC = @cplan_rc AND CSERVICIO = @cservicio')
+            .input('cplan_rc', sql.Int, cplan_rc)
+            .input('baceptado', sql.Bit, quantityList[i].baceptado)
+            .input('ncantidad', sql.Int, quantityList[i].ncantidad)
+            .input('pservicio', sql.Numeric(5, 2), quantityList[i].pservicio)
+            .input('mmaximocobertura', sql.Numeric(18, 2), quantityList[i].mmaximocobertura)
+            .input('mdeducible', sql.Numeric(18, 2), quantityList[i].mdeducible)
+            .input('cservicio', sql.Int, quantityList[i].cservicio)
+            .query('UPDATE POSERVICIOS_RC SET NCANTIDAD = @ncantidad, PSERVICIO = @pservicio, MMAXIMOCOBERTURA = @mmaximocobertura, MDEDUCIBLE = @mdeducible, BACEPTADO = @baceptado WHERE CPLAN_RC = @cplan_rc AND CSERVICIO = @cservicio')
             rowsAffected = rowsAffected + update.rowsAffected;
         }
         //sql.close();
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
+        consoloe.log(err.message)
         return { error: err.message };
     }
 },
@@ -16096,6 +16103,7 @@ updateAceptepServiceQuery: async(baceptado, cplan) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16174,6 +16182,36 @@ searchQuantityPlanRcvQuery: async(searchData) => {
         //sql.close();
         return { result: result };
     }catch(err){
+        return { error: err.message };
+    }
+},
+searchPlanRcvServiceQuery: async(cplan_rc) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan_rc', sql.Int, cplan_rc)
+            .query('select * from POSERVICIOS_RC where CPLAN_RC = @cplan_rc AND BACEPTADO IS NULL');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        console.log(err.message)
+        return { error: err.message };
+    }
+},
+updateAceptepServiceRcvQuery: async(baceptado, cplan_rc) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        let update = await pool.request()
+            .input('cplan_rc', sql.Int, cplan_rc)
+            .input('baceptado', sql.Bit, baceptado)
+            .query('UPDATE POSERVICIOS_RC SET BACEPTADO = @baceptado WHERE CPLAN_RC = @cplan_rc AND BACEPTADO IS NULL')
+        rowsAffected = rowsAffected + update.rowsAffected;
+        //sql.close();
+        return { result: { rowsAffected: rowsAffected } };
+    }
+    catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
