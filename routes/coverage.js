@@ -137,7 +137,6 @@ router.route('/update').post((req, res) => {
 
 const operationUpdateCoverage = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
-    if(!helper.validateRequestObj(requestBody, ['cpais', 'ccompania', 'ccobertura', 'xcobertura', 'bactivo', 'cusuariomodificacion'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
     let coverageData = {
         ccompania: requestBody.ccompania,
         cpais: requestBody.cpais,
@@ -150,7 +149,7 @@ const operationUpdateCoverage = async(authHeader, requestBody) => {
     if(verifyCoverageName.error){ return { status: false, code: 500, message: verifyCoverageName.error }; }
     if(verifyCoverageName.result.rowsAffected > 0){ return { status: false, code: 200, condition: 'coverage-name-already-exist'}; }
     else{
-        let updateCoverage = await bd.updateCoverageQuery(coverageData).then((res) => res);
+        let updateCoverage = await bd.updateCoverageTableQuery(coverageData).then((res) => res);
         if(updateCoverage.error){ return { status: false, code: 500, message: updateCoverage.error }; }
         if(updateCoverage.result.rowsAffected > 0){ return { status: true, ccobertura: coverageData.ccobertura }; }
         else{ return { status: false, code: 404, message: 'Coverage not found.' }; }
