@@ -4546,18 +4546,12 @@ module.exports = {
     },
     searchReplacementQuery: async(searchData) => {
         try{
-            let query = `select * from VWBUSCARREPUESTODATA where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.ctiporepuesto ? " and CTIPOREPUESTO = @ctiporepuesto" : '' }${ searchData.xrepuesto ? " and XREPUESTO like '%" + searchData.xrepuesto + "%'" : '' }${ searchData.bizquierda ? " and BIZQUIERDA = @bizquierda" : '' }${ searchData.bderecha ? " and BDERECHA = @bderecha" : '' }${ searchData.bsuperior ? " and BSUPERIOR = @bsuperior" : '' }${ searchData.binferior ? " and BINFERIOR = @binferior" : '' }${ searchData.bdelantero ? " and BDELANTERO = @bdelantero" : '' }${ searchData.btrasero ? " and BTRASERO = @btrasero" : '' }`;
+            let query = `select * from VWBUSCARREPUESTODATA where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.ctiporepuesto ? " and CTIPOREPUESTO = @ctiporepuesto" : '' }${ searchData.xrepuesto ? " and XREPUESTO like '%" + searchData.xrepuesto + "%'" : '' }`;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('cpais', sql.Numeric(4, 0), searchData.cpais)
                 .input('ccompania', sql.Int, searchData.ccompania)
                 .input('ctiporepuesto', sql.Int, searchData.ctiporepuesto ? searchData.ctiporepuesto : undefined)
-                .input('bizquierda', sql.Bit, searchData.bizquierda ? searchData.bizquierda : 1)
-                .input('bderecha', sql.Bit, searchData.bderecha ? searchData.bderecha : 1)
-                .input('bsuperior', sql.Bit, searchData.bsuperior ? searchData.bsuperior : 1)
-                .input('binferior', sql.Bit, searchData.binferior ? searchData.binferior : 1)
-                .input('bdelantero', sql.Bit, searchData.bdelantero ? searchData.bdelantero : 1)
-                .input('btrasero', sql.Bit, searchData.btrasero ? searchData.btrasero : 1)
                 .query(query);
             //sql.close();
             return { result: result };
@@ -4585,19 +4579,13 @@ module.exports = {
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('xrepuesto', sql.NVarChar, replacementData.xrepuesto)
-                .input('bizquierda', sql.Bit, replacementData.bizquierda)
-                .input('bderecha', sql.Bit, replacementData.bderecha)
-                .input('bsuperior', sql.Bit, replacementData.bsuperior)
-                .input('binferior', sql.Bit, replacementData.binferior)
-                .input('bdelantero', sql.Bit, replacementData.bdelantero)
-                .input('btrasero', sql.Bit, replacementData.btrasero)
                 .input('bactivo', sql.Bit, replacementData.bactivo)
                 .input('cpais', sql.Numeric(4, 0), replacementData.cpais)
                 .input('ccompania', sql.Int, replacementData.ccompania)
                 .input('ctiporepuesto', sql.Int, replacementData.ctiporepuesto)
                 .input('cusuariocreacion', sql.Int, replacementData.cusuariocreacion)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into MAREPUESTO (XREPUESTO, CTIPOREPUESTO, BIZQUIERDA, BDERECHA, BSUPERIOR, BINFERIOR, BDELANTERO, BTRASERO, BACTIVO, CPAIS, CCOMPANIA, CUSUARIOCREACION, FCREACION) values (@xrepuesto, @ctiporepuesto, @bizquierda, @bderecha, @bsuperior, @binferior, @bdelantero, @btrasero, @bactivo, @cpais, @ccompania, @cusuariocreacion, @fcreacion)');
+                .query('insert into MAREPUESTO (XREPUESTO, CTIPOREPUESTO, BACTIVO, CPAIS, CCOMPANIA, CUSUARIOCREACION, FCREACION) values (@xrepuesto, @ctiporepuesto, @bactivo, @cpais, @ccompania, @cusuariocreacion, @fcreacion)');
             if(result.rowsAffected > 0){
                 let query = await pool.request()
                     .input('xrepuesto', sql.NVarChar, replacementData.xrepuesto)
@@ -4654,16 +4642,10 @@ module.exports = {
                 .input('crepuesto', sql.Int, replacementData.crepuesto)
                 .input('xrepuesto', sql.NVarChar, replacementData.xrepuesto)
                 .input('ctiporepuesto', sql.NVarChar, replacementData.ctiporepuesto)
-                .input('bizquierda', sql.Bit, replacementData.bizquierda)
-                .input('bderecha', sql.Bit, replacementData.bderecha)
-                .input('bsuperior', sql.Bit, replacementData.bsuperior)
-                .input('binferior', sql.Bit, replacementData.binferior)
-                .input('bdelantero', sql.Bit, replacementData.bdelantero)
-                .input('btrasero', sql.Bit, replacementData.btrasero)
                 .input('bactivo', sql.Bit, replacementData.bactivo)
                 .input('cusuariomodificacion', sql.Int, replacementData.cusuariomodificacion)
                 .input('fmodificacion', sql.DateTime, new Date())
-                .query('update MAREPUESTO set XREPUESTO = @xrepuesto, CTIPOREPUESTO = @ctiporepuesto, BIZQUIERDA = @bizquierda, BDERECHA = @bderecha, BSUPERIOR = @bsuperior, BINFERIOR = @binferior, BDELANTERO = @bdelantero, BTRASERO = @btrasero, BACTIVO = @bactivo, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CREPUESTO = @crepuesto and CPAIS = @cpais and CCOMPANIA = @ccompania');
+                .query('update MAREPUESTO set XREPUESTO = @xrepuesto, CTIPOREPUESTO = @ctiporepuesto, BACTIVO = @bactivo, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CREPUESTO = @crepuesto and CPAIS = @cpais and CCOMPANIA = @ccompania');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -12996,6 +12978,26 @@ updateCoverageQuery: async(coverageData) => {
                 .query('update sucoberturas set mprima = @mprima, msuma_aseg = @msuma_aseg WHERE ccontratoflota = @ccontratoflota AND ccobertura = @ccobertura');
                 rowsAffected = rowsAffected + update.rowsAffected;
             }
+            //sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            return { error: err.message };
+        }
+    },
+    updateCoverageTableQuery: async(coverageData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            let update = await pool.request()
+            .input('ccobertura', sql.Int, coverageData.ccobertura)
+            .input('xcobertura', sql.NVarChar, coverageData.xcobertura)
+            .input('bactivo', sql.Bit, coverageData.bactivo)
+            .input('cusuariomodificacion', sql.Bit, coverageData.cusuariomodificacion)
+            .input('fmodificacion', sql.DateTime, new Date())
+            .query('update MACOBERTURA set XCOBERTURA = @xcobertura, BACTIVO = @bactivo, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion WHERE CCOBERTURA = @ccobertura');
+            rowsAffected = rowsAffected + update.rowsAffected;
+        
             //sql.close();
             return { result: { rowsAffected: rowsAffected } };
         }
