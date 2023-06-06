@@ -153,10 +153,10 @@ router.route('/production/update').post((req, res) => {
         return;
     }
     let validateSchema = helper.validateSchema('production', 'payment-methodology', req.body, 'updateTablesProductionPaymentMethodologySchema');
-    if(validateSchema.error){ 
-        res.status(400).json({ data: { status: false, code: 400, message: validateSchema.error.details[0].message } });
-        return;
-    }
+    // if(validateSchema.error){ 
+    //     res.status(400).json({ data: { status: false, code: 400, message: validateSchema.error.details[0].message } });
+    //     return;
+    // }
     validator.operationVerifyProductionModulePermission(req.body.permissionData, 'BEDITAR').then((response) => {
         if(response.error){ 
             res.status(401).json({ status: false, code: 401, condition: 'user-dont-have-permissions', expired: false });
