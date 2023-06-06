@@ -137,7 +137,6 @@ router.route('/update').post((req, res) => {
 
 const operationUpdatePaymentType = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
-    if(!helper.validateRequestObj(requestBody, ['cpais', 'ccompania', 'ctipopago', 'xtipopago', 'bactivo', 'cusuariomodificacion'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
     let paymentTypeData = {
         ccompania: requestBody.ccompania,
         cpais: requestBody.cpais,
