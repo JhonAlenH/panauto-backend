@@ -7407,7 +7407,7 @@ module.exports = {
                     .input('ctipovehiculo', sql.Int, vehicleTypes[i].ctipovehiculo)
                     .input('ctipovehiculoregistrotasa', sql.Int, vehicleTypes[i].ctipovehiculoregistrotasa)
                     .input('miniciointervalo', sql.Numeric(11, 2), vehicleTypes[i].miniciointervalo)
-                    .input('mfinalintervalo', sql.Numeric(11, 02), vehicleTypes[i].mfinalintervalo)
+                    .input('mfinalintervalo', sql.Numeric(11, 2), vehicleTypes[i].mfinalintervalo)
                     .input('ptasa', sql.Numeric(5, 2), vehicleTypes[i].ptasa)
                     .input('cusuariomodificacion', sql.Int, feesRegisterData.cusuariomodificacion)
                     .input('fmodificacion', sql.DateTime, new Date())
@@ -14120,6 +14120,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('xmarca', sql.NVarChar, userData.xmarca)
             .input('xmodelo', sql.NVarChar, userData.xmodelo)
             .input('xversion', sql.NVarChar, userData.xversion)
+            .input('xpais_proveniente', sql.NVarChar, userData.xpais_proveniente)
             .input('xrif_cliente', sql.NVarChar, userData.xrif_cliente)
             .input('email', sql.NVarChar, userData.email)
             .input('xtelefono_prop', sql.NVarChar , userData.xtelefono_prop)
@@ -14151,7 +14152,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('fnac', sql.DateTime, userData.fnac)
             .input('cplan_rc', sql.Int, userData.cplan_rc)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p )')                
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente )')                
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
@@ -15736,6 +15737,7 @@ getContractArysDataQuery: async(contractData) => {
         
         return { result: result };
     }catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -15772,6 +15774,19 @@ getPlanData: async(cplan) => {
             .input('cplan', sql.Int, cplan)
             .query('select * from POPLAN where CPLAN = @cplan');
         //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getServiceTypeFromPlanQuery: async(cplan) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cplan', sql.Int, cplan)
+            .query('select DISTINCT CTIPOSERVICIO, XTIPOSERVICIO, BACEPTADO from VWBUSCARSERVICIOSXPLAN where CPLAN = @cplan AND BACEPTADO = 1');
+        //sql.close();
+        
         return { result: result };
     }catch(err){
         return { error: err.message };
