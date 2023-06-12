@@ -85,10 +85,8 @@ const operationCreate = async(authHeader, requestBody) => {
         icedula: requestBody.icedula ? requestBody.icedula : undefined,
         femision: requestBody.femision ,
         cusuario: requestBody.cusuario ? requestBody.cusuario : undefined,
-        xzona_postal: requestBody.xzona_postal ? requestBody.xzona_postal : undefined,
         cuso: requestBody.cuso,
         ctipovehiculo: requestBody.ctipovehiculo,
-        cclase: requestBody.cclase,
         fdesde_pol: requestBody.fdesde_pol,
         fhasta_pol: requestBody.fhasta_pol,
         ccorredor: requestBody.ccorredor,
@@ -96,6 +94,9 @@ const operationCreate = async(authHeader, requestBody) => {
         fnac: requestBody.fnac,
         cplan_rc: requestBody.cplan_rc,
         xpais_proveniente: requestBody.xpais_proveniente,
+        xcobertura: requestBody.xcobertura,
+        msuma_casco: requestBody.msuma_casco,
+        mprima_casco: requestBody.mprima_casco,
     };
     console.log(userData)
     if(userData){
