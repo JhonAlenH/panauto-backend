@@ -14140,22 +14140,24 @@ createContractServiceArysQuery: async(userData) => {
             .input('icedula', sql.NVarChar, userData.icedula)
             .input('ivigencia', sql.Int, userData.ivigencia)
             .input('cusuariocreacion', sql.Int, userData.cusuario ? userData.cusuario: 0)
-            .input('xzona_postal', sql.NVarChar, userData.xzona_postal)
             .input('cestatusgeneral', sql.Int, userData.cestatusgeneral)
             .input('ccorregimiento', sql.Int, userData.ccorregimiento)
             .input('cuso', sql.Int, userData.cuso)
             .input('ctipovehiculo', sql.Int, userData.ctipovehiculo)
-            .input('cclase', sql.Int, userData.cclase)
             .input('ccorredor', sql.Int, userData.ccorredor)
             .input('fdesde_pol', sql.DateTime, userData.fdesde_pol)
             .input('fhasta_pol', sql.DateTime, userData.fhasta_pol)
             .input('fnac', sql.DateTime, userData.fnac)
             .input('cplan_rc', sql.Int, userData.cplan_rc)
+            .input('xcobertura', sql.NVarChar, userData.xcobertura)
+            .input('msuma_casco', sql.Numeric(18, 2), userData.msuma_casco)
+            .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, XZONA_POSTAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCLASE, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @xzona_postal, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @cclase, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente )')                
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco )')                
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
