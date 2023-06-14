@@ -95,37 +95,19 @@ const operationCreate = async(authHeader, requestBody) => {
         cplan_rc: requestBody.cplan_rc,
         xpais_proveniente: requestBody.xpais_proveniente,
         xcobertura: requestBody.xcobertura,
-        msuma_casco: requestBody.msuma_casco,
-        mprima_casco: requestBody.mprima_casco,
+        msuma_casco: requestBody.msuma_casco ? requestBody.msuma_casco: 0,
+        mprima_casco: requestBody.mprima_casco ? requestBody.mprima_casco: 0,
+        xmes_venplaca: requestBody.xmes,
     };
-    console.log(userData)
+    let contrato;
     if(userData){
         let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
         if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
+        console.log(createContractServiceArys.result.rowsAffected)
     }
-    // let lastQuote = await bd.getLastQuoteQuery();
-    // if(lastQuote.error){ return { status: false, code: 500, message: lastQuote.error }; }
     return { 
         status: true, 
-        code: 200, 
-        // xnombre: lastQuote.result.recordset[0].XNOMBRE, 
-        // xapellido: lastQuote.result.recordset[0].XAPELLIDO, 
-        // icedula: lastQuote.result.recordset[0].ICEDULA, 
-        // xcedula: lastQuote.result.recordset[0].XCEDULA, 
-        // xserialcarroceria: lastQuote.result.recordset[0].XSERIALCARROCERIA, 
-        // xserialmotor: lastQuote.result.recordset[0].XSERIALMOTOR, 
-        // xplaca: lastQuote.result.recordset[0].XPLACA, 
-        // xmarca: lastQuote.result.recordset[0].XMARCA, 
-        // xmodelo: lastQuote.result.recordset[0].XMODELO, 
-        // xversion: lastQuote.result.recordset[0].XVERISON, 
-        // cano: lastQuote.result.recordset[0].CANO, 
-        // xestatusgeneral: lastQuote.result.recordset[0].XESTATUSGENERAL, 
-        // xtipovehiculo: lastQuote.result.recordset[0].XTIPOVEHICULO, 
-        // xuso: lastQuote.result.recordset[0].XUSO, 
-        // xclase: lastQuote.result.recordset[0].XCLASE, 
-        // xtomador: lastQuote.result.recordset[0].XTOMADOR, 
-        // xprofesion: lastQuote.result.recordset[0].XPROFESION, 
-        // xrif: lastQuote.result.recordset[0].XRIF, 
+        code: 200
     };
 }
 
