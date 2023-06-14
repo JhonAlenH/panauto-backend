@@ -65,6 +65,11 @@
         "route": "/api/home"
     },
     {
+        "name": "Email Route",
+        "router": "../routes/emailer",
+        "route": "/api/emailer"
+    },
+    {
         "name": "Plan Route",
         "router": "../routes/plan",
         "route": "/api/plan"

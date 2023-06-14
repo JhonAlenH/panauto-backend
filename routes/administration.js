@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const helper = require('../src/helper');
 const bd = require('../src/bd');
-const emailer = require('../src/emailer')
 
 router.route('/search').post((req, res) => {
     if(!req.header('Authorization')){
