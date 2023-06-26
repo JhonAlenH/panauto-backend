@@ -77,7 +77,7 @@ const operationDetailCollection = async(authHeader, requestBody) => {
     if(detailCollection.error){ return { status: false}; }
         let xvehiculo = detailCollection.result.recordset[0].XMARCA + ' ' + detailCollection.result.recordset[0].XMODELO + ' ' + detailCollection.result.recordset[0].XVERSION
         let mprima
-        detailCollection.result.recordset[0].xmoneda = 'B/.'
+        // detailCollection.result.recordset[0].xmoneda = 'B/.'
         if(detailCollection.result.recordset[0].MPRIMA_ANUAL){
             mprima = detailCollection.result.recordset[0].MPRIMA_ANUAL + ' ' + detailCollection.result.recordset[0].xmoneda
         }else{
@@ -98,6 +98,7 @@ const operationDetailCollection = async(authHeader, requestBody) => {
                 xplaca: detailCollection.result.recordset[0].XPLACA,
                 xestatusgeneral: detailCollection.result.recordset[0].XESTATUSGENERAL,
                 mprima: mprima,
+                xmoneda: detailCollection.result.recordset[0].xmoneda,
                 mprima_pagada: detailCollection.result.recordset[0].MPRIMA_PAGADA,
                 ccodigo_ubii: detailCollection.result.recordset[0].CCODIGO_UBII,
                 ccontratoflota: detailCollection.result.recordset[0].CCONTRATOFLOTA
