@@ -356,6 +356,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                 })
             }
         }
+        let getBroker = await bd.getBroker(getContractArysData.result.recordset[0].ccorredor);
+        if(getBroker.error){ return { status: false, code: 500, message: getBroker.error }; }
         return {
             status: true,
             xlogo: getCompanyContractData.result.recordset[0].xlogo,
@@ -388,6 +390,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             // fdesde: getPlan.result.recordset[0].FDESDE,
             mtotal_plan: getPlan.result.recordset[0].MCOSTO.toFixed(2),
             cplan: getPlan.result.recordset[0].CPLAN,
+            xplan: getPlan.result.recordset[0].XPLAN,
             finiciorecibo: getContractArysData.result.recordset[0].FDESDE_REC,
             fhastarecibo: getContractArysData.result.recordset[0].FHASTA_REC,
             femision: getContractArysData.result.recordset[0].FINICIO,
@@ -443,6 +446,9 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
+            xcorredor: getBroker.result.recordset[0].XCORREDOR,
+            xdocidentidadcorredor: getBroker.result.recordset[0].XDOCIDENTIDAD,
+            xtelefonocorredor: getBroker.result.recordset[0].XTELEFONO,
             services: serviceList,
             servicesType: serviceTypeList,
             xestadocontrato: xestadocontrato
