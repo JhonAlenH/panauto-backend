@@ -1045,8 +1045,8 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
                 if(!helper.validateRequestObj(requestBody.tracings.create[i], ['ctiposeguimiento', 'cmotivoseguimiento', "fseguimientonotificacion"])){ return { status: false, code: 400, message: 'Required params not found.' }; }
                 requestBody.tracings.create[i].xobservacion = requestBody.tracings.create[i].xobservacion ? helper.encrypt(requestBody.tracings.create[i].xobservacion.toUpperCase()) : undefined;
             }
-            let closeTracingsByNotificationUpdate = await bd.closeTracingsByNotificationUpdateQuery(notificationData).then((res) => res);
-            if(closeTracingsByNotificationUpdate.error){ return { status: false, code: 500, message: closeTracingsByNotificationUpdate.error }; }
+            // let closeTracingsByNotificationUpdate = await bd.closeTracingsByNotificationUpdateQuery(notificationData).then((res) => res);
+            // if(closeTracingsByNotificationUpdate.error){ return { status: false, code: 500, message: closeTracingsByNotificationUpdate.error }; }
             let createTracingsByNotificationUpdate = await bd.createTracingsByNotificationUpdateQuery(requestBody.tracings.create, notificationData).then((res) => res);
             if(createTracingsByNotificationUpdate.error){ return { status: false, code: 500, message: createTracingsByNotificationUpdate.error }; }
             if(createTracingsByNotificationUpdate.result.rowsAffected < 0){ return { status: false, code: 500, message: 'Server Internal Error.', hint: 'createTracingsByNotificationUpdate' }; }

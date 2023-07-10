@@ -14120,6 +14120,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('xmarca', sql.NVarChar, userData.xmarca)
             .input('xmodelo', sql.NVarChar, userData.xmodelo)
             .input('xversion', sql.NVarChar, userData.xversion)
+            .input('nkilometraje', sql.Numeric(11, 2), userData.nkilometraje)
             .input('xpais_proveniente', sql.NVarChar, userData.xpais_proveniente)
             .input('xrif_cliente', sql.NVarChar, userData.xrif_cliente)
             .input('email', sql.NVarChar, userData.email)
@@ -14154,7 +14155,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('xmes_venplaca', sql.NVarChar, userData.xmes_venplaca)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca )')        
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca )')        
             rowsAffected = rowsAffected + insert.rowsAffected;        
              return { result: { rowsAffected: rowsAffected} };
     }
@@ -16236,5 +16237,40 @@ updateAceptepServiceRcvQuery: async(baceptado, cplan_rc) => {
         return { error: err.message };
     }
 },
+getContractSendEmailDataQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('SELECT * FROM SuvMembresia WHERE IENVIOS = 0 OR IENVIOS IS NULL');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getSearchTracingData: async (dataTracing) => {
+    try {
+      let query = "";
+      let pool = await sql.connect(config);
+      let result;
+  
+      if (dataTracing.xvencimiento === 'TODOS') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA`;
+        result = await pool.request().query(query);
+      } else if (dataTracing.xvencimiento === 'DIA') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE CONVERT(DATE, FSEGUIMIENTONOTIFICACION) = CONVERT(DATE, GETDATE())`;
+        result = await pool.request().query(query);
+      } else if (dataTracing.xvencimiento === 'ATRASADO') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION < CONVERT(DATE, GETDATE())`;
+        result = await pool.request().query(query);
+      } else if (dataTracing.xvencimiento === 'VENCER') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION > CONVERT(DATE, GETDATE())`;
+        result = await pool.request().query(query);
+      }
+      return { result: result };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
 }
 
