@@ -12477,6 +12477,7 @@ module.exports = {
         }
     },
     DataCreateAgendaClient: async(DataAgenda) => {
+        console.log(DataAgenda)
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -12486,7 +12487,7 @@ module.exports = {
                 .input('fhasta', sql.DateTime, DataAgenda.fhasta)
                 .input('xcondicion', sql.Bit, DataAgenda.condicion)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into TRAGENDA (CPROPIETARIO, XTITULO, FDESDE, FHASTA, XCONDICION, FCREACION, CUSUARIOMODIFICACION) values (@cpropietario,@xtitulo, @fdesde, @fhasta, @xcondicion, @fcreacion, @cpropietario )');
+                .query('insert into TRAGENDA (CPROPIETARIO, XTITULO, FDESDE, FHASTA, XCONDICION, FCREACION, CUSUARIOMODIFICACION, BACTIVO) values (@cpropietario,@xtitulo, @fdesde, @fhasta, @xcondicion, @fcreacion, @cpropietario , 1)');
                 if(result.rowsAffected > 0){
                 let query = await pool.request()
                     .input('cpropietario', sql.Int, DataAgenda.cpropietario)
