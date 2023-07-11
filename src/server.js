@@ -16,6 +16,8 @@ const IMAGES_PATH = './public/images';
 
 const DOCUMENTS_PATH = './public/documents';
 
+const jobRouter = require('../routes/job')
+
 let image_storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, IMAGES_PATH);
@@ -73,6 +75,7 @@ app.use(morgan('combined'));
 app.use(express.json({ extended: true, inflate: true, limit: '100kb', parameterLimit: 1000, type: 'application/json', verify: undefined }));
 app.use(express.static('public'));
 app.listen(port, () => { console.log(`listening on port ${port}`) });
+app.use('/api/job', jobRouter)
 
 for(let i = 0; i < confRoute.length; i++){
   app.use(confRoute[i].route, require(`${confRoute[i].router}`));
