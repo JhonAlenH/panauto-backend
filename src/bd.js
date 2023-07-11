@@ -155,7 +155,7 @@ module.exports = {
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
-                .query('select CCOMPANIA, XCOMPANIA, BACTIVO from MACOMPANIA');
+                .query('select * from MACOMPANIA');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -10203,6 +10203,7 @@ module.exports = {
                         let insert = await pool.request()
                             .input('cnotificacion', sql.Int, result.recordset[0].CNOTIFICACION)
                             .input('cdanomaterial', sql.Int, notificationData.materialDamages[i].cdanomaterial)
+                            .input('xmaterial', sql.NVarChar, notificationData.materialDamages[i].xmaterial)
                             .input('cniveldano', sql.Int, notificationData.materialDamages[i].cniveldano)
                             .input('xobservacion', sql.NVarChar, notificationData.materialDamages[i].xobservacion)
                             .input('ctipodocidentidad', sql.Int, notificationData.materialDamages[i].ctipodocidentidad)
@@ -10217,7 +10218,7 @@ module.exports = {
                             .input('xemail', sql.NVarChar, notificationData.materialDamages[i].xemail)
                             .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
                             .input('fcreacion', sql.DateTime, new Date())
-                            .query('insert into EVDANOMATERIALNOTIFICACION (CNOTIFICACION, CDANOMATERIAL, CNIVELDANO, XOBSERVACION, CTIPODOCIDENTIDAD, XDOCIDENTIDAD, XNOMBRE, XAPELLIDO, CESTADO, CCIUDAD, XDIRECCION, XTELEFONOCELULAR, XTELEFONOCASA, XEMAIL, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @cdanomaterial, @cniveldano, @xobservacion, @ctipodocidentidad, @xdocidentidad, @xnombre, @xapellido, @cestado, @cciudad, @xdireccion, @xtelefonocelular, @xtelefonocasa, @xemail, @cusuariocreacion, @fcreacion)')
+                            .query('insert into EVDANOMATERIALNOTIFICACION (CNOTIFICACION, CDANOMATERIAL, XMATERIAL, CNIVELDANO, XOBSERVACION, CTIPODOCIDENTIDAD, XDOCIDENTIDAD, XNOMBRE, XAPELLIDO, CESTADO, CCIUDAD, XDIRECCION, XTELEFONOCELULAR, XTELEFONOCASA, XEMAIL, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @cdanomaterial, @xmaterial, @cniveldano, @xobservacion, @ctipodocidentidad, @xdocidentidad, @xnombre, @xapellido, @cestado, @cciudad, @xdireccion, @xtelefonocelular, @xtelefonocasa, @xemail, @cusuariocreacion, @fcreacion)')
                     }
                 }
                 if(notificationData.serviceOrder){
@@ -10614,6 +10615,232 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
+            return { error: err.message };
+        }
+    },
+    createMaterialDamagesByNotificationUpdateQuery: async(materialDamages, notificationData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            for(let i = 0; i < materialDamages.length; i++){
+                let insert = await pool.request()
+                    .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                    .input('cdanomaterial', sql.Int, materialDamages[i].cdanomaterial)
+                    .input('xmaterial', sql.NVarChar, materialDamages[i].xmaterial)
+                    .input('cniveldano', sql.Int, materialDamages[i].cniveldano)
+                    .input('xobservacion', sql.NVarChar, materialDamages[i].xobservacion)
+                    .input('ctipodocidentidad', sql.Int, materialDamages[i].ctipodocidentidad)
+                    .input('xdocidentidad', sql.NVarChar, materialDamages[i].xdocidentidad)
+                    .input('xnombre', sql.NVarChar, materialDamages[i].xnombre)
+                    .input('xapellido', sql.NVarChar, materialDamages[i].xapellido)
+                    .input('cestado', sql.Int, materialDamages[i].cestado)
+                    .input('cciudad', sql.Int, materialDamages[i].cciudad)
+                    .input('xdireccion', sql.NVarChar, materialDamages[i].xdireccion)
+                    .input('xtelefonocelular', sql.NVarChar, materialDamages[i].xtelefonocelular)
+                    .input('xtelefonocasa', sql.NVarChar, materialDamages[i].xtelefonocasa ?  materialDamages[i].xtelefonocasa : null)
+                    .input('xemail', sql.NVarChar, materialDamages[i].xemail)
+                    .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
+                    .input('fcreacion', sql.DateTime, new Date())
+                    .query('insert into EVDANOMATERIALNOTIFICACION (CNOTIFICACION, CDANOMATERIAL, XMATERIAL, CNIVELDANO, XOBSERVACION, CTIPODOCIDENTIDAD, XDOCIDENTIDAD, XNOMBRE, XAPELLIDO, CESTADO, CCIUDAD, XDIRECCION, XTELEFONOCELULAR, XTELEFONOCASA, XEMAIL, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @cdanomaterial, @xmaterial, @cniveldano, @xobservacion, @ctipodocidentidad, @xdocidentidad, @xnombre, @xapellido, @cestado, @cciudad, @xdireccion, @xtelefonocelular, @xtelefonocasa, @xemail, @cusuariocreacion, @fcreacion)')
+                rowsAffected = rowsAffected + insert.rowsAffected;
+            }
+            //sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            console.log(err + ' || createMaterialDamagesByNotificationUpdateQuery');
+            return { error: err.message };
+        }
+    },
+    updateMaterialDamagesByNotificationUpdateQuery: async(materialDamages, notificationData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            for(let i = 0; i < materialDamages.length; i++){
+                let update = await pool.request()
+                    .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                    .input('cdanomaterialnotificacion', sql.Int, materialDamages[i].cdanomaterialnotificacion)
+                    .input('cdanomaterial', sql.Int, materialDamages[i].cdanomaterial)
+                    .input('xmaterial', sql.NVarChar, materialDamages[i].xmaterial)
+                    .input('cniveldano', sql.Int, materialDamages[i].cniveldano)
+                    .input('xobservacion', sql.NVarChar, materialDamages[i].xobservacion)
+                    .input('ctipodocidentidad', sql.Int, materialDamages[i].ctipodocidentidad)
+                    .input('xdocidentidad', sql.NVarChar, materialDamages[i].xdocidentidad)
+                    .input('xnombre', sql.NVarChar, materialDamages[i].xnombre)
+                    .input('xapellido', sql.NVarChar, materialDamages[i].xapellido)
+                    .input('cestado', sql.Int, materialDamages[i].cestado)
+                    .input('cciudad', sql.Int, materialDamages[i].cciudad)
+                    .input('xdireccion', sql.NVarChar, materialDamages[i].xdireccion)
+                    .input('xtelefonocelular', sql.NVarChar, materialDamages[i].xtelefonocelular)
+                    .input('xtelefonocasa', sql.NVarChar, materialDamages[i].xtelefonocasa ?  materialDamages[i].xtelefonocasa : null)
+                    .input('xemail', sql.NVarChar, materialDamages[i].xemail)
+                    .input('cusuariomodificacion', sql.Int, notificationData.cusuariomodificacion)
+                    .input('fmodificacion', sql.DateTime, new Date())
+                    .query('update EVDANOMATERIALNOTIFICACION SET CNOTIFICACION = @cnotificacion, CDANOMATERIAL = @cdanomaterial, XMATERIAL = @xmaterial, CNIVELDANO = @cniveldano, XOBSERVACION = @xobservacion, CTIPODOCIDENTIDAD = ctipodocidentidad, XDOCIDENTIDAD = @xdocidentidad, XNOMBRE = @xnombre, XAPELLIDO = @xapellido, CESTADO = @cestado, CCIUDAD = @cciudad, XDIRECCION = @xdireccion, XTELEFONOCELULAR = @xtelefonocelular, XTELEFONOCASA = @xtelefonocasa, XEMAIL = @xemail, FMODIFICACION = @fmodificacion, CUSUARIOMODIFICACION = @cusuariomodificacion where CNOTIFICACION = @cnotificacion and CDANOMATERIALNOTIFICACION = @cdanomaterialnotificacion')
+                rowsAffected = rowsAffected + update.rowsAffected;
+            }
+            //sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            console.log(err + ' || updateMaterialDamagesByNotificationUpdateQuery');
+            return { error: err.message };
+        }
+    },
+    deleteMaterialDamagesByNotificationUpdateQuery: async(materialDamages, notificationData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            for(let i = 0; i < materialDamages.length; i++){
+                let erase = await pool.request()
+                    .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                    .input('cdanomaterialnotificacion', sql.Int, materialDamages[i].cdanomaterialnotificacion)
+                    .query('delete from EVDANOMATERIALNOTIFICACION where CNOTIFICACION = @cnotificacion and CDANOMATERIALNOTIFICACION = @cdanomaterialnotificacion');
+                rowsAffected = rowsAffected + erase.rowsAffected;
+            }
+            sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            console.log(err + ' || deleteMaterialDamagesByNotificationUpdateQuery');
+            return { error: err.message };
+        }
+    },
+    createThirdPartyVehiclesByNotificationUpdateQuery: async(thirdpartyVehicles, notificationData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            for(let i = 0; i < thirdpartyVehicles.length; i++){
+                let insert = await pool.request()
+                    .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                    .input('ctipodocidentidadconductor', sql.Int, thirdpartyVehicles[i].ctipodocidentidadconductor)
+                    .input('xdocidentidadconductor', sql.NVarChar, thirdpartyVehicles[i].xdocidentidadconductor)
+                    .input('xnombreconductor', sql.NVarChar, thirdpartyVehicles[i].xnombreconductor)
+                    .input('xapellidoconductor', sql.NVarChar, thirdpartyVehicles[i].xapellidoconductor)
+                    .input('xtelefonocelularconductor', sql.NVarChar, thirdpartyVehicles[i].xtelefonocelularconductor)
+                    .input('xtelefonocasaconductor', sql.NVarChar, thirdpartyVehicles[i].xtelefonocasaconductor ? thirdpartyVehicles[i].xtelefonocasaconductor : null)
+                    .input('xemailconductor', sql.NVarChar, thirdpartyVehicles[i].xemailconductor)
+                    .input('xobservacionconductor', sql.NVarChar, thirdpartyVehicles[i].xobservacionconductor)
+                    .input('xplaca', sql.NVarChar, thirdpartyVehicles[i].xplaca)
+                    .input('cmarca', sql.Int, thirdpartyVehicles[i].cmarca)
+                    .input('cmodelo', sql.Int, thirdpartyVehicles[i].cmodelo)
+                    .input('cversion', sql.Int, thirdpartyVehicles[i].cversion)
+                    .input('fano', sql.Numeric(4, 0), thirdpartyVehicles[i].fano)
+                    .input('ccolor', sql.Int, thirdpartyVehicles[i].ccolor)
+                    .input('xobservacionvehiculo', sql.NVarChar, thirdpartyVehicles[i].xobservacionvehiculo)
+                    .input('ctipodocidentidadpropietario', sql.Int, thirdpartyVehicles[i].ctipodocidentidadpropietario)
+                    .input('xdocidentidadpropietario', sql.NVarChar, thirdpartyVehicles[i].xdocidentidadpropietario)
+                    .input('xnombrepropietario', sql.NVarChar, thirdpartyVehicles[i].xnombrepropietario)
+                    .input('xapellidopropietario', sql.NVarChar, thirdpartyVehicles[i].xapellidopropietario)
+                    .input('cestado', sql.Int, thirdpartyVehicles[i].cestado)
+                    .input('cciudad', sql.Int, thirdpartyVehicles[i].cciudad)
+                    .input('xdireccion', sql.NVarChar, thirdpartyVehicles[i].xdireccion)
+                    .input('xtelefonocelularpropietario', sql.NVarChar, thirdpartyVehicles[i].xtelefonocelularpropietario)
+                    .input('xtelefonocasapropietario', sql.NVarChar, thirdpartyVehicles[i].xtelefonocasapropietario ? thirdpartyVehicles[i].xtelefonocasapropietario : null)
+                    .input('xemailpropietario', sql.NVarChar, thirdpartyVehicles[i].xemailpropietario)
+                    .input('xobservacionpropietario', sql.NVarChar, thirdpartyVehicles[i].xobservacionpropietario)
+                    .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
+                    .input('fcreacion', sql.DateTime, new Date())
+                    .query('insert into EVVEHICULOTERCERONOTIFICACION (CNOTIFICACION, CTIPODOCIDENTIDADCONDUCTOR, XDOCIDENTIDADCONDUCTOR, XNOMBRECONDUCTOR, XAPELLIDOCONDUCTOR, XTELEFONOCELULARCONDUCTOR, XTELEFONOCASACONDUCTOR, XEMAILCONDUCTOR, XOBSERVACIONCONDUCTOR, XPLACA, CMARCA, CMODELO, CVERSION, FANO, CCOLOR, XOBSERVACIONVEHICULO, CTIPODOCIDENTIDADPROPIETARIO, XDOCIDENTIDADPROPIETARIO, XNOMBREPROPIETARIO, XAPELLIDOPROPIETARIO, CESTADO, CCIUDAD, XDIRECCION, XTELEFONOCELULARPROPIETARIO, XTELEFONOCASAPROPIETARIO, XEMAILPROPIETARIO, XOBSERVACIONPROPIETARIO, CUSUARIOCREACION, FCREACION) output inserted.CVEHICULOTERCERONOTIFICACION values (@cnotificacion, @ctipodocidentidadconductor, @xdocidentidadconductor, @xnombreconductor, @xapellidoconductor, @xtelefonocelularconductor, @xtelefonocasaconductor, @xemailconductor, @xobservacionconductor, @xplaca, @cmarca, @cmodelo, @cversion, @fano, @ccolor, @xobservacionvehiculo, @ctipodocidentidadpropietario, @xdocidentidadpropietario, @xnombrepropietario, @xapellidopropietario, @cestado, @cciudad, @xdireccion, @xtelefonocelularpropietario, @xtelefonocasapropietario, @xemailpropietario, @xobservacionpropietario, @cusuariocreacion, @fcreacion)')
+                if(thirdpartyVehicles[i].replacements){
+                    for(let j = 0; j < thirdpartyVehicles[i].replacements.length; j++){
+                        let subInsert = await pool.request()
+                            .input('cvehiculoterceronotificacion', sql.Int, insert.recordset[0].CVEHICULOTERCERONOTIFICACION)
+                            .input('crepuesto', sql.Int, thirdpartyVehicles[i].replacements[j].crepuesto)
+                            .input('ctiporepuesto', sql.Int, thirdpartyVehicles[i].replacements[j].ctiporepuesto)
+                            .input('ncantidad', sql.Int, thirdpartyVehicles[i].replacements[j].ncantidad)
+                            .input('cniveldano', sql.Int, thirdpartyVehicles[i].replacements[j].cniveldano)
+                            .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
+                            .input('fcreacion', sql.DateTime, new Date())
+                            .query('insert into EVREPUESTOVEHICULOTERCERO (CVEHICULOTERCERONOTIFICACION, CREPUESTO, CTIPOREPUESTO, NCANTIDAD, CNIVELDANO, CUSUARIOCREACION, FCREACION) values (@cvehiculoterceronotificacion, @crepuesto, @ctiporepuesto, @ncantidad, @cniveldano, @cusuariocreacion, @fcreacion)')
+                    }
+                }
+            }
+            //sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            console.log(err + ' || createThirdPartyVehiclesByNotificationUpdateQuery');
+            return { error: err.message };
+        }
+    },
+    updateThirdPartyVehiclesByNotificationUpdateQuery: async(thirdpartyVehicles, notificationData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            for(let i = 0; i < thirdpartyVehicles.length; i++){
+                // console.log(thirdpartyVehicles);
+                let update = await pool.request()
+                    .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                    .input('cvehiculoterceronotificacion', sql.Int, thirdpartyVehicles[i].cvehiculoterceronotificacion)
+                    .input('ctipodocidentidadconductor', sql.Int, thirdpartyVehicles[i].ctipodocidentidadconductor)
+                    .input('xdocidentidadconductor', sql.NVarChar, thirdpartyVehicles[i].xdocidentidadconductor)
+                    .input('xnombreconductor', sql.NVarChar, thirdpartyVehicles[i].xnombreconductor)
+                    .input('xapellidoconductor', sql.NVarChar, thirdpartyVehicles[i].xapellidoconductor)
+                    .input('xtelefonocelularconductor', sql.NVarChar, thirdpartyVehicles[i].xtelefonocelularconductor)
+                    .input('xtelefonocasaconductor', sql.NVarChar, thirdpartyVehicles[i].xtelefonocasaconductor ? thirdpartyVehicles[i].xtelefonocasaconductor : null)
+                    .input('xemailconductor', sql.NVarChar, thirdpartyVehicles[i].xemailconductor)
+                    .input('xobservacionconductor', sql.NVarChar, thirdpartyVehicles[i].xobservacionconductor)
+                    .input('xplaca', sql.NVarChar, thirdpartyVehicles[i].xplaca)
+                    .input('cmarca', sql.Int, thirdpartyVehicles[i].cmarca)
+                    .input('cmodelo', sql.Int, thirdpartyVehicles[i].cmodelo)
+                    .input('cversion', sql.Int, thirdpartyVehicles[i].cversion)
+                    .input('fano', sql.Numeric(4, 0), thirdpartyVehicles[i].fano)
+                    .input('ccolor', sql.Int, thirdpartyVehicles[i].ccolor)
+                    .input('xobservacionvehiculo', sql.NVarChar, thirdpartyVehicles[i].xobservacionvehiculo)
+                    .input('ctipodocidentidadpropietario', sql.Int, thirdpartyVehicles[i].ctipodocidentidadpropietario)
+                    .input('xdocidentidadpropietario', sql.NVarChar, thirdpartyVehicles[i].xdocidentidadpropietario)
+                    .input('xnombrepropietario', sql.NVarChar, thirdpartyVehicles[i].xnombrepropietario)
+                    .input('xapellidopropietario', sql.NVarChar, thirdpartyVehicles[i].xapellidopropietario)
+                    .input('cestado', sql.Int, thirdpartyVehicles[i].cestado)
+                    .input('cciudad', sql.Int, thirdpartyVehicles[i].cciudad)
+                    .input('xdireccion', sql.NVarChar, thirdpartyVehicles[i].xdireccion)
+                    .input('xtelefonocelularpropietario', sql.NVarChar, thirdpartyVehicles[i].xtelefonocelularpropietario)
+                    .input('xtelefonocasapropietario', sql.NVarChar, thirdpartyVehicles[i].xtelefonocasapropietario ? thirdpartyVehicles[i].xtelefonocasapropietario : null)
+                    .input('xemailpropietario', sql.NVarChar, thirdpartyVehicles[i].xemailpropietario)
+                    .input('xobservacionpropietario', sql.NVarChar, thirdpartyVehicles[i].xobservacionpropietario)
+                    .input('cusuariomodificacion', sql.Int, notificationData.cusuariomodificacion)
+                    .input('fmodificacion', sql.DateTime, new Date())
+                    .query('update EVVEHICULOTERCERONOTIFICACION SET CTIPODOCIDENTIDADCONDUCTOR = @ctipodocidentidadconductor, XDOCIDENTIDADCONDUCTOR = @xdocidentidadconductor, XNOMBRECONDUCTOR = @xnombreconductor, XAPELLIDOCONDUCTOR = @xapellidoconductor, XTELEFONOCELULARCONDUCTOR = @xtelefonocelularconductor, XTELEFONOCASACONDUCTOR = @xtelefonocasaconductor, XEMAILCONDUCTOR = @xemailconductor, XOBSERVACIONCONDUCTOR = @xobservacionconductor, XPLACA = @xplaca, CMARCA = @cmarca, CMODELO = @cmodelo, CVERSION = @cversion, FANO = @fano, CCOLOR = @ccolor, XOBSERVACIONVEHICULO = @xobservacionvehiculo, CTIPODOCIDENTIDADPROPIETARIO = @ctipodocidentidadpropietario, XDOCIDENTIDADPROPIETARIO = @xdocidentidadpropietario, XNOMBREPROPIETARIO = @xnombrepropietario, XAPELLIDOPROPIETARIO = @xapellidopropietario, CESTADO = @cestado, CCIUDAD = @cciudad, XDIRECCION = @xdireccion, XTELEFONOCELULARPROPIETARIO = @xtelefonocelularpropietario, XTELEFONOCASAPROPIETARIO = @xtelefonocasapropietario, XEMAILPROPIETARIO = @xemailpropietario, XOBSERVACIONPROPIETARIO = @xobservacionpropietario, FMODIFICACION = @fmodificacion, CUSUARIOMODIFICACION = @cusuariomodificacion WHERE CNOTIFICACION = @cnotificacion and CVEHICULOTERCERONOTIFICACION = @cvehiculoterceronotificacion')
+                if(thirdpartyVehicles[i].replacements){
+                    for(let j = 0; j < thirdpartyVehicles[i].replacements.length; j++){
+                        let subInsert = await pool.request()
+                            // .input('cvehiculoterceronotificacion', sql.Int, update.recordset[0].CVEHICULOTERCERONOTIFICACION)
+                            .input('cvehiculoterceronotificacion', sql.Int, thirdpartyVehicles[i].cvehiculoterceronotificacion)
+                            .input('crepuesto', sql.Int, thirdpartyVehicles[i].replacements[j].crepuesto)
+                            .input('ctiporepuesto', sql.Int, thirdpartyVehicles[i].replacements[j].ctiporepuesto)
+                            .input('ncantidad', sql.Int, thirdpartyVehicles[i].replacements[j].ncantidad)
+                            .input('cniveldano', sql.Int, thirdpartyVehicles[i].replacements[j].cniveldano)
+                            .input('cusuariomodificacion', sql.Int, notificationData.cusuariomodificacion)
+                            .input('fmodificacion', sql.DateTime, new Date())
+                            .query('UPDATE EVREPUESTOVEHICULOTERCERO SET CTIPOREPUESTO = @ctiporepuesto, NCANTIDAD = @ncantidad, CNIVELDANO = @cniveldano, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion WHERE CVEHICULOTERCERONOTIFICACION = @cvehiculoterceronotificacion and CREPUESTO = @crepuesto')
+                    }
+                }
+            }
+            //sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            console.log(err + ' || updateThirdPartyVehiclesByNotificationUpdateQuery');
+            return { error: err.message };
+        }
+    },
+    deleteThirdPartyVehiclesByNotificationUpdateQuery: async(thirdpartyVehicles, notificationData) => {
+        try{
+            let rowsAffected = 0;
+            let pool = await sql.connect(config);
+            for(let i = 0; i < thirdpartyVehicles.length; i++){
+                let erase = await pool.request()
+                    .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                    .input('cvehiculoterceronotificacion', sql.Int, thirdpartyVehicles[i].cvehiculoterceronotificacion)
+                    .query('delete from EVVEHICULOTERCERONOTIFICACION WHERE CNOTIFICACION = @cnotificacion and CVEHICULOTERCERONOTIFICACION = @cvehiculoterceronotificacion');
+                rowsAffected = rowsAffected + erase.rowsAffected;
+            }
+            sql.close();
+            return { result: { rowsAffected: rowsAffected } };
+        }
+        catch(err){
+            console.log(err + ' || deleteThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -12250,6 +12477,7 @@ module.exports = {
         }
     },
     DataCreateAgendaClient: async(DataAgenda) => {
+        console.log(DataAgenda)
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -12259,7 +12487,7 @@ module.exports = {
                 .input('fhasta', sql.DateTime, DataAgenda.fhasta)
                 .input('xcondicion', sql.Bit, DataAgenda.condicion)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into TRAGENDA (CPROPIETARIO, XTITULO, FDESDE, FHASTA, XCONDICION, FCREACION, CUSUARIOMODIFICACION) values (@cpropietario,@xtitulo, @fdesde, @fhasta, @xcondicion, @fcreacion, @cpropietario )');
+                .query('insert into TRAGENDA (CPROPIETARIO, XTITULO, FDESDE, FHASTA, XCONDICION, FCREACION, CUSUARIOMODIFICACION, BACTIVO) values (@cpropietario,@xtitulo, @fdesde, @fhasta, @xcondicion, @fcreacion, @cpropietario , 1)');
                 if(result.rowsAffected > 0){
                 let query = await pool.request()
                     .input('cpropietario', sql.Int, DataAgenda.cpropietario)
@@ -14120,6 +14348,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('xmarca', sql.NVarChar, userData.xmarca)
             .input('xmodelo', sql.NVarChar, userData.xmodelo)
             .input('xversion', sql.NVarChar, userData.xversion)
+            .input('nkilometraje', sql.Numeric(11, 2), userData.nkilometraje)
             .input('xpais_proveniente', sql.NVarChar, userData.xpais_proveniente)
             .input('xrif_cliente', sql.NVarChar, userData.xrif_cliente)
             .input('email', sql.NVarChar, userData.email)
@@ -14154,7 +14383,8 @@ createContractServiceArysQuery: async(userData) => {
             .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('xmes_venplaca', sql.NVarChar, userData.xmes_venplaca)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca )')                
+            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca )')        
+            rowsAffected = rowsAffected + insert.rowsAffected;        
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
@@ -16235,5 +16465,40 @@ updateAceptepServiceRcvQuery: async(baceptado, cplan_rc) => {
         return { error: err.message };
     }
 },
+getContractSendEmailDataQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('SELECT * FROM SuvMembresia WHERE IENVIOS = 0 OR IENVIOS IS NULL');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+getSearchTracingData: async (dataTracing) => {
+    try {
+      let query = "";
+      let pool = await sql.connect(config);
+      let result;
+  
+      if (dataTracing.xvencimiento === 'TODOS') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA`;
+        result = await pool.request().query(query);
+      } else if (dataTracing.xvencimiento === 'DIA') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE CONVERT(DATE, FSEGUIMIENTONOTIFICACION) = CONVERT(DATE, GETDATE())`;
+        result = await pool.request().query(query);
+      } else if (dataTracing.xvencimiento === 'ATRASADO') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION < CONVERT(DATE, GETDATE())`;
+        result = await pool.request().query(query);
+      } else if (dataTracing.xvencimiento === 'VENCER') {
+        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION > CONVERT(DATE, GETDATE())`;
+        result = await pool.request().query(query);
+      }
+      return { result: result };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
 }
 

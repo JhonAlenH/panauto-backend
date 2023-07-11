@@ -65,6 +65,21 @@
         "route": "/api/home"
     },
     {
+        "name": "Job Route",
+        "router": "../routes/job",
+        "route": "/api/job"
+    },
+    {
+        "name": "Tracing Route",
+        "router": "../routes/tracing",
+        "route": "/api/tracing"
+    },
+    {
+        "name": "Email Route",
+        "router": "../routes/emailer",
+        "route": "/api/emailer"
+    },
+    {
         "name": "Plan Route",
         "router": "../routes/plan",
         "route": "/api/plan"

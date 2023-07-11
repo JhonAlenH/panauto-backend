@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const helper = require('../src/helper');
 const bd = require('../src/bd');
+const nodemailer = require('nodemailer');
+const { Vonage } = require('@vonage/server-sdk')
 
 function changeDateFormat (date) {
     let dateArray = date.toISOString().substring(0,10).split("-");
@@ -98,12 +100,58 @@ const operationCreate = async(authHeader, requestBody) => {
         msuma_casco: requestBody.msuma_casco ? requestBody.msuma_casco: 0,
         mprima_casco: requestBody.mprima_casco ? requestBody.mprima_casco: 0,
         xmes_venplaca: requestBody.xmes,
+        xclave_club: requestBody.xclave_club,
+        nkilometraje: requestBody.nkilometraje ? requestBody.nkilometraje: null
     };
     let contrato;
     if(userData){
         let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
         if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
-        console.log(createContractServiceArys.result.rowsAffected)
+        // if(createContractServiceArys.result.rowsAffected > 0){
+        //     let transporter = nodemailer.createTransport({
+        //         service: 'gmail',
+        //         auth: {
+        //           user: 'alenjhon9@gmail.com',
+        //           pass: 'nnvwygxnvdpjegbj'
+        //         }
+        //       });
+            
+        //     let mailOptions = {
+        //       from: 'alenjhon9@gmail.com',
+        //       to: `${userData.email}`,
+        //       subject: '¡Bienvenido a Panauto Club!',
+        //       html: `
+        //         <html>
+        //           <body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        //             <div style="text-align: center;">
+        //               <img src="https://i.ibb.co/YXWxSk5/panauto.png" alt="Logo" style="width: 250px; height: auto;">
+        //               <h2>Hola <span style="color: #0070C0;">${userData.xnombre} ${userData.xapellido}</span>,</h2>
+        //               <h4 style="color: #0070C0;">¡Te damos la bienvenida al Club PanAuto!</h4>
+        //               <h4>Ahora podrás disfrutar de todos los beneficios de PanAuto, tu plataforma online.</h4>
+        //               <h4>Para acceder a nuestro canal de autogestión online, puedes hacerlo con:</h4>
+        //               <h4>Correo electrónico</h4>
+        //               <h2 style="color:#0070c0;margin-top: -17px;">${userData.email}</h2>
+        //               <h4>Contraseña</h4>
+        //               <h2 style="color:#0070c0;margin-top: -17px;">${userData.xclave_club}</h2>
+        //               <h4>¿Qué ventajas tienes como usuario registrado?</h4>
+        //               <p>Realizar trámites y consultas desde el lugar donde estés, acceder y agendar todos los servicios de forma digital asociados a tu perfil.</p>
+        //               <h4>Conoce lo que puedes hacer <a href="https://www.panautoclub.com/">aquí</a>.</h4>
+        //               <p style="font-size: 18px; font-style: italic; border-radius: 10px; background-color: lightgray; padding: 10px;">Tu manejas, nosotros te acompañamos.</p>
+        //             </div>
+        //           </body>
+        //         </html>
+        //       `
+        //     };
+            
+        //     transporter.sendMail(mailOptions, function(error, info) {
+        //       if (error) {
+        //         console.log('Error al enviar el correo:', error);
+        //       } else {
+        //         console.log('Correo enviado correctamente:', info.response);
+        //         return {status: true}
+        //       }
+        //     });
+        // }
     }
     return { 
         status: true, 
@@ -308,6 +356,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                 })
             }
         }
+        let getBroker = await bd.getBroker(getContractArysData.result.recordset[0].ccorredor);
+        if(getBroker.error){ return { status: false, code: 500, message: getBroker.error }; }
         return {
             status: true,
             xlogo: getCompanyContractData.result.recordset[0].xlogo,
@@ -340,6 +390,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             // fdesde: getPlan.result.recordset[0].FDESDE,
             mtotal_plan: getPlan.result.recordset[0].MCOSTO.toFixed(2),
             cplan: getPlan.result.recordset[0].CPLAN,
+            xplan: getPlan.result.recordset[0].XPLAN,
             finiciorecibo: getContractArysData.result.recordset[0].FDESDE_REC,
             fhastarecibo: getContractArysData.result.recordset[0].FHASTA_REC,
             femision: getContractArysData.result.recordset[0].FINICIO,
@@ -395,6 +446,9 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
+            xcorredor: getBroker.result.recordset[0].XCORREDOR,
+            xdocidentidadcorredor: getBroker.result.recordset[0].XDOCIDENTIDAD,
+            xtelefonocorredor: getBroker.result.recordset[0].XTELEFONO,
             services: serviceList,
             servicesType: serviceTypeList,
             xestadocontrato: xestadocontrato
