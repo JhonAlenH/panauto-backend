@@ -391,8 +391,8 @@ const CreateAgenda = async(requestBody) => {
     let DataAgenda = {
         cpropietario: requestBody.cpropietario,
         xtitulo: requestBody.title,
-        fdesde: requestBody.fdesde + 'T' + requestBody.hora + ':00',
-        fhasta: requestBody.fhasta + 'T' + requestBody.hora + ':00',
+        fdesde: requestBody.start + ' ' + requestBody.hora + ':00.000',
+        fhasta: requestBody.end || requestBody.start  +' '+  requestBody.hora + ':00.000',
         condicion: requestBody.allDay,
     };
     let Agenda = await bd.DataCreateAgendaClient(DataAgenda).then((res) => res);
@@ -443,12 +443,13 @@ const SearcheAgenda = async(requestBody) => {
     let BirthdayEvent = await bd.BirthdayClient(DataAgenda).then((res) => res); //busqueda de fecha de nacimiento
     //obtener fecha actual
 
+
     const DateNow = new Date().toLocaleDateString('en-us', { day:"numeric", month:"numeric"})
 
 
     if(AgendaEvent.error){ return { status: false, code: 500, message: Agenda.error }; }
 
-    if(AgendaEvent.rowsAffected == 0){ return { status: false, code: 404 }; }
+    if(AgendaEvent.result.rowsAffected == 0){ return { status: false, code: 404 }; }
 
      // primero entra a la busqueda de solicitudes de servicio (busca solicitudes,eventos,fecha de nacimiento)
     if(Agenda.result.rowsAffected > 0){
@@ -554,9 +555,6 @@ const SearcheAgenda = async(requestBody) => {
                 list: list
             }; 
         }
-    return { 
-    status: false, 
-};
 
 }
 
@@ -612,7 +610,7 @@ router.route('/upload/mantenimiento/client-agenda').post((req, res) => {
 const UploadMantenimientoClub = async(requestBody) => {
     let DataDocAgend = {
         cpropietario: requestBody.cpropietario,
-        fdesde: requestBody.fdesde + 'T' + requestBody.hora + ':00',
+        fdesde: requestBody.fdesde + ' '+requestBody.hora + ':00.000',
         xmantenimientoPrevent: requestBody.xmantenimientoPrevent,
         xmantenimientoCorrect: requestBody.xmantenimientoCorrect,
     };
