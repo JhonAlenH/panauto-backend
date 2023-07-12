@@ -276,25 +276,21 @@ const operationSearchProvider = async(authHeader, requestBody) => {
         ccompania: requestBody.ccompania,
         cproveedor: requestBody.cproveedor
     }
-    let getServicesByNotificationTypeData = await bd.getServicesByNotificationTypeDataQuery().then((res) => res);
-    if(getServicesByNotificationTypeData.error){ return  { status: false, code: 500, message: getServicesByNotificationTypeData.error }; }
-    if(getServicesByNotificationTypeData.result.rowsAffected > 0){
-        let getProvidersByServicesData = await bd.getProvidersByServicesDataQuery().then((res) => res);
-        if(getProvidersByServicesData.error){ return  { status: false, code: 500, message: getProvidersByServicesData.error }; }
-        if(getProvidersByServicesData.result.rowsAffected > 0){
-            let jsonList = [];
-            for(let i = 0; i < getProvidersByServicesData.result.recordset.length; i++){
-                jsonList.push({
-                    cproveedor: getProvidersByServicesData.result.recordset[i].CPROVEEDOR,
-                    xdocidentidad: getProvidersByServicesData.result.recordset[i].XDOCIDENTIDAD,
-                    xnombre: getProvidersByServicesData.result.recordset[i].XNOMBRE,
-                    xtelefonoproveedor: getProvidersByServicesData.result.recordset[i].XTELEFONO,
-                });
-            }
-            console.log(jsonList)
-            return { status: true, list: jsonList };
-        }else{ return { status: false, code: 404, message: 'Provider not found.' }; }
-    }else{ return { status: false, code: 404, message: 'Notification Type Services not found.' }; }
+    let getProvidersByServicesData = await bd.getProvidersByServicesDataQuery().then((res) => res);
+    if(getProvidersByServicesData.error){ return  { status: false, code: 500, message: getProvidersByServicesData.error }; }
+    if(getProvidersByServicesData.result.rowsAffected > 0){
+        let jsonList = [];
+        for(let i = 0; i < getProvidersByServicesData.result.recordset.length; i++){
+            jsonList.push({
+                cproveedor: getProvidersByServicesData.result.recordset[i].CPROVEEDOR,
+                xdocidentidad: getProvidersByServicesData.result.recordset[i].XDOCIDENTIDAD,
+                xnombre: getProvidersByServicesData.result.recordset[i].XNOMBRE,
+                xtelefonoproveedor: getProvidersByServicesData.result.recordset[i].XTELEFONO,
+            });
+        }
+        console.log(jsonList)
+        return { status: true, list: jsonList };
+    }else{ return { status: false, code: 404, message: 'Provider not found.' }; }
 }
 
 router.route('/create').post((req, res) => {

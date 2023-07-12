@@ -101,7 +101,8 @@ const operationCreate = async(authHeader, requestBody) => {
         mprima_casco: requestBody.mprima_casco ? requestBody.mprima_casco: 0,
         xmes_venplaca: requestBody.xmes,
         xclave_club: requestBody.xclave_club,
-        nkilometraje: requestBody.nkilometraje ? requestBody.nkilometraje: null
+        nkilometraje: requestBody.nkilometraje ? requestBody.nkilometraje: null,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     };
     let contrato;
     if(userData){
@@ -244,8 +245,11 @@ router.route('/search-contract-arys').post((req, res) => {
 const operationSearchContractArys = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     //if(!helper.validateRequestObj(requestBody, ['cpais', 'ccompania', 'ctiposervicio'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
+    let canal = {
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
+    }
     let contractArysList = [];
-    let searchContractArys = await bd.searchContractArysQuery().then((res) => res);
+    let searchContractArys = await bd.searchContractArysQuery(canal).then((res) => res);
     if(searchContractArys.error){ console.log(searchContractArys.error);return { status: false, code: 500, message: searchContractArys.error }; }
     if(searchContractArys.result.rowsAffected != 0){
         for(let i = 0; i < searchContractArys.result.recordset.length; i++){

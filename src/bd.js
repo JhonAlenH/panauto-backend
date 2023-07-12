@@ -245,11 +245,13 @@ module.exports = {
                 .input('ccompania', sql.Int, userData.ccompania)
                 .input('cdepartamento', sql.Int, userData.cdepartamento)
                 .input('crol', sql.Int, userData.crol)
+                .input('ccanal', sql.Int, userData.ccanal)
                 .input('ccorredor', sql.Int, userData.ccorredor)
                 .input('bcorredor', sql.Bit, userData.bcorredor)
                 .input('cusuariocreacion', sql.Int, userData.cusuariocreacion)
+                .input('ctipo_sistema', sql.Int, 2)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into SEUSUARIO (XNOMBRE, XAPELLIDO, XEMAIL, XTELEFONO, XDIRECCION, XCONTRASENA, BPROVEEDOR, BACTIVO, CPROVEEDOR, CPAIS, CCOMPANIA, CDEPARTAMENTO, CROL, BCORREDOR, CCORREDOR, CUSUARIOCREACION, FCREACION) values (@xnombre, @xapellido, @xemail, @xtelefono, @xdireccion, @xcontrasena, @bproveedor, @bactivo, @cproveedor, @cpais, @ccompania, @cdepartamento, @crol, @bcorredor, @ccorredor, @cusuariocreacion, @fcreacion)');
+                .query('insert into SEUSUARIO (XNOMBRE, XAPELLIDO, XEMAIL, XTELEFONO, XDIRECCION, XCONTRASENA, BPROVEEDOR, BACTIVO, CPROVEEDOR, CPAIS, CCOMPANIA, CDEPARTAMENTO, CROL, BCORREDOR, CCORREDOR, CUSUARIOCREACION, FCREACION, CTIPO_SISTEMA, CCANAL) values (@xnombre, @xapellido, @xemail, @xtelefono, @xdireccion, @xcontrasena, @bproveedor, @bactivo, @cproveedor, @cpais, @ccompania, @cdepartamento, @crol, @bcorredor, @ccorredor, @cusuariocreacion, @fcreacion, @ctipo_sistema, @ccanal)');
             if(result.rowsAffected > 0){
                 let query = await pool.request()
                     .input('xemail', sql.NVarChar, userData.xemail)
@@ -292,12 +294,13 @@ module.exports = {
                 .input('ccompania', sql.Int, userData.ccompania)
                 .input('cdepartamento', sql.Int, userData.cdepartamento)
                 .input('crol', sql.Int, userData.crol)
+                .input('ccanal', sql.Int, userData.ccanal)
                 .input('cproveedor', sql.Int, userData.cproveedor)
                 .input('cusuariomodificacion', sql.Int, userData.cusuariomodificacion)
                 .input('ccorredor', sql.Int, userData.ccorredor)
                 .input('bcorredor', sql.Bit, userData.bcorredor)
                 .input('fmodificacion', sql.DateTime, new Date())
-                .query('update SEUSUARIO set XNOMBRE = @xnombre, XAPELLIDO = @xapellido, XEMAIL = @xemail, XTELEFONO = @xtelefono, XDIRECCION = @xdireccion, BPROVEEDOR = @bproveedor, BACTIVO = @bactivo, CPAIS = @cpais, CCOMPANIA = @ccompania, CDEPARTAMENTO = @cdepartamento, CROL = @crol, CPROVEEDOR = @cproveedor, BCORREDOR = @bcorredor, CCORREDOR = @ccorredor, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CUSUARIO = @cusuario');
+                .query('update SEUSUARIO set XNOMBRE = @xnombre, XAPELLIDO = @xapellido, XEMAIL = @xemail, XTELEFONO = @xtelefono, XDIRECCION = @xdireccion, BPROVEEDOR = @bproveedor, BACTIVO = @bactivo, CPAIS = @cpais, CCOMPANIA = @ccompania, CDEPARTAMENTO = @cdepartamento, CROL = @crol, CPROVEEDOR = @cproveedor, BCORREDOR = @bcorredor, CCORREDOR = @ccorredor, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion, CCANAL = @ccanal where CUSUARIO = @cusuario');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -10948,6 +10951,7 @@ module.exports = {
     },
 
     getServicesByNotificationTypeDataQuery: async() => {
+        console.log('www')
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -10956,6 +10960,7 @@ module.exports = {
             //sql.close();
             return { result: result };
         }catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -11028,6 +11033,7 @@ module.exports = {
             //sql.close();
             return { result: result };
         }catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -12814,14 +12820,14 @@ module.exports = {
     },
     searchCollectionQuery: async(searchData) => {
         try{
-            let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania${ searchData.xplaca ? " and XPLACA = @xplaca" : '' } ${ searchData.ccorredor ? " and CCORREDOR = @ccorredor" : '' }`;
+            let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania${ searchData.xplaca ? " and XPLACA = @xplaca" : '' } ${ searchData.ccorredor ? " and CCORREDOR = @ccorredor" : '' } ${ searchData.ccanal ? " and CCANAL = @ccanal" : '' }`;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('cestatusgeneral', sql.Int, 13)
                 .input('ccompania', sql.Int, searchData.ccompania ? searchData.ccompania: undefined)
                 .input('xplaca', sql.NVarChar, searchData.xplaca ? searchData.xplaca: undefined)
                 .input('ccorredor', sql.Int, searchData.ccorredor ? searchData.ccorredor: undefined)
-                //.input('xclausulas', sql.NVarChar, searchData.xclausulas ? searchData.xclausulas: undefined)
+                .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
                 .query(query);
             //sql.close();
             return { result: result };
@@ -12859,7 +12865,8 @@ module.exports = {
             .input('cbanco_destino', sql.Int, collectionDataList.cbanco_destino)
             .input('mtasa_cambio', sql.Numeric(18,2), collectionDataList.mtasa_cambio)
             .input('ftasa_cambio', sql.DateTime, collectionDataList.ftasa_cambio)
-            .query('update SURECIBO set XREFERENCIA = @xreferencia, CTIPOPAGO = @ctipopago, CBANCO = @cbanco, FCOBRO = @fcobro, MPRIMA_PAGADA = @mprima_pagada, CESTATUSGENERAL = @cestatusgeneral, XNOTA = @xnota, CBANCO_DESTINO = @cbanco_destino, MTASA_CAMBIO = @mtasa_cambio, FTASA_CAMBIO = @ftasa_cambio where CRECIBO = @crecibo AND CCOMPANIA = @ccompania AND CPAIS = @cpais');
+            .input('ccanal', sql.Int, collectionDataList.ccanal)
+            .query('update SURECIBO set XREFERENCIA = @xreferencia, CTIPOPAGO = @ctipopago, CBANCO = @cbanco, FCOBRO = @fcobro, MPRIMA_PAGADA = @mprima_pagada, CESTATUSGENERAL = @cestatusgeneral, XNOTA = @xnota, CBANCO_DESTINO = @cbanco_destino, MTASA_CAMBIO = @mtasa_cambio, FTASA_CAMBIO = @ftasa_cambio, CCANAL = @ccanal where CRECIBO = @crecibo AND CCOMPANIA = @ccompania AND CPAIS = @cpais');
             rowsAffected = rowsAffected + update.rowsAffected;
             //sql.close();
             return { result: { rowsAffected: rowsAffected } };
@@ -14382,8 +14389,9 @@ createContractServiceArysQuery: async(userData) => {
             .input('msuma_casco', sql.Numeric(18, 2), userData.msuma_casco)
             .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('xmes_venplaca', sql.NVarChar, userData.xmes_venplaca)
+            .input('ccanal', sql.Int, userData.ccanal)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca )')        
+            .query('insert into TMEMISION_SERVICIOS (XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA, CCANAL) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca, @ccanal )')        
             rowsAffected = rowsAffected + insert.rowsAffected;        
              return { result: { rowsAffected: rowsAffected} };
     }
@@ -15937,11 +15945,13 @@ storeProcedureFromClubQuery: async(data) => {
         return { error: err.message };
         }
 },
-searchContractArysQuery: async() => {
+searchContractArysQuery: async(canal) => {
     try{
+        let query = `select * from VWBUSCARCONTRATOSSERVICIOSARYS where CESTATUSGENERAL <> 22${ canal.ccanal ? ' and CCANAL = @ccanal' : '' }`;
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT * FROM VWBUSCARCONTRATOSSERVICIOSARYS WHERE CESTATUSGENERAL <> 22');
+            .input('ccanal', sql.Int, canal.ccanal)
+            .query(query);
         //sql.close();
         return { result: result };
     }catch(err){
@@ -16499,6 +16509,17 @@ getSearchTracingData: async (dataTracing) => {
     } catch (err) {
       return { error: err.message };
     }
-  }
+  },
+salesPipelineValrepQuery: async() => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query('select * from MACANALVENTA');
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
 }
 

@@ -134,6 +134,7 @@ const operationCreateUser = async(authHeader, requestBody) => {
         cusuariocreacion: requestBody.cusuariocreacion,
         ccorredor: requestBody.ccorredor ? requestBody.ccorredor : undefined,
         bcorredor: requestBody.bcorredor,
+        ccanal: requestBody.ccanal ? requestBody.ccanal : undefined,
     };
     let verifyUserEmail = await bd.verifyUserEmailToCreateQuery(userData.xemail).then((res) => res);
     if(verifyUserEmail.error){ return { status: false, code: 500, message: verifyUserEmail.error }; }
@@ -205,6 +206,7 @@ const operationDetailUser = async(authHeader, requestBody) => {
             xproveedor: providerData.xproveedor ? providerData.xproveedor : undefined,
             xrazonsocial: providerData.xrazonsocial ? providerData.xrazonsocial : undefined,
             xcorredor: brokerData.xcorredor ? brokerData.xcorredor : undefined,
+            ccanal: getUserData.result.recordset[0].CCANAL,
         }
     }else{ return { status: false, code: 404, message: 'User not found.' }; }
 }
@@ -246,6 +248,7 @@ const operationUpdateUser = async(authHeader, requestBody) => {
         cusuariomodificacion: requestBody.cusuariomodificacion,
         ccorredor: requestBody.ccorredor ? requestBody.ccorredor : undefined,
         bcorredor: requestBody.bcorredor ? requestBody.bcorredor : undefined,
+        ccanal: requestBody.ccanal ? requestBody.ccanal : undefined,
     };
     let verifyUserEmail = await bd.verifyUserEmailToUpdateQuery(userData.cusuario, userData.xemail).then((res) => res);
     if(verifyUserEmail.error){ return { status: false, code: 500, message: verifyUserEmail.error }; }

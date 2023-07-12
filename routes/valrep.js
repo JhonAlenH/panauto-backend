@@ -3425,4 +3425,33 @@ const operationValrepSearchService = async(authHeader, requestBody) => {
     return { status: true, list: jsonArray }
 }
 
+router.route('/sales-pipeline').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationValrepSalesPipeline(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationValrepSalesPipeline' } });
+        });
+    }
+});
+
+const operationValrepSalesPipeline = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+
+    let query = await bd.salesPipelineValrepQuery().then((res) => res);
+    if(query.error){ return { status: false, code: 500, message: query.error }; }
+    let jsonArray = [];
+    for(let i = 0; i < query.result.recordset.length; i++){
+        jsonArray.push({ ccanal: query.result.recordset[i].CCANAL, xcanal: query.result.recordset[i].XCANALVENTA});
+    }
+    return { status: true, list: jsonArray }
+}
+
 module.exports = router;

@@ -69,6 +69,7 @@ const operationAuth = async(requestBody) => {
                         cpais: query.result.recordset[0].CPAIS, 
                         cproveedor: query.result.recordset[0].CPROVEEDOR ? query.result.recordset[0].CPROVEEDOR : undefined, 
                         ccorredor: query.result.recordset[0].CCORREDOR ? query.result.recordset[0].CCORREDOR : undefined,
+                        ccanal: query.result.recordset[0].CCANAL ? query.result.recordset[0].CCANAL : undefined,
                         xlogo: query.result.recordset[0].xlogo,
                         csession: jwt.token, expires: jwt.expires };
                 }

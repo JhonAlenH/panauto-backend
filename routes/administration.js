@@ -274,7 +274,6 @@ const operationGetLastExchangeRate = async(authHeader, requestBody) => {
             mtasa_cambio: lastExchangeRate.result.recordset[0].MTASA_CAMBIO,
             fingreso: lastExchangeRate.result.recordset[0].FINGRESO
         }
-        console.log(tasaCambio);
         return { status: true, tasaCambio: tasaCambio };
     }else{ return { status: false, code: 404, message: 'Exchange Rate not found.' }; }
 }
