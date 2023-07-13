@@ -10651,7 +10651,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || createMaterialDamagesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10686,7 +10685,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || updateMaterialDamagesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10705,7 +10703,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || deleteMaterialDamagesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10763,7 +10760,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || createThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10772,7 +10768,6 @@ module.exports = {
             let rowsAffected = 0;
             let pool = await sql.connect(config);
             for(let i = 0; i < thirdpartyVehicles.length; i++){
-                // console.log(thirdpartyVehicles);
                 let update = await pool.request()
                     .input('cnotificacion', sql.Int, notificationData.cnotificacion)
                     .input('cvehiculoterceronotificacion', sql.Int, thirdpartyVehicles[i].cvehiculoterceronotificacion)
@@ -10824,7 +10819,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || updateThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10843,7 +10837,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || deleteThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10951,7 +10944,6 @@ module.exports = {
     },
 
     getServicesByNotificationTypeDataQuery: async() => {
-        console.log('www')
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -10960,7 +10952,6 @@ module.exports = {
             //sql.close();
             return { result: result };
         }catch(err){
-            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -11033,7 +11024,6 @@ module.exports = {
             //sql.close();
             return { result: result };
         }catch(err){
-            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -12483,7 +12473,6 @@ module.exports = {
         }
     },
     DataCreateAgendaClient: async(DataAgenda) => {
-        console.log(DataAgenda)
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -14156,7 +14145,8 @@ searchPlanQuery: async(searchData) => {
             .input('ccompania', sql.Int, searchData.ccompania)
             .input('ctipoplan', sql.Int, searchData.ctipoplan ? searchData.ctipoplan : null)
             .input('xplan', sql.NVarChar, searchData.xplan ? searchData.xplan : null)
-            .query(`select * from POPLAN where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.ctipoplan ? ' and CTIPOPLAN = @CTIPOPLAN' : '' }${ searchData.xplan ? ' and XPLAN = @xplan' : '' }`);
+            .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal : undefined)
+            .query(`select * from POPLAN where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.ctipoplan ? ' and CTIPOPLAN = @CTIPOPLAN' : '' }${ searchData.xplan ? ' and XPLAN = @xplan' : '' }${ searchData.ccanal ? ' and CCANAL = @ccanal' : '' }`);
         //sql.close();
         return { result: result };
     }catch(err){
@@ -14222,15 +14212,15 @@ createPlanQuery: async(dataList, cplan) => {
             .input('ccompania', sql.Int, dataList.ccompania)
             .input('mcosto', sql.Numeric(18, 2), dataList.mcosto)
             .input('cmoneda', sql.Int, dataList.cmoneda)
+            .input('ccanal', sql.Int, dataList.ccanal)
             .input('bactivo', sql.Bit, dataList.bactivo)
             .input('cusuariocreacion', sql.Int, dataList.cusuario)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into POPLAN (CPLAN, XPLAN, CTIPOPLAN, BRCV, CPAIS, CCOMPANIA, MCOSTO, CMONEDA, BACTIVO, CUSUARIOCREACION, FCREACION ) values (@cplan, @xplan, @ctipoplan, @brcv, @cpais, @ccompania, @mcosto, @cmoneda, @bactivo, @cusuariocreacion, @fcreacion)')
+            .query('insert into POPLAN (CPLAN, XPLAN, CTIPOPLAN, BRCV, CPAIS, CCOMPANIA, MCOSTO, CMONEDA, BACTIVO, CUSUARIOCREACION, FCREACION, CCANAL ) values (@cplan, @xplan, @ctipoplan, @brcv, @cpais, @ccompania, @mcosto, @cmoneda, @bactivo, @cusuariocreacion, @fcreacion, @ccanal)')
 
             return { result: result, cplan};
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14329,11 +14319,13 @@ getServiceTypePlanQuery: async(cplan) => {
 },
 valrepPlanWithoutRcvQuery: async(searchData) => {
     try{
+        let query = `select * from VWBUSCARPLANDATA where CPAIS = @cpais and CCOMPANIA = @ccompania AND BRCV = 0 AND BACTIVO = 1 AND CTIPOPLAN = 2${ searchData.ccanal ? ' and CCANAL = @ccanal' : '' }`;
         let pool = await sql.connect(config);
         let result = await pool.request()
+            .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
             .input('cpais', sql.Numeric(4, 0), searchData.cpais)
             .input('ccompania', sql.Int, searchData.ccompania)
-            .query('select * from VWBUSCARPLANDATA where CPAIS = @cpais and CCOMPANIA = @ccompania AND BRCV = 0 AND BACTIVO = 1 AND CTIPOPLAN = 2');
+            .query(query);
         //sql.close();
         return { result: result };
     }catch(err){
@@ -14396,7 +14388,6 @@ createContractServiceArysQuery: async(userData) => {
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14493,7 +14484,6 @@ updateQuatityFromPlanQuery: async(updateQuatityList, dataList) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14516,7 +14506,6 @@ updateQuatityFromPlanRcvQuery: async(updateQuatityList, dataPlanRcv) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -15980,7 +15969,6 @@ getContractArysDataQuery: async(contractData) => {
         
         return { result: result };
     }catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16346,7 +16334,6 @@ searchPlanServiceQuery: async(cplan) => {
         //sql.close();
         return { result: result };
     }catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16363,7 +16350,6 @@ updateAceptepServiceQuery: async(baceptado, cplan) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16454,7 +16440,6 @@ searchPlanRcvServiceQuery: async(cplan_rc) => {
         //sql.close();
         return { result: result };
     }catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16470,8 +16455,7 @@ updateAceptepServiceRcvQuery: async(baceptado, cplan_rc) => {
         //sql.close();
         return { result: { rowsAffected: rowsAffected } };
     }
-    catch(err){
-        console.log(err.message)
+    catch(err){  
         return { error: err.message };
     }
 },
@@ -16510,11 +16494,13 @@ getSearchTracingData: async (dataTracing) => {
       return { error: err.message };
     }
   },
-salesPipelineValrepQuery: async() => {
+salesPipelineValrepQuery: async(data) => {
     try{
+        let query = `select * from MACANALVENTA where BACTIVO = 1${ data.ccanal ? ' and CCANAL = @ccanal' : '' }`;
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('select * from MACANALVENTA');
+            .input('ccanal', sql.Int, data.ccanal)
+            .query(query);
         //sql.close();
         return { result: result };
     }catch(err){

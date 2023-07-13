@@ -2833,8 +2833,10 @@ const operationValrepPlanContract = async(authHeader, requestBody) => {
     // if(!helper.validateRequestObj(requestBody, ['cpais', 'ccompania', 'ctipoplan'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
     let searchData = {
         cpais: requestBody.cpais,
-        ccompania: requestBody.ccompania
+        ccompania: requestBody.ccompania,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     };
+    console.log(searchData)
     let valrepPlanWithoutRcv = await bd.valrepPlanWithoutRcvQuery(searchData).then((res) => res);
     if(valrepPlanWithoutRcv.error){ return { status: false, code: 500, message: valrepPlanWithoutRcv.error }; }
     let jsonArray = [];
@@ -3445,7 +3447,11 @@ router.route('/sales-pipeline').post((req, res) => {
 const operationValrepSalesPipeline = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
 
-    let query = await bd.salesPipelineValrepQuery().then((res) => res);
+    let data = {
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
+    }
+
+    let query = await bd.salesPipelineValrepQuery(data).then((res) => res);
     if(query.error){ return { status: false, code: 500, message: query.error }; }
     let jsonArray = [];
     for(let i = 0; i < query.result.recordset.length; i++){
