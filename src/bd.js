@@ -9738,7 +9738,7 @@ module.exports = {
     },
     searchNotificationQuery: async(searchData) => {
         try{
-            let query = `select * from VWBUSCARNOTIFICACIONDATA where CCOMPANIA = @ccompania${ searchData.cnotificacion ? " and CNOTIFICACION = @cnotificacion" : '' }${ searchData.ccliente ? " and CCLIENTE = @ccliente" : '' }${ searchData.casociado ? " and CASOCIADO = @casociado" : '' }${ searchData.fevento ? " and datediff(day, FEVENTO, @fevento) = 0" : '' }${ searchData.fcreacion ? " and datediff(day, FCREACION, @fcreacion) = 0" : '' }${ searchData.xplaca ? " and XPLACA = @xplaca" : '' }`;
+            let query = `select * from VWBUSCARNOTIFICACIONDATA where CCOMPANIA = @ccompania${ searchData.cnotificacion ? " and CNOTIFICACION = @cnotificacion" : '' }${ searchData.ccliente ? " and CCLIENTE = @ccliente" : '' }${ searchData.casociado ? " and CASOCIADO = @casociado" : '' }${ searchData.fevento ? " and datediff(day, FEVENTO, @fevento) = 0" : '' }${ searchData.fcreacion ? " and datediff(day, FCREACION, @fcreacion) = 0" : '' }${ searchData.xplaca ? " and XPLACA = @xplaca" : '' }${ searchData.ccanal ? " and CCANAL = @ccanal" : '' } ORDER BY CNOTIFICACION`;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 //.input('cpais', sql.Numeric(4, 0), searchData.cpais ? searchData.cpais : 1)
@@ -9749,6 +9749,7 @@ module.exports = {
                 .input('fevento', sql.DateTime, searchData.fevento ? searchData.fevento : '01/01/2000')
                 .input('fcreacion', sql.DateTime, searchData.fcreacion ? searchData.fcreacion : '01/01/2000')
                 .input('xplaca', sql.NVarChar, searchData.xplaca ? searchData.xplaca: undefined)
+                .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
                 .query(query);
             //sql.close();
             return { result: result };
@@ -10085,8 +10086,9 @@ module.exports = {
                 .input('xobservacion', sql.NVarChar, notificationData.xobservacion)
                 .input('bactivo', sql.Bit, notificationData.bactivo)
                 .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
+                .input('ccanal', sql.Int, notificationData.ccanal)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into EVNOTIFICACION (CPAIS, CCOMPANIA, CCONTRATOFLOTA, CTIPONOTIFICACION, CRECAUDO, CCAUSASINIESTRO, XNOMBRE, XAPELLIDO, XTELEFONO, XNOMBREALTERNATIVO, XAPELLIDOALTERNATIVO, XTELEFONOALTERNATIVO, BDANO, BTRANSITAR, BDANOOTRO, BLESIONADO, BPROPIETARIO, FEVENTO, CESTADO, CCIUDAD, XDIRECCION, XDESCRIPCION, BTRANSITO, BCARGA, BPASAJERO, NPASAJERO, XOBSERVACION, BACTIVO, CUSUARIOCREACION, FCREACION) output inserted.CNOTIFICACION values (@cpais, @ccompania, @ccontratoflota, @ctiponotificacion, @crecaudo, @ccausasiniestro, @xnombre, @xapellido, @xtelefono, @xnombrealternativo, @xapellidoalternativo, @xtelefonoalternativo, @bdano, @btransitar, @bdanootro, @blesionado, @bpropietario, @fevento, @cestado, @cciudad, @xdireccion, @xdescripcion, @btransito, @bcarga, @bpasajero, @npasajero, @xobservacion, @bactivo, @cusuariocreacion, @fcreacion)');
+                .query('insert into EVNOTIFICACION (CPAIS, CCOMPANIA, CCONTRATOFLOTA, CTIPONOTIFICACION, CRECAUDO, CCAUSASINIESTRO, XNOMBRE, XAPELLIDO, XTELEFONO, XNOMBREALTERNATIVO, XAPELLIDOALTERNATIVO, XTELEFONOALTERNATIVO, BDANO, BTRANSITAR, BDANOOTRO, BLESIONADO, BPROPIETARIO, FEVENTO, CESTADO, CCIUDAD, XDIRECCION, XDESCRIPCION, BTRANSITO, BCARGA, BPASAJERO, NPASAJERO, XOBSERVACION, BACTIVO, CUSUARIOCREACION, FCREACION, CCANAL) output inserted.CNOTIFICACION values (@cpais, @ccompania, @ccontratoflota, @ctiponotificacion, @crecaudo, @ccausasiniestro, @xnombre, @xapellido, @xtelefono, @xnombrealternativo, @xapellidoalternativo, @xtelefonoalternativo, @bdano, @btransitar, @bdanootro, @blesionado, @bpropietario, @fevento, @cestado, @cciudad, @xdireccion, @xdescripcion, @btransito, @bcarga, @bpasajero, @npasajero, @xobservacion, @bactivo, @cusuariocreacion, @fcreacion, @ccanal)');
             if(result.rowsAffected > 0){
                 let insertSecond = await pool.request()
                     .input('cnotificacion', sql.Int, result.recordset[0].CNOTIFICACION)
@@ -10096,8 +10098,9 @@ module.exports = {
                     .input('xobservacion', sql.NVarChar, notificationData.xobservacionseguimiento)
                     .input('bcerrado', sql.Bit, false)
                     .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
+                    .input('ccanal', sql.Int, notificationData.ccanal)
                     .input('fcreacion', sql.DateTime, new Date())
-                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion)')
+                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION, CCANAL) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion, @ccanal)')
                 if(notificationData.thirdpartyVehicles){
                     for(let i = 0; i < notificationData.thirdpartyVehicles.length; i++){
                         let insert = await pool.request()
@@ -10195,8 +10198,9 @@ module.exports = {
                                     .input('xobservacion', sql.NVarChar, notificationData.thirdparties[i].tracings[j].xobservacion)
                                     .input('bcerrado', sql.Bit, false)
                                     .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
+                                    .input('ccanal', sql.Int, notificationData.ccanal)
                                     .input('fcreacion', sql.DateTime, new Date())
-                                    .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion)')
+                                    .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION, CCANAL) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion, @ccanal)')
                             }
                         }
                     }
@@ -10229,8 +10233,9 @@ module.exports = {
                         let insert = await pool.request()
                         .input('cservicio', sql.Int, notificationData.cservicio)
                         .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                        .input('ccanal', sql.Int, notificationData.ccanal)
                         .input('fcreacion', sql.DateTime, new Date())
-                        .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION) values (@cservicio, @fcreacion, @cnotificacion)')
+                        .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION, CCANAL) values (@cservicio, @fcreacion, @cnotificacion, @ccanal)')
                     }
                 }
                 //sql.close();
@@ -10474,11 +10479,12 @@ module.exports = {
                     .input('ctiposeguimiento', sql.Int, tracings[i].ctiposeguimiento)
                     .input('cmotivoseguimiento', sql.Int, tracings[i].cmotivoseguimiento)
                     .input('fseguimientonotificacion', sql.DateTime, tracings[i].fseguimientonotificacion)
+                    .input('ccanal', sql.Int, tracings[i].ccanal)
                     .input('bcerrado', sql.Bit, false)
                     .input('xobservacion', sql.NVarChar, tracings[i].xobservacion)
                     .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
                     .input('fcreacion', sql.DateTime, new Date())
-                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, BCERRADO, XOBSERVACION, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @bcerrado, @xobservacion, @cusuariocreacion, @fcreacion)')
+                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, BCERRADO, XOBSERVACION, CUSUARIOCREACION, FCREACION, CCANAL) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @bcerrado, @xobservacion, @cusuariocreacion, @fcreacion, @ccanal)')
                 rowsAffected = rowsAffected + insert.rowsAffected;
             }
             //sql.close();
@@ -10869,8 +10875,9 @@ module.exports = {
                     .input('ccotizacion', sql.Int, serviceOrderCreateList[i].ccotizacion)
                     .input('cestatusgeneral', sql.Int, 13)
                     .input('ccausaanulacion', sql.Int, serviceOrderCreateList[i].ccausaanulacion)
+                    .input('ccanal', sql.Int, notificationData.ccanal)
                     .input('fcreacion', sql.DateTime, new Date())
-                    .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION, XOBSERVACION, CSERVICIOADICIONAL, CCOTIZACION, XDANOS, XFECHA, FAJUSTE, XDESDE, XHACIA, MMONTO, MMONTOTOTAL, CMONEDA, CIMPUESTO, PIMPUESTO, MMONTOTOTALIVA, XMENSAJE, XRUTAARCHIVO, CPROVEEDOR, CCOMPANIA, CPAIS, CESTATUSGENERAL, CCAUSAANULACION, BACTIVO) values (@cservicio, @fcreacion, @cnotificacion, @xobservacion, @cservicioadicional, @ccotizacion, @xdanos, @xfecha, @fajuste, @xdesde, @xhacia, @mmonto, @mmontototal, @cmoneda, @cimpuesto, @pimpuesto, @mmontototaliva, @xmensaje, @xrutaarchivo, @cproveedor, @ccompania, @cpais, @cestatusgeneral, @ccausaanulacion, 1)')
+                    .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION, XOBSERVACION, CSERVICIOADICIONAL, CCOTIZACION, XDANOS, XFECHA, FAJUSTE, XDESDE, XHACIA, MMONTO, MMONTOTOTAL, CMONEDA, CIMPUESTO, PIMPUESTO, MMONTOTOTALIVA, XMENSAJE, XRUTAARCHIVO, CPROVEEDOR, CCOMPANIA, CPAIS, CESTATUSGENERAL, CCAUSAANULACION, BACTIVO, CCANAL) values (@cservicio, @fcreacion, @cnotificacion, @xobservacion, @cservicioadicional, @ccotizacion, @xdanos, @xfecha, @fajuste, @xdesde, @xhacia, @mmonto, @mmontototal, @cmoneda, @cimpuesto, @pimpuesto, @mmontototaliva, @xmensaje, @xrutaarchivo, @cproveedor, @ccompania, @cpais, @cestatusgeneral, @ccausaanulacion, 1, @ccanal)')
                 rowsAffected = rowsAffected + insert.rowsAffected;
             }
             //sql.close();
@@ -12173,8 +12180,9 @@ module.exports = {
             .input('mmontofiniquito', sql.Numeric(17, 2), settlementCreate.mmontofiniquito)
             .input('cmoneda', sql.Int, settlementCreate.cmoneda)
             .input('ccausafiniquito', sql.Int, settlementCreate.ccausafiniquito)
+            .input('ccanal', sql.Int, notificationData.ccanal)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into EVFINIQUITO (CNOTIFICACION, FCREACION, XOBSERVACION, XDANOS, MMONTOFINIQUITO, CMONEDA, CCAUSAFINIQUITO, CCOMPANIA, BACTIVO) values (@cnotificacion, @fcreacion, @xobservacion, @xdanos, @mmontofiniquito, @cmoneda, @ccausafiniquito, @ccompania, 1)');
+            .query('insert into EVFINIQUITO (CNOTIFICACION, FCREACION, XOBSERVACION, XDANOS, MMONTOFINIQUITO, CMONEDA, CCAUSAFINIQUITO, CCOMPANIA, BACTIVO, CCANAL) values (@cnotificacion, @fcreacion, @xobservacion, @xdanos, @mmontofiniquito, @cmoneda, @ccausafiniquito, @ccompania, 1, @ccanal)');
             rowsAffected = rowsAffected + update.rowsAffected;
             //sql.close();
             return { result: { rowsAffected: rowsAffected, corden: settlementCreate.corden } };

@@ -29,7 +29,8 @@ const operationSearchNotification = async(authHeader, requestBody) => {
         fcreacion: requestBody.fcreacion ? requestBody.fcreacion : undefined,
         fevento: requestBody.fevento ? requestBody.fevento : undefined,
         xplaca: requestBody.xplaca ? requestBody.xplaca : undefined,
-        ccompania: requestBody.ccompania
+        ccompania: requestBody.ccompania,
+        ccanal: requestBody.ccanal ? requestBody.ccanal : undefined,
     };
     let searchNotification = await bd.searchNotificationQuery(searchData).then((res) => res);
     if(searchNotification.error){ return  { status: false, code: 500, message: searchNotification.error }; }
@@ -439,7 +440,8 @@ const operationCreateNotification = async (authHeader, requestBody) => {
         fseguimientonotificacion: requestBody.fseguimientonotificacion,
         xobservacionseguimiento: requestBody.xobservacionseguimiento ? requestBody.xobservacionseguimiento.toUpperCase() : undefined,
         bactivo: true,
-        cusuariocreacion: requestBody.cusuariocreacion
+        cusuariocreacion: requestBody.cusuariocreacion,
+        ccanal: requestBody.ccanal ? requestBody.ccanal : undefined,
     }
     let createNotification = await bd.createNotificationQuery(notificationData).then((res) => res);
     if(createNotification.error){return { status: false, code: 500, message: createNotification.error }; }
@@ -934,6 +936,7 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
         cnotificacion: requestBody.cnotificacion,
         cusuariomodificacion: requestBody.cusuariomodificacion,
         quotesProviders: requestBody.quotesProviders,
+        ccanal: requestBody.ccanal ? requestBody.ccanal : undefined,
     }
     if(requestBody.notes){
         if(requestBody.notes.create && requestBody.notes.create.length > 0){
