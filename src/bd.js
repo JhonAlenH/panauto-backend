@@ -16484,19 +16484,9 @@ getSearchTracingData: async (dataTracing) => {
       let pool = await sql.connect(config);
       let result;
   
-      if (dataTracing.xvencimiento === 'TODOS') {
         query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA`;
         result = await pool.request().query(query);
-      } else if (dataTracing.xvencimiento === 'DIA') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE CONVERT(DATE, FSEGUIMIENTONOTIFICACION) = CONVERT(DATE, GETDATE())`;
-        result = await pool.request().query(query);
-      } else if (dataTracing.xvencimiento === 'ATRASADO') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION < CONVERT(DATE, GETDATE())`;
-        result = await pool.request().query(query);
-      } else if (dataTracing.xvencimiento === 'VENCER') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION > CONVERT(DATE, GETDATE())`;
-        result = await pool.request().query(query);
-      }
+
       return { result: result };
     } catch (err) {
       return { error: err.message };
