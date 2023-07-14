@@ -36,16 +36,32 @@ const operationSearchTracing = async(authHeader, requestBody) => {
     if(getServiceTypePlan.result){
         for(let i = 0; i < getServiceTypePlan.result.recordset.length; i++){
             let cerrado;
+            let vencimiento;
             if(getServiceTypePlan.result.recordset[i].BCERRADO == false){
                 cerrado = 'No'
             }else{
                 cerrado = 'Si'
             }
+            let date = new Date()
+            let fechaISO = date.toISOString().substring(0, 10);
+
+            if(getServiceTypePlan.result.recordset[i].FSEGUIMIENTONOTIFICACION.toISOString().split('T')[0] == fechaISO){
+                vencimiento = "DIA"     
+            }
+            else if(getServiceTypePlan.result.recordset[i].FSEGUIMIENTONOTIFICACION.toISOString().split('T')[0] < fechaISO){
+                vencimiento  = "ATRASADOS"           
+            }
+            else if(getServiceTypePlan.result.recordset[i].FSEGUIMIENTONOTIFICACION.toISOString().split('T')[0] > fechaISO)
+            {
+                vencimiento = "VENCER"   
+            }
+
             tracingList.push({
                 cnotificacion: getServiceTypePlan.result.recordset[i].CNOTIFICACION,
                 xtiposeguimiento: getServiceTypePlan.result.recordset[i].XTIPOSEGUIMIENTO,
                 xmotivoseguimiento: getServiceTypePlan.result.recordset[i].XMOTIVOSEGUIMIENTO,
                 bcerrado: cerrado,
+                xvencimiento : vencimiento,
                 xobservacion: getServiceTypePlan.result.recordset[i].XOBSERVACION,
                 fseguimiento: getServiceTypePlan.result.recordset[i].FSEGUIMIENTONOTIFICACION.toISOString().split('T')[0]
             })
