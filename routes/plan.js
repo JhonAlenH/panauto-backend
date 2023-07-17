@@ -25,7 +25,8 @@ const operationSearchPlan = async(authHeader, requestBody) => {
         cpais: requestBody.cpais,
         ccompania: requestBody.ccompania,
         ctipoplan: requestBody.ctipoplan ? requestBody.ctipoplan : undefined,
-        xplan: requestBody.xplan ? requestBody.xplan.toUpperCase() : undefined
+        xplan: requestBody.xplan ? requestBody.xplan.toUpperCase() : undefined,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     };
     let searchPlan = await bd.searchPlanQuery(searchData).then((res) => res);
     if(searchPlan.error){ return  { status: false, code: 500, message: searchPlan.error }; }
@@ -189,6 +190,7 @@ const operationCreatePlan = async(authHeader, requestBody) => {
         msuma_recuperacion: requestBody.msuma_recuperacion ? requestBody.msuma_recuperacion: 0,
         mprima_recuperacion: requestBody.mprima_recuperacion ? requestBody.mprima_recuperacion: 0,
         mdeducible: requestBody.mdeducible ? requestBody.mdeducible: 0,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     }
     //Busca código del plan
     let searchCodePlan = await bd.searchCodePlanQuery().then((res) => res);

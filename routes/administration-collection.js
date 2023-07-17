@@ -2,6 +2,11 @@ const router = require('express').Router();
 const helper = require('../src/helper');
 const bd = require('../src/bd');
 
+function changeDateFormat (date) {
+    let dateArray = date.toISOString().substring(0,10).split("-");
+    return dateArray[2] + '-' + dateArray[1] + '-' + dateArray[0];
+  }
+
 router.route('/search').post((req, res) => {
     if(!req.header('Authorization')){
         res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
@@ -25,7 +30,8 @@ const operationSearchCollection = async(authHeader, requestBody) => {
     let searchData = {
         ccompania: requestBody.ccompania,
         xplaca: requestBody.xplaca ? requestBody.xplaca.toUpperCase() : undefined,
-        ccorredor: requestBody.ccorredor ? requestBody.ccorredor: undefined
+        ccorredor: requestBody.ccorredor ? requestBody.ccorredor: undefined,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
     }
     let searchCollection = await bd.searchCollectionQuery(searchData).then((res) => res);
     if(searchCollection.error){ return { status: false, code: 500, message: searchCollection.error }; }
@@ -35,8 +41,8 @@ const operationSearchCollection = async(authHeader, requestBody) => {
             jsonList.push({
                 crecibo: searchCollection.result.recordset[i].CRECIBO,
                 clote: searchCollection.result.recordset[i].CLOTE,
-                fdesde_pol: searchCollection.result.recordset[i].FDESDE_POL,
-                fhasta_pol: searchCollection.result.recordset[i].FHASTA_POL,
+                fdesde_pol: changeDateFormat(searchCollection.result.recordset[i].FDESDE_REC),
+                fhasta_pol: changeDateFormat(searchCollection.result.recordset[i].FHASTA_REC),
                 xnombrepropietario: searchCollection.result.recordset[i].XNOMBREPROPIETARIO,
                 cestatusgeneral: searchCollection.result.recordset[i].CESTATUSGENERAL,
                 xestatusgeneral: searchCollection.result.recordset[i].XESTATUSGENERAL,
@@ -179,8 +185,8 @@ const operationUpdateCollection = async(authHeader, requestBody) => {
             cbanco_destino: requestBody.pago.cbanco_destino,
             mtasa_cambio: requestBody.pago.mtasa_cambio,
             ftasa_cambio: requestBody.pago.ftasa_cambio,
+            ccanal: requestBody.ccanal,
         }
-        console.log(collectionDataList)
     let updateCollection = await bd.updateCollectionQuery(collectionDataList).then((res) => res);
     if(updateCollection.error){ return { status: false, code: 500, message: updateCollection.error }; }
     if(updateCollection.result.rowsAffected > 0){ return { status: true, crecibo: collectionDataList.crecibo }; }

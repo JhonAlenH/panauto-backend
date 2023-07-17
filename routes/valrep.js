@@ -2833,8 +2833,10 @@ const operationValrepPlanContract = async(authHeader, requestBody) => {
     // if(!helper.validateRequestObj(requestBody, ['cpais', 'ccompania', 'ctipoplan'])){ return { status: false, code: 400, message: 'Required params not found.' }; }
     let searchData = {
         cpais: requestBody.cpais,
-        ccompania: requestBody.ccompania
+        ccompania: requestBody.ccompania,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     };
+    console.log(searchData)
     let valrepPlanWithoutRcv = await bd.valrepPlanWithoutRcvQuery(searchData).then((res) => res);
     if(valrepPlanWithoutRcv.error){ return { status: false, code: 500, message: valrepPlanWithoutRcv.error }; }
     let jsonArray = [];
@@ -3421,6 +3423,39 @@ const operationValrepSearchService = async(authHeader, requestBody) => {
     let jsonArray = [];
     for(let i = 0; i < query.result.recordset.length; i++){
         jsonArray.push({ cservicio: query.result.recordset[i].CSERVICIO, xservicio: query.result.recordset[i].XSERVICIO, bactivo: query.result.recordset[i].BACTIVO });
+    }
+    return { status: true, list: jsonArray }
+}
+
+router.route('/sales-pipeline').post((req, res) => {
+    if(!req.header('Authorization')){ 
+        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } })
+        return;
+    }else{
+        operationValrepSalesPipeline(req.header('Authorization'), req.body).then((result) => {
+            if(!result.status){ 
+                res.status(result.code).json({ data: result });
+                return;
+            }
+            res.json({ data: result });
+        }).catch((err) => {
+            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationValrepSalesPipeline' } });
+        });
+    }
+});
+
+const operationValrepSalesPipeline = async(authHeader, requestBody) => {
+    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
+
+    let data = {
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
+    }
+
+    let query = await bd.salesPipelineValrepQuery(data).then((res) => res);
+    if(query.error){ return { status: false, code: 500, message: query.error }; }
+    let jsonArray = [];
+    for(let i = 0; i < query.result.recordset.length; i++){
+        jsonArray.push({ ccanal: query.result.recordset[i].CCANAL, xcanal: query.result.recordset[i].XCANALVENTA});
     }
     return { status: true, list: jsonArray }
 }

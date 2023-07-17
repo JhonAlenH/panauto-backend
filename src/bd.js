@@ -245,11 +245,13 @@ module.exports = {
                 .input('ccompania', sql.Int, userData.ccompania)
                 .input('cdepartamento', sql.Int, userData.cdepartamento)
                 .input('crol', sql.Int, userData.crol)
+                .input('ccanal', sql.Int, userData.ccanal)
                 .input('ccorredor', sql.Int, userData.ccorredor)
                 .input('bcorredor', sql.Bit, userData.bcorredor)
                 .input('cusuariocreacion', sql.Int, userData.cusuariocreacion)
+                .input('ctipo_sistema', sql.Int, 2)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into SEUSUARIO (XNOMBRE, XAPELLIDO, XEMAIL, XTELEFONO, XDIRECCION, XCONTRASENA, BPROVEEDOR, BACTIVO, CPROVEEDOR, CPAIS, CCOMPANIA, CDEPARTAMENTO, CROL, BCORREDOR, CCORREDOR, CUSUARIOCREACION, FCREACION) values (@xnombre, @xapellido, @xemail, @xtelefono, @xdireccion, @xcontrasena, @bproveedor, @bactivo, @cproveedor, @cpais, @ccompania, @cdepartamento, @crol, @bcorredor, @ccorredor, @cusuariocreacion, @fcreacion)');
+                .query('insert into SEUSUARIO (XNOMBRE, XAPELLIDO, XEMAIL, XTELEFONO, XDIRECCION, XCONTRASENA, BPROVEEDOR, BACTIVO, CPROVEEDOR, CPAIS, CCOMPANIA, CDEPARTAMENTO, CROL, BCORREDOR, CCORREDOR, CUSUARIOCREACION, FCREACION, CTIPO_SISTEMA, CCANAL) values (@xnombre, @xapellido, @xemail, @xtelefono, @xdireccion, @xcontrasena, @bproveedor, @bactivo, @cproveedor, @cpais, @ccompania, @cdepartamento, @crol, @bcorredor, @ccorredor, @cusuariocreacion, @fcreacion, @ctipo_sistema, @ccanal)');
             if(result.rowsAffected > 0){
                 let query = await pool.request()
                     .input('xemail', sql.NVarChar, userData.xemail)
@@ -292,12 +294,13 @@ module.exports = {
                 .input('ccompania', sql.Int, userData.ccompania)
                 .input('cdepartamento', sql.Int, userData.cdepartamento)
                 .input('crol', sql.Int, userData.crol)
+                .input('ccanal', sql.Int, userData.ccanal)
                 .input('cproveedor', sql.Int, userData.cproveedor)
                 .input('cusuariomodificacion', sql.Int, userData.cusuariomodificacion)
                 .input('ccorredor', sql.Int, userData.ccorredor)
                 .input('bcorredor', sql.Bit, userData.bcorredor)
                 .input('fmodificacion', sql.DateTime, new Date())
-                .query('update SEUSUARIO set XNOMBRE = @xnombre, XAPELLIDO = @xapellido, XEMAIL = @xemail, XTELEFONO = @xtelefono, XDIRECCION = @xdireccion, BPROVEEDOR = @bproveedor, BACTIVO = @bactivo, CPAIS = @cpais, CCOMPANIA = @ccompania, CDEPARTAMENTO = @cdepartamento, CROL = @crol, CPROVEEDOR = @cproveedor, BCORREDOR = @bcorredor, CCORREDOR = @ccorredor, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion where CUSUARIO = @cusuario');
+                .query('update SEUSUARIO set XNOMBRE = @xnombre, XAPELLIDO = @xapellido, XEMAIL = @xemail, XTELEFONO = @xtelefono, XDIRECCION = @xdireccion, BPROVEEDOR = @bproveedor, BACTIVO = @bactivo, CPAIS = @cpais, CCOMPANIA = @ccompania, CDEPARTAMENTO = @cdepartamento, CROL = @crol, CPROVEEDOR = @cproveedor, BCORREDOR = @bcorredor, CCORREDOR = @ccorredor, CUSUARIOMODIFICACION = @cusuariomodificacion, FMODIFICACION = @fmodificacion, CCANAL = @ccanal where CUSUARIO = @cusuario');
             //sql.close();
             return { result: result };
         }catch(err){
@@ -9735,7 +9738,7 @@ module.exports = {
     },
     searchNotificationQuery: async(searchData) => {
         try{
-            let query = `select * from VWBUSCARNOTIFICACIONDATA where CCOMPANIA = @ccompania${ searchData.cnotificacion ? " and CNOTIFICACION = @cnotificacion" : '' }${ searchData.ccliente ? " and CCLIENTE = @ccliente" : '' }${ searchData.casociado ? " and CASOCIADO = @casociado" : '' }${ searchData.fevento ? " and datediff(day, FEVENTO, @fevento) = 0" : '' }${ searchData.fcreacion ? " and datediff(day, FCREACION, @fcreacion) = 0" : '' }${ searchData.xplaca ? " and XPLACA = @xplaca" : '' }`;
+            let query = `select * from VWBUSCARNOTIFICACIONDATA where CCOMPANIA = @ccompania${ searchData.cnotificacion ? " and CNOTIFICACION = @cnotificacion" : '' }${ searchData.ccliente ? " and CCLIENTE = @ccliente" : '' }${ searchData.casociado ? " and CASOCIADO = @casociado" : '' }${ searchData.fevento ? " and datediff(day, FEVENTO, @fevento) = 0" : '' }${ searchData.fcreacion ? " and datediff(day, FCREACION, @fcreacion) = 0" : '' }${ searchData.xplaca ? " and XPLACA = @xplaca" : '' }${ searchData.ccanal ? " and CCANAL = @ccanal" : '' } ORDER BY CNOTIFICACION`;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 //.input('cpais', sql.Numeric(4, 0), searchData.cpais ? searchData.cpais : 1)
@@ -9746,6 +9749,7 @@ module.exports = {
                 .input('fevento', sql.DateTime, searchData.fevento ? searchData.fevento : '01/01/2000')
                 .input('fcreacion', sql.DateTime, searchData.fcreacion ? searchData.fcreacion : '01/01/2000')
                 .input('xplaca', sql.NVarChar, searchData.xplaca ? searchData.xplaca: undefined)
+                .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
                 .query(query);
             //sql.close();
             return { result: result };
@@ -10082,8 +10086,9 @@ module.exports = {
                 .input('xobservacion', sql.NVarChar, notificationData.xobservacion)
                 .input('bactivo', sql.Bit, notificationData.bactivo)
                 .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
+                .input('ccanal', sql.Int, notificationData.ccanal)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('insert into EVNOTIFICACION (CPAIS, CCOMPANIA, CCONTRATOFLOTA, CTIPONOTIFICACION, CRECAUDO, CCAUSASINIESTRO, XNOMBRE, XAPELLIDO, XTELEFONO, XNOMBREALTERNATIVO, XAPELLIDOALTERNATIVO, XTELEFONOALTERNATIVO, BDANO, BTRANSITAR, BDANOOTRO, BLESIONADO, BPROPIETARIO, FEVENTO, CESTADO, CCIUDAD, XDIRECCION, XDESCRIPCION, BTRANSITO, BCARGA, BPASAJERO, NPASAJERO, XOBSERVACION, BACTIVO, CUSUARIOCREACION, FCREACION) output inserted.CNOTIFICACION values (@cpais, @ccompania, @ccontratoflota, @ctiponotificacion, @crecaudo, @ccausasiniestro, @xnombre, @xapellido, @xtelefono, @xnombrealternativo, @xapellidoalternativo, @xtelefonoalternativo, @bdano, @btransitar, @bdanootro, @blesionado, @bpropietario, @fevento, @cestado, @cciudad, @xdireccion, @xdescripcion, @btransito, @bcarga, @bpasajero, @npasajero, @xobservacion, @bactivo, @cusuariocreacion, @fcreacion)');
+                .query('insert into EVNOTIFICACION (CPAIS, CCOMPANIA, CCONTRATOFLOTA, CTIPONOTIFICACION, CRECAUDO, CCAUSASINIESTRO, XNOMBRE, XAPELLIDO, XTELEFONO, XNOMBREALTERNATIVO, XAPELLIDOALTERNATIVO, XTELEFONOALTERNATIVO, BDANO, BTRANSITAR, BDANOOTRO, BLESIONADO, BPROPIETARIO, FEVENTO, CESTADO, CCIUDAD, XDIRECCION, XDESCRIPCION, BTRANSITO, BCARGA, BPASAJERO, NPASAJERO, XOBSERVACION, BACTIVO, CUSUARIOCREACION, FCREACION, CCANAL) output inserted.CNOTIFICACION values (@cpais, @ccompania, @ccontratoflota, @ctiponotificacion, @crecaudo, @ccausasiniestro, @xnombre, @xapellido, @xtelefono, @xnombrealternativo, @xapellidoalternativo, @xtelefonoalternativo, @bdano, @btransitar, @bdanootro, @blesionado, @bpropietario, @fevento, @cestado, @cciudad, @xdireccion, @xdescripcion, @btransito, @bcarga, @bpasajero, @npasajero, @xobservacion, @bactivo, @cusuariocreacion, @fcreacion, @ccanal)');
             if(result.rowsAffected > 0){
                 let insertSecond = await pool.request()
                     .input('cnotificacion', sql.Int, result.recordset[0].CNOTIFICACION)
@@ -10093,8 +10098,9 @@ module.exports = {
                     .input('xobservacion', sql.NVarChar, notificationData.xobservacionseguimiento)
                     .input('bcerrado', sql.Bit, false)
                     .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
+                    .input('ccanal', sql.Int, notificationData.ccanal)
                     .input('fcreacion', sql.DateTime, new Date())
-                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion)')
+                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION, CCANAL) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion, @ccanal)')
                 if(notificationData.thirdpartyVehicles){
                     for(let i = 0; i < notificationData.thirdpartyVehicles.length; i++){
                         let insert = await pool.request()
@@ -10192,8 +10198,9 @@ module.exports = {
                                     .input('xobservacion', sql.NVarChar, notificationData.thirdparties[i].tracings[j].xobservacion)
                                     .input('bcerrado', sql.Bit, false)
                                     .input('cusuariocreacion', sql.Int, notificationData.cusuariocreacion)
+                                    .input('ccanal', sql.Int, notificationData.ccanal)
                                     .input('fcreacion', sql.DateTime, new Date())
-                                    .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion)')
+                                    .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION, CCANAL) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion, @ccanal)')
                             }
                         }
                     }
@@ -10226,8 +10233,9 @@ module.exports = {
                         let insert = await pool.request()
                         .input('cservicio', sql.Int, notificationData.cservicio)
                         .input('cnotificacion', sql.Int, notificationData.cnotificacion)
+                        .input('ccanal', sql.Int, notificationData.ccanal)
                         .input('fcreacion', sql.DateTime, new Date())
-                        .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION) values (@cservicio, @fcreacion, @cnotificacion)')
+                        .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION, CCANAL) values (@cservicio, @fcreacion, @cnotificacion, @ccanal)')
                     }
                 }
                 //sql.close();
@@ -10471,11 +10479,12 @@ module.exports = {
                     .input('ctiposeguimiento', sql.Int, tracings[i].ctiposeguimiento)
                     .input('cmotivoseguimiento', sql.Int, tracings[i].cmotivoseguimiento)
                     .input('fseguimientonotificacion', sql.DateTime, tracings[i].fseguimientonotificacion)
+                    .input('ccanal', sql.Int, tracings[i].ccanal)
                     .input('bcerrado', sql.Bit, false)
                     .input('xobservacion', sql.NVarChar, tracings[i].xobservacion)
                     .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
                     .input('fcreacion', sql.DateTime, new Date())
-                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, BCERRADO, XOBSERVACION, CUSUARIOCREACION, FCREACION) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @bcerrado, @xobservacion, @cusuariocreacion, @fcreacion)')
+                    .query('insert into EVSEGUIMIENTONOTIFICACION (CNOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTONOTIFICACION, BCERRADO, XOBSERVACION, CUSUARIOCREACION, FCREACION, CCANAL) values (@cnotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientonotificacion, @bcerrado, @xobservacion, @cusuariocreacion, @fcreacion, @ccanal)')
                 rowsAffected = rowsAffected + insert.rowsAffected;
             }
             //sql.close();
@@ -10588,9 +10597,10 @@ module.exports = {
                                 .input('fseguimientotercero', sql.DateTime, thirdparties[i].tracingsResult.create[j].fseguimientotercero)
                                 .input('xobservacion', sql.NVarChar, thirdparties[i].tracingsResult.create[j].xobservacion)
                                 .input('bcerrado', sql.Bit, false)
+                                .input('ccanal', sql.Int, notificationData.ccanal)
                                 .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
                                 .input('fcreacion', sql.DateTime, new Date())
-                                .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion)')
+                                .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION, CCANAL) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion, @ccanal)')
                             rowsAffected = rowsAffected + subInsert.rowsAffected;    
                         }
                     }
@@ -10648,7 +10658,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || createMaterialDamagesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10683,7 +10692,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || updateMaterialDamagesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10702,7 +10710,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || deleteMaterialDamagesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10760,7 +10767,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || createThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10769,7 +10775,6 @@ module.exports = {
             let rowsAffected = 0;
             let pool = await sql.connect(config);
             for(let i = 0; i < thirdpartyVehicles.length; i++){
-                // console.log(thirdpartyVehicles);
                 let update = await pool.request()
                     .input('cnotificacion', sql.Int, notificationData.cnotificacion)
                     .input('cvehiculoterceronotificacion', sql.Int, thirdpartyVehicles[i].cvehiculoterceronotificacion)
@@ -10821,7 +10826,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || updateThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10840,7 +10844,6 @@ module.exports = {
             return { result: { rowsAffected: rowsAffected } };
         }
         catch(err){
-            console.log(err + ' || deleteThirdPartyVehiclesByNotificationUpdateQuery');
             return { error: err.message };
         }
     },
@@ -10873,8 +10876,9 @@ module.exports = {
                     .input('ccotizacion', sql.Int, serviceOrderCreateList[i].ccotizacion)
                     .input('cestatusgeneral', sql.Int, 13)
                     .input('ccausaanulacion', sql.Int, serviceOrderCreateList[i].ccausaanulacion)
+                    .input('ccanal', sql.Int, notificationData.ccanal)
                     .input('fcreacion', sql.DateTime, new Date())
-                    .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION, XOBSERVACION, CSERVICIOADICIONAL, CCOTIZACION, XDANOS, XFECHA, FAJUSTE, XDESDE, XHACIA, MMONTO, MMONTOTOTAL, CMONEDA, CIMPUESTO, PIMPUESTO, MMONTOTOTALIVA, XMENSAJE, XRUTAARCHIVO, CPROVEEDOR, CCOMPANIA, CPAIS, CESTATUSGENERAL, CCAUSAANULACION, BACTIVO) values (@cservicio, @fcreacion, @cnotificacion, @xobservacion, @cservicioadicional, @ccotizacion, @xdanos, @xfecha, @fajuste, @xdesde, @xhacia, @mmonto, @mmontototal, @cmoneda, @cimpuesto, @pimpuesto, @mmontototaliva, @xmensaje, @xrutaarchivo, @cproveedor, @ccompania, @cpais, @cestatusgeneral, @ccausaanulacion, 1)')
+                    .query('insert into EVORDENSERVICIO (CSERVICIO, FCREACION, CNOTIFICACION, XOBSERVACION, CSERVICIOADICIONAL, CCOTIZACION, XDANOS, XFECHA, FAJUSTE, XDESDE, XHACIA, MMONTO, MMONTOTOTAL, CMONEDA, CIMPUESTO, PIMPUESTO, MMONTOTOTALIVA, XMENSAJE, XRUTAARCHIVO, CPROVEEDOR, CCOMPANIA, CPAIS, CESTATUSGENERAL, CCAUSAANULACION, BACTIVO, CCANAL) values (@cservicio, @fcreacion, @cnotificacion, @xobservacion, @cservicioadicional, @ccotizacion, @xdanos, @xfecha, @fajuste, @xdesde, @xhacia, @mmonto, @mmontototal, @cmoneda, @cimpuesto, @pimpuesto, @mmontototaliva, @xmensaje, @xrutaarchivo, @cproveedor, @ccompania, @cpais, @cestatusgeneral, @ccausaanulacion, 1, @ccanal)')
                 rowsAffected = rowsAffected + insert.rowsAffected;
             }
             //sql.close();
@@ -12177,8 +12181,9 @@ module.exports = {
             .input('mmontofiniquito', sql.Numeric(17, 2), settlementCreate.mmontofiniquito)
             .input('cmoneda', sql.Int, settlementCreate.cmoneda)
             .input('ccausafiniquito', sql.Int, settlementCreate.ccausafiniquito)
+            .input('ccanal', sql.Int, notificationData.ccanal)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into EVFINIQUITO (CNOTIFICACION, FCREACION, XOBSERVACION, XDANOS, MMONTOFINIQUITO, CMONEDA, CCAUSAFINIQUITO, CCOMPANIA, BACTIVO) values (@cnotificacion, @fcreacion, @xobservacion, @xdanos, @mmontofiniquito, @cmoneda, @ccausafiniquito, @ccompania, 1)');
+            .query('insert into EVFINIQUITO (CNOTIFICACION, FCREACION, XOBSERVACION, XDANOS, MMONTOFINIQUITO, CMONEDA, CCAUSAFINIQUITO, CCOMPANIA, BACTIVO, CCANAL) values (@cnotificacion, @fcreacion, @xobservacion, @xdanos, @mmontofiniquito, @cmoneda, @ccausafiniquito, @ccompania, 1, @ccanal)');
             rowsAffected = rowsAffected + update.rowsAffected;
             //sql.close();
             return { result: { rowsAffected: rowsAffected, corden: settlementCreate.corden } };
@@ -12477,7 +12482,6 @@ module.exports = {
         }
     },
     DataCreateAgendaClient: async(DataAgenda) => {
-        console.log(DataAgenda)
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
@@ -12814,14 +12818,14 @@ module.exports = {
     },
     searchCollectionQuery: async(searchData) => {
         try{
-            let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania${ searchData.xplaca ? " and XPLACA = @xplaca" : '' } ${ searchData.ccorredor ? " and CCORREDOR = @ccorredor" : '' }`;
+            let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania${ searchData.xplaca ? " and XPLACA = @xplaca" : '' } ${ searchData.ccorredor ? " and CCORREDOR = @ccorredor" : '' } ${ searchData.ccanal ? " and CCANAL = @ccanal" : '' }`;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('cestatusgeneral', sql.Int, 13)
                 .input('ccompania', sql.Int, searchData.ccompania ? searchData.ccompania: undefined)
                 .input('xplaca', sql.NVarChar, searchData.xplaca ? searchData.xplaca: undefined)
                 .input('ccorredor', sql.Int, searchData.ccorredor ? searchData.ccorredor: undefined)
-                //.input('xclausulas', sql.NVarChar, searchData.xclausulas ? searchData.xclausulas: undefined)
+                .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
                 .query(query);
             //sql.close();
             return { result: result };
@@ -12859,7 +12863,8 @@ module.exports = {
             .input('cbanco_destino', sql.Int, collectionDataList.cbanco_destino)
             .input('mtasa_cambio', sql.Numeric(18,2), collectionDataList.mtasa_cambio)
             .input('ftasa_cambio', sql.DateTime, collectionDataList.ftasa_cambio)
-            .query('update SURECIBO set XREFERENCIA = @xreferencia, CTIPOPAGO = @ctipopago, CBANCO = @cbanco, FCOBRO = @fcobro, MPRIMA_PAGADA = @mprima_pagada, CESTATUSGENERAL = @cestatusgeneral, XNOTA = @xnota, CBANCO_DESTINO = @cbanco_destino, MTASA_CAMBIO = @mtasa_cambio, FTASA_CAMBIO = @ftasa_cambio where CRECIBO = @crecibo AND CCOMPANIA = @ccompania AND CPAIS = @cpais');
+            .input('ccanal', sql.Int, collectionDataList.ccanal)
+            .query('update SURECIBO set XREFERENCIA = @xreferencia, CTIPOPAGO = @ctipopago, CBANCO = @cbanco, FCOBRO = @fcobro, MPRIMA_PAGADA = @mprima_pagada, CESTATUSGENERAL = @cestatusgeneral, XNOTA = @xnota, CBANCO_DESTINO = @cbanco_destino, MTASA_CAMBIO = @mtasa_cambio, FTASA_CAMBIO = @ftasa_cambio, CCANAL = @ccanal where CRECIBO = @crecibo AND CCOMPANIA = @ccompania AND CPAIS = @cpais');
             rowsAffected = rowsAffected + update.rowsAffected;
             //sql.close();
             return { result: { rowsAffected: rowsAffected } };
@@ -14149,7 +14154,8 @@ searchPlanQuery: async(searchData) => {
             .input('ccompania', sql.Int, searchData.ccompania)
             .input('ctipoplan', sql.Int, searchData.ctipoplan ? searchData.ctipoplan : null)
             .input('xplan', sql.NVarChar, searchData.xplan ? searchData.xplan : null)
-            .query(`select * from POPLAN where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.ctipoplan ? ' and CTIPOPLAN = @CTIPOPLAN' : '' }${ searchData.xplan ? ' and XPLAN = @xplan' : '' }`);
+            .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal : undefined)
+            .query(`select * from POPLAN where CPAIS = @cpais and CCOMPANIA = @ccompania${ searchData.ctipoplan ? ' and CTIPOPLAN = @CTIPOPLAN' : '' }${ searchData.xplan ? ' and XPLAN = @xplan' : '' }${ searchData.ccanal ? ' and CCANAL = @ccanal' : '' }`);
         //sql.close();
         return { result: result };
     }catch(err){
@@ -14215,15 +14221,15 @@ createPlanQuery: async(dataList, cplan) => {
             .input('ccompania', sql.Int, dataList.ccompania)
             .input('mcosto', sql.Numeric(18, 2), dataList.mcosto)
             .input('cmoneda', sql.Int, dataList.cmoneda)
+            .input('ccanal', sql.Int, dataList.ccanal)
             .input('bactivo', sql.Bit, dataList.bactivo)
             .input('cusuariocreacion', sql.Int, dataList.cusuario)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into POPLAN (CPLAN, XPLAN, CTIPOPLAN, BRCV, CPAIS, CCOMPANIA, MCOSTO, CMONEDA, BACTIVO, CUSUARIOCREACION, FCREACION ) values (@cplan, @xplan, @ctipoplan, @brcv, @cpais, @ccompania, @mcosto, @cmoneda, @bactivo, @cusuariocreacion, @fcreacion)')
+            .query('insert into POPLAN (CPLAN, XPLAN, CTIPOPLAN, BRCV, CPAIS, CCOMPANIA, MCOSTO, CMONEDA, BACTIVO, CUSUARIOCREACION, FCREACION, CCANAL ) values (@cplan, @xplan, @ctipoplan, @brcv, @cpais, @ccompania, @mcosto, @cmoneda, @bactivo, @cusuariocreacion, @fcreacion, @ccanal)')
 
             return { result: result, cplan};
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14322,11 +14328,13 @@ getServiceTypePlanQuery: async(cplan) => {
 },
 valrepPlanWithoutRcvQuery: async(searchData) => {
     try{
+        let query = `select * from VWBUSCARPLANDATA where CPAIS = @cpais and CCOMPANIA = @ccompania AND BRCV = 0 AND BACTIVO = 1 AND CTIPOPLAN = 2${ searchData.ccanal ? ' and CCANAL = @ccanal' : '' }`;
         let pool = await sql.connect(config);
         let result = await pool.request()
+            .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
             .input('cpais', sql.Numeric(4, 0), searchData.cpais)
             .input('ccompania', sql.Int, searchData.ccompania)
-            .query('select * from VWBUSCARPLANDATA where CPAIS = @cpais and CCOMPANIA = @ccompania AND BRCV = 0 AND BACTIVO = 1 AND CTIPOPLAN = 2');
+            .query(query);
         //sql.close();
         return { result: result };
     }catch(err){
@@ -14382,13 +14390,13 @@ createContractServiceArysQuery: async(userData) => {
             .input('msuma_casco', sql.Numeric(18, 2), userData.msuma_casco)
             .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('xmes_venplaca', sql.NVarChar, userData.xmes_venplaca)
+            .input('ccanal', sql.Int, userData.ccanal)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS(XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca )')        
+            .query('insert into TMEMISION_SERVICIOS (XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA, CCANAL) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca, @ccanal )')        
             rowsAffected = rowsAffected + insert.rowsAffected;        
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14485,7 +14493,6 @@ updateQuatityFromPlanQuery: async(updateQuatityList, dataList) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -14508,7 +14515,6 @@ updateQuatityFromPlanRcvQuery: async(updateQuatityList, dataPlanRcv) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -15937,11 +15943,13 @@ storeProcedureFromClubQuery: async(data) => {
         return { error: err.message };
         }
 },
-searchContractArysQuery: async() => {
+searchContractArysQuery: async(canal) => {
     try{
+        let query = `select * from VWBUSCARCONTRATOSSERVICIOSARYS where CESTATUSGENERAL <> 22${ canal.ccanal ? ' and CCANAL = @ccanal' : '' }`;
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT * FROM VWBUSCARCONTRATOSSERVICIOSARYS WHERE CESTATUSGENERAL <> 22');
+            .input('ccanal', sql.Int, canal.ccanal)
+            .query(query);
         //sql.close();
         return { result: result };
     }catch(err){
@@ -15970,7 +15978,6 @@ getContractArysDataQuery: async(contractData) => {
         
         return { result: result };
     }catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16336,7 +16343,6 @@ searchPlanServiceQuery: async(cplan) => {
         //sql.close();
         return { result: result };
     }catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16353,7 +16359,6 @@ updateAceptepServiceQuery: async(baceptado, cplan) => {
         return { result: { rowsAffected: rowsAffected } };
     }
     catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16444,7 +16449,6 @@ searchPlanRcvServiceQuery: async(cplan_rc) => {
         //sql.close();
         return { result: result };
     }catch(err){
-        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16460,8 +16464,7 @@ updateAceptepServiceRcvQuery: async(baceptado, cplan_rc) => {
         //sql.close();
         return { result: { rowsAffected: rowsAffected } };
     }
-    catch(err){
-        console.log(err.message)
+    catch(err){  
         return { error: err.message };
     }
 },
@@ -16477,28 +16480,30 @@ getContractSendEmailDataQuery: async() => {
     }
 },
 getSearchTracingData: async (dataTracing) => {
-    try {
-      let query = "";
-      let pool = await sql.connect(config);
-      let result;
-  
-      if (dataTracing.xvencimiento === 'TODOS') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA`;
-        result = await pool.request().query(query);
-      } else if (dataTracing.xvencimiento === 'DIA') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE CONVERT(DATE, FSEGUIMIENTONOTIFICACION) = CONVERT(DATE, GETDATE())`;
-        result = await pool.request().query(query);
-      } else if (dataTracing.xvencimiento === 'ATRASADO') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION < CONVERT(DATE, GETDATE())`;
-        result = await pool.request().query(query);
-      } else if (dataTracing.xvencimiento === 'VENCER') {
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA WHERE FSEGUIMIENTONOTIFICACION > CONVERT(DATE, GETDATE())`;
-        result = await pool.request().query(query);
-      }
-      return { result: result };
-    } catch (err) {
-      return { error: err.message };
+    try{
+        let query = `select * from VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA where BACTIVO = 1${ dataTracing.ccanal ? ' and CCANAL = @ccanal' : '' }`;
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccanal', sql.Int, dataTracing.ccanal)
+            .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
     }
-  }
+  },
+salesPipelineValrepQuery: async(data) => {
+    try{
+        let query = `select * from MACANALVENTA where BACTIVO = 1${ data.ccanal ? ' and CCANAL = @ccanal' : '' }`;
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccanal', sql.Int, data.ccanal)
+            .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
 }
 
