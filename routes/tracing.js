@@ -29,6 +29,7 @@ const operationSearchTracing = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     let dataTracing = {
         xvencimiento: requestBody.xvencimiento,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
     }
     let tracingList = []
     let getServiceTypePlan = await bd.getSearchTracingData(dataTracing).then((res) => res);

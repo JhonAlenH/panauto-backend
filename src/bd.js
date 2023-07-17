@@ -10597,9 +10597,10 @@ module.exports = {
                                 .input('fseguimientotercero', sql.DateTime, thirdparties[i].tracingsResult.create[j].fseguimientotercero)
                                 .input('xobservacion', sql.NVarChar, thirdparties[i].tracingsResult.create[j].xobservacion)
                                 .input('bcerrado', sql.Bit, false)
+                                .input('ccanal', sql.Int, notificationData.ccanal)
                                 .input('cusuariocreacion', sql.Int, notificationData.cusuariomodificacion)
                                 .input('fcreacion', sql.DateTime, new Date())
-                                .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion)')
+                                .query('insert into EVSEGUIMIENTOTERCERO (CTERCERONOTIFICACION, CTIPOSEGUIMIENTO, CMOTIVOSEGUIMIENTO, FSEGUIMIENTOTERCERO, XOBSERVACION, BCERRADO, CUSUARIOCREACION, FCREACION, CCANAL) values (@cterceronotificacion, @ctiposeguimiento, @cmotivoseguimiento, @fseguimientotercero, @xobservacion, @bcerrado, @cusuariocreacion, @fcreacion, @ccanal)')
                             rowsAffected = rowsAffected + subInsert.rowsAffected;    
                         }
                     }
@@ -16479,17 +16480,16 @@ getContractSendEmailDataQuery: async() => {
     }
 },
 getSearchTracingData: async (dataTracing) => {
-    try {
-      let query = "";
-      let pool = await sql.connect(config);
-      let result;
-  
-        query = `SELECT * FROM VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA`;
-        result = await pool.request().query(query);
-
-      return { result: result };
-    } catch (err) {
-      return { error: err.message };
+    try{
+        let query = `select * from VWBUSCARSEGUIMIENTOXNOTIFICACIONDATA where BACTIVO = 1${ dataTracing.ccanal ? ' and CCANAL = @ccanal' : '' }`;
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccanal', sql.Int, dataTracing.ccanal)
+            .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
     }
   },
 salesPipelineValrepQuery: async(data) => {

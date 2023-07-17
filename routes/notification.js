@@ -1203,9 +1203,9 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
                 mtotalcotizacion: notificationData.quotesProviders[i].mtotalcotizacion,
             })
         }
-        let updateQuoteRequest = await bd.updateQuoteRequestNotificationQuery(quotesProviders).then((res) => res);
+        let updateQuoteRequest = await bd.updateQuoteRequestNotificationQuery(quotesProviders, notificationData).then((res) => res);
         if(updateQuoteRequest.error){ return { status: false, code: 500, message: updateQuoteRequest.error }; }
-        let updateReplacementsByQuoteRequestUpdate = await bd.updateReplacementsByQuoteRequestNotificationUpdateQuery(quotesProviders).then((res) => res);
+        let updateReplacementsByQuoteRequestUpdate = await bd.updateReplacementsByQuoteRequestNotificationUpdateQuery(quotesProviders, notificationData).then((res) => res);
         if(updateReplacementsByQuoteRequestUpdate.error){ return { status: false, code: 500, message: updateReplacementsByQuoteRequestUpdate.error }; }
     }
     return { status: true, cnotificacion: notificationData.cnotificacion };
