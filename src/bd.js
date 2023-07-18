@@ -13978,7 +13978,8 @@ dataPendingContractQuery: async(data) => {
         let result = await pool.request()
             .input('cpais', sql.Int, data.cpais)
             .input('ccompania', sql.Int, data.ccompania)
-            .query('SELECT COUNT(CCONTRATOFLOTA) AS NPERSONAS_PENDIENTES FROM VWBUSCARSUCONTRATOFLOTADATA WHERE CESTATUSGENERAL = 13 AND CPAIS = @cpais AND CCOMPANIA = @ccompania');
+            .input('ccanal', sql.Int, data.ccanal)
+            .query(`SELECT COUNT(CCONTRATOFLOTA) AS NPERSONAS_PENDIENTES FROM VWBUSCARSUCONTRATOFLOTADATA WHERE CESTATUSGENERAL = 13 AND CPAIS = @cpais AND CCOMPANIA = @ccompania${ data.ccanal ? ' and CCANAL = @ccanal' : '' }`);
         //sql.close()
         return { result: result };
     }catch(err){
@@ -13991,7 +13992,8 @@ dataContractsCollectedQuery: async(data) => {
         let result = await pool.request()
             .input('cpais', sql.Int, data.cpais)
             .input('ccompania', sql.Int, data.ccompania)
-            .query('SELECT COUNT(CCONTRATOFLOTA) AS NPERSONAS_COBRADAS FROM VWBUSCARSUCONTRATOFLOTADATA WHERE CESTATUSGENERAL = 7 AND CPAIS = @cpais AND CCOMPANIA = @ccompania');
+            .input('ccanal', sql.Int, data.ccanal)
+            .query(`SELECT COUNT(CCONTRATOFLOTA) AS NPERSONAS_COBRADAS FROM VWBUSCARSUCONTRATOFLOTADATA WHERE CESTATUSGENERAL = 7 AND CPAIS = @cpais AND CCOMPANIA = @ccompania${ data.ccanal ? ' and CCANAL = @ccanal' : '' }`);
         //sql.close()
         return { result: result };
     }catch(err){
@@ -14016,41 +14018,21 @@ dataNotificationsQuery: async(data) => {
         let result = await pool.request()
             .input('cpais', sql.Int, data.cpais)
             .input('ccompania', sql.Int, data.ccompania)
-            .query('SELECT COUNT(CNOTIFICACION) AS NNOTIFICACION FROM VWBUSCARNOTIFICACIONDATA WHERE CCOMPANIA = @ccompania');
+            .input('ccanal', sql.Int, data.ccanal)
+            .query(`SELECT COUNT(CNOTIFICACION) AS NNOTIFICACION FROM VWBUSCARNOTIFICACIONDATA WHERE CCOMPANIA = @ccompania${ data.ccanal ? ' and CCANAL = @ccanal' : '' }`);
         //sql.close()
         return { result: result };
     }catch(err){
         return { error: err.message };
     }
 },
-dataCountArysServiceQuery: async() => {
+dataCountArysServiceQuery: async(data) => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT COUNT(CCODIGO_SERV) AS CCODIGO_SERV FROM SUCONTRATOFLOTA');
-        //sql.close()
-        return { result: result };
-    }catch(err){
-        return { error: err.message };
-    }
-},
-
-amountsPaidQuery: async() => {
-    try{
-        let pool = await sql.connect(config);
-        let result = await pool.request()
-            .query('SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 7 GROUP BY DATEPART(month, FDESDE_POL)');
-        //sql.close()
-        return { result: result };
-    }catch(err){
-        return { error: err.message };
-    }
-},
-amountsOutstandingQuery: async() => {
-    try{
-        let pool = await sql.connect(config);
-        let result = await pool.request()
-            .query('SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 13 GROUP BY DATEPART(month, FDESDE_POL)');
+            .input('ccanal', sql.Int, data.ccanal)
+            .input('ccompania', sql.Int, data.ccompania)
+            .query(`SELECT COUNT(CCODIGO_SERV) AS CCODIGO_SERV FROM SUCONTRATOFLOTA WHERE CCOMPANIA = @ccompania${ data.ccanal ? ' and CCANAL = @ccanal' : '' }`);
         //sql.close()
         return { result: result };
     }catch(err){
@@ -14058,11 +14040,41 @@ amountsOutstandingQuery: async() => {
     }
 },
 
-countNotificationsQuery: async() => {
+amountsPaidQuery: async(data) => {
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .query('SELECT DATEPART(month, FCREACION) as MES, COUNT(CNOTIFICACION) as NOTIFICACIONES FROM EVNOTIFICACION GROUP BY DATEPART(month, FCREACION)');
+            .input('ccanal', sql.Int, data.ccanal)
+            .input('ccompania', sql.Int, data.ccompania)
+            .query(`SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 7${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FDESDE_POL)`);
+        //sql.close()
+        console.log(result)
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+amountsOutstandingQuery: async(data) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccanal', sql.Int, data.ccanal)
+            .input('ccompania', sql.Int, data.ccompania)
+            .query(`SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 13 ${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FDESDE_POL)`);
+        //sql.close()
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+
+countNotificationsQuery: async(data) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccanal', sql.Int, data.ccanal)
+            .input('ccompania', sql.Int, data.ccompania)
+            .query(`SELECT DATEPART(month, FCREACION) as MES, COUNT(CNOTIFICACION) as NOTIFICACIONES FROM EVNOTIFICACION where CCOMPANIA = @ccompania ${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FCREACION)`);
         //sql.close()
         return { result: result };
     }catch(err){
