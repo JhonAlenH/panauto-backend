@@ -23,7 +23,8 @@ const operationContract = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     let data = {
         cpais: requestBody.cpais,
-        ccompania: requestBody.ccompania
+        ccompania: requestBody.ccompania,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     }
     let dataPendingContract = await bd.dataPendingContractQuery(data).then((res) => res);
     if(dataPendingContract.error){ return { status: false, code: 500, message: dataPendingContract.error }; }
@@ -61,7 +62,8 @@ const operationNotification = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
     let data = {
         cpais: requestBody.cpais,
-        ccompania: requestBody.ccompania
+        ccompania: requestBody.ccompania,
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     }
     let dataNotifications = await bd.dataNotificationsQuery(data).then((res) => res);
     if(dataNotifications.error){ return { status: false, code: 500, message: dataNotifications.error }; }
@@ -160,8 +162,11 @@ router.route('/amounts-paid').post((req, res) => {
 
 const operationAmountsPaid = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
-
-    let amountsPaid = await bd.amountsPaidQuery().then((res) => res);
+    let data = {
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        ccompania: requestBody.ccompania,
+    }
+    let amountsPaid = await bd.amountsPaidQuery(data).then((res) => res);
     if(amountsPaid.error){ return  { status: false, code: 500, message: amountsPaid.error }; }
     if(amountsPaid.result.rowsAffected > 0){
         let jsonList = [];
@@ -220,8 +225,11 @@ router.route('/amounts-outstanding').post((req, res) => {
 
 const operationAmountsOutstanding = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
-
-    let amountsOutstanding = await bd.amountsOutstandingQuery().then((res) => res);
+    let data = {
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        ccompania: requestBody.ccompania,
+    }
+    let amountsOutstanding = await bd.amountsOutstandingQuery(data).then((res) => res);
     if(amountsOutstanding.error){ return  { status: false, code: 500, message: amountsOutstanding.error }; }
     if(amountsOutstanding.result.rowsAffected > 0){
         let jsonList = [];
@@ -280,8 +288,11 @@ router.route('/count-notifications').post((req, res) => {
 
 const operationCountNotifications = async(authHeader, requestBody) => {
     if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
-
-    let countNotifications = await bd.countNotificationsQuery().then((res) => res);
+    let data = {
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        ccompania: requestBody.ccompania,
+    }
+    let countNotifications = await bd.countNotificationsQuery(data).then((res) => res);
     if(countNotifications.error){ return  { status: false, code: 500, message: countNotifications.error }; }
     if(countNotifications.result.rowsAffected > 0){
         let jsonList = [];
