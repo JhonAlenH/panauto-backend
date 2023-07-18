@@ -14046,7 +14046,7 @@ amountsPaidQuery: async(data) => {
         let result = await pool.request()
             .input('ccanal', sql.Int, data.ccanal)
             .input('ccompania', sql.Int, data.ccompania)
-            .query(`SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 7${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FDESDE_POL)`);
+            .query(`SELECT DATEPART(month, FDESDE_REC) as MES, SUM(MPRIMA_PAGADA) as MPRIMA_PAGADA FROM VWBUSCARPRIMASPENDIENTES WHERE CESTATUSGENERAL = 7${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FDESDE_REC)`);
         //sql.close()
         console.log(result)
         return { result: result };
@@ -14060,7 +14060,7 @@ amountsOutstandingQuery: async(data) => {
         let result = await pool.request()
             .input('ccanal', sql.Int, data.ccanal)
             .input('ccompania', sql.Int, data.ccompania)
-            .query(`SELECT DATEPART(month, FDESDE_POL) as MES, SUM(MCOSTO) as MPRIMA_ANUAL FROM VWBUSCARPLANXCONTRATO WHERE CESTATUSGENERAL = 13 ${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FDESDE_POL)`);
+            .query(`SELECT DATEPART(month, FDESDE_REC) as MES, SUM(MPRIMA_ANUAL) as MPRIMA_ANUAL FROM VWBUSCARPRIMASPENDIENTES WHERE CESTATUSGENERAL = 13 ${ data.ccanal ? ' and CCANAL = @ccanal' : '' } GROUP BY DATEPART(month, FDESDE_REC)`);
         //sql.close()
         return { result: result };
     }catch(err){
