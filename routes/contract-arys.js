@@ -96,7 +96,7 @@ const operationCreate = async(authHeader, requestBody) => {
         fnac: requestBody.fnac,
         cplan_rc: requestBody.cplan_rc,
         xpais_proveniente: requestBody.xpais_proveniente,
-        xcobertura: requestBody.xcobertura,
+        xcobertura: requestBody.xcobertura ? requestBody.xcobertura: undefined,
         msuma_casco: requestBody.msuma_casco ? requestBody.msuma_casco: 0,
         mprima_casco: requestBody.mprima_casco ? requestBody.mprima_casco: 0,
         xmes_venplaca: requestBody.xmes,
@@ -300,7 +300,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
     let contractData = {
         cpais: requestBody.cpais,
         ccompania: requestBody.ccompania,
-        ccontratoflota: requestBody.ccontratoflota
+        ccontratoflota: requestBody.ccontratoflota,
+        ccanal: requestBody.ccanal,
     };
     let getCompanyContractData = await bd.getCompanyContractData();
     if(getCompanyContractData.error){ return { status: false, code: 500, message: getCompanyContractData.error }; }
@@ -360,8 +361,8 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                 })
             }
         }
-        let getBroker = await bd.getBroker(getContractArysData.result.recordset[0].ccorredor);
-        if(getBroker.error){ return { status: false, code: 500, message: getBroker.error }; }
+        let getPipelineSales = await bd.getPipelineSalesQuery(contractData.ccanal);
+        if(getPipelineSales.error){ return { status: false, code: 500, message: getPipelineSales.error }; }
         return {
             status: true,
             xlogo: getCompanyContractData.result.recordset[0].xlogo,
@@ -450,9 +451,9 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
-            xcorredor: getBroker.result.recordset[0].XCORREDOR,
-            xdocidentidadcorredor: getBroker.result.recordset[0].XDOCIDENTIDAD,
-            xtelefonocorredor: getBroker.result.recordset[0].XTELEFONO,
+            xcanal: getPipelineSales.result.recordset[0].XCANALVENTA,
+            // xdocidentidadcorredor: getPipelineSales.result.recordset[0].XDOCIDENTIDAD,
+            // xtelefonocorredor: getPipelineSales.result.recordset[0].XTELEFONO,
             services: serviceList,
             servicesType: serviceTypeList,
             xestadocontrato: xestadocontrato
