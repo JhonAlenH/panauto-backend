@@ -2836,12 +2836,34 @@ const operationValrepPlanContract = async(authHeader, requestBody) => {
         ccompania: requestBody.ccompania,
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
     };
-    console.log(searchData)
-    let valrepPlanWithoutRcv = await bd.valrepPlanWithoutRcvQuery(searchData).then((res) => res);
+    let plan = [];
+    if(searchData.ccanal){
+        let planData = await bd.planDataQuery(searchData.ccanal).then((res) => res);
+        if(planData.error){ return { status: false, code: 500, message: planData.error }; }
+        if(planData.result.rowsAffected > 0){
+            for(let i = 0; i < planData.result.recordset.length; i++){
+                plan.push({
+                    cplan: planData.result.recordset[i].CPLAN
+                })
+            }
+        }
+    }
+    let valrepPlanWithoutRcv = await bd.valrepPlanWithoutRcvQuery(searchData, plan).then((res) => res);
     if(valrepPlanWithoutRcv.error){ return { status: false, code: 500, message: valrepPlanWithoutRcv.error }; }
     let jsonArray = [];
-    for(let i = 0; i < valrepPlanWithoutRcv.result.recordset.length; i++){
-        jsonArray.push({ cplan: valrepPlanWithoutRcv.result.recordset[i].CPLAN, xplan: valrepPlanWithoutRcv.result.recordset[i].XPLAN, binternacional: valrepPlanWithoutRcv.result.recordset[i].BINTERNACIONAL, bactivo: valrepPlanWithoutRcv.result.recordset[i].BACTIVO, control: i,  mcosto: valrepPlanWithoutRcv.result.recordset[i].MCOSTO, xmoneda: valrepPlanWithoutRcv.result.recordset[i].xmoneda});
+    for(let i = 0; i < valrepPlanWithoutRcv.result.length; i++){
+        let recordset = valrepPlanWithoutRcv.result[i].recordset;
+        if (recordset && recordset.length > 0) {
+            for (let j = 0; j < recordset.length; j++) {
+                jsonArray.push({
+                    cplan: recordset[j].CPLAN,
+                    xplan: recordset[j].XPLAN,
+                    mcosto: recordset[j].MCOSTO,
+                    xmoneda: recordset[j].xmoneda,
+                    control: i
+                })
+            }
+        }
     }
     return { status: true, list: jsonArray }
 }
