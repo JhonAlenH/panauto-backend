@@ -107,6 +107,7 @@ const operationDetailCollection = async(authHeader, requestBody) => {
                 mprima: mprima,
                 xmoneda: detailCollection.result.recordset[0].xmoneda,
                 mprima_pagada: detailCollection.result.recordset[0].MPRIMA_PAGADA,
+                mprima_anual: detailCollection.result.recordset[0].MPRIMA_ANUAL,
                 ccodigo_ubii: detailCollection.result.recordset[0].CCODIGO_UBII,
                 ccontratoflota: detailCollection.result.recordset[0].CCONTRATOFLOTA
                };
