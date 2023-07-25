@@ -12816,21 +12816,44 @@ module.exports = {
             return { error: err.message };
         }
     },
-    searchCollectionQuery: async(searchData) => {
-        try{
-            let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania${ searchData.xplaca ? " and XPLACA = @xplaca" : '' } ${ searchData.ccorredor ? " and CCORREDOR = @ccorredor" : '' } ${ searchData.ccanal ? " and CCANAL = @ccanal" : '' }`;
-            let pool = await sql.connect(config);
-            let result = await pool.request()
-                .input('cestatusgeneral', sql.Int, 13)
-                .input('ccompania', sql.Int, searchData.ccompania ? searchData.ccompania: undefined)
-                .input('xplaca', sql.NVarChar, searchData.xplaca ? searchData.xplaca: undefined)
-                .input('ccorredor', sql.Int, searchData.ccorredor ? searchData.ccorredor: undefined)
-                .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
-                .query(query);
-            //sql.close();
-            return { result: result };
-        }catch(err){
-            return { error: err.message };
+    // searchCollectionQuery: async(searchData) => {
+    //     try{
+    //         let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania${ searchData.xplaca ? " and XPLACA = @xplaca" : '' } ${ searchData.ccorredor ? " and CCORREDOR = @ccorredor" : '' } ${ searchData.ccanal ? " and CCANAL = @ccanal" : '' }`;
+    //         let pool = await sql.connect(config);
+    //         let result = await pool.request()
+    //             .input('cestatusgeneral', sql.Int, 13)
+    //             .input('ccompania', sql.Int, searchData.ccompania ? searchData.ccompania: undefined)
+    //             .input('xplaca', sql.NVarChar, searchData.xplaca ? searchData.xplaca: undefined)
+    //             .input('ccorredor', sql.Int, searchData.ccorredor ? searchData.ccorredor: undefined)
+    //             .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
+    //             .query(query);
+    //         //sql.close();
+    //         return { result: result };
+    //     }catch(err){
+    //         return { error: err.message };
+    //     }
+    // },
+    searchCollectionQuery: async (searchData) => {
+        try {
+          let query = `SELECT * FROM VWBUSCARRECIBOSPENDIENTES WHERE CESTATUSGENERAL = @cestatusgeneral AND CCOMPANIA = @ccompania`;
+      
+          if (searchData.cproductor) {
+            query += ` AND CCANAL = @ccanal AND CPRODUCTOR = @cproductor`;
+          } else if (searchData.ccanal) {
+            query += ` AND CCANAL = @ccanal`;
+          }
+      
+          let pool = await sql.connect(config);
+          let result = await pool.request()
+            .input('cestatusgeneral', sql.Int, 13)
+            .input('ccompania', sql.Int, searchData.ccompania ? searchData.ccompania : undefined)
+            .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal : undefined)
+            .input('cproductor', sql.Int, searchData.cproductor ? searchData.cproductor : undefined)
+            .query(query);
+      
+          return { result: result };
+        } catch (err) {
+          return { error: err.message };
         }
     },
     detailCollectionQuery: async(searchData) => {
@@ -14420,9 +14443,10 @@ createContractServiceArysQuery: async(userData) => {
             .input('msuma_casco', sql.Numeric(18, 2), userData.msuma_casco)
             .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('xmes_venplaca', sql.NVarChar, userData.xmes_venplaca)
-            .input('ccanal', sql.Int, userData.ccanal)
+            .input('ccanal', sql.Int, userData.ccanal ? userData.ccanal: undefined)
+            .input('cproductor', sql.Int, userData.cproductor ? userData.cproductor: undefined)
             .input('fcreacion', sql.DateTime, new Date())
-            .query('insert into TMEMISION_SERVICIOS (XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA, CCANAL) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca, @ccanal )')        
+            .query('insert into TMEMISION_SERVICIOS (XRIF_CLIENTE, XNOMBRE, XAPELLIDO, CMARCA, CMODELO, CVERSION, NKILOMETRAJE, CANO, XCOLOR, EMAIL, XTELEFONO_PROP, XDIRECCIONFISCAL, XSERIALMOTOR, XSERIALCARROCERIA, XPLACA, XTELEFONO_EMP, CPLAN, XCEDULA, FINICIO, CESTADO, CCIUDAD, CPAIS, ICEDULA, FEMISION, CESTATUSGENERAL, FCREACION, CUSUARIOCREACION, CCORREGIMIENTO, CUSO, CTIPOVEHICULO, CCORREDOR, FDESDE_POL, FHASTA_POL, FNAC, CPLAN_RC, XMARCA, XMODELO, XVERSION, NPASAJEROS, XPAIS_PROVENIENTE, XCOBERTURA, MSUMA_CASCO, MPRIMA_CASCO, XMES_VENPLACA, CCANAL, CPRODUCTOR) values (@xrif_cliente, @xnombre, @xapellido, @cmarca, @cmodelo, @cversion, @nkilometraje, @cano, @xcolor, @email, @xtelefono_prop, @xdireccionfiscal, @xserialmotor, @xserialcarroceria, @xplaca, @xtelefono_emp, @cplan, @xcedula, @finicio, @cestado, @cciudad, @cpais, @icedula, @femision, @cestatusgeneral, @fcreacion, @cusuariocreacion, @ccorregimiento, @cuso, @ctipovehiculo, @ccorredor, @fdesde_pol, @fhasta_pol, @fnac, @cplan_rc, @xmarca, @xmodelo, @xversion, @ncapacidad_p, @xpais_proveniente, @xcobertura, @msuma_casco, @mprima_casco, @xmes_venplaca, @ccanal, @cproductor )')        
             rowsAffected = rowsAffected + insert.rowsAffected;        
              return { result: { rowsAffected: rowsAffected} };
     }
@@ -15974,19 +15998,41 @@ storeProcedureFromClubQuery: async(data) => {
         return { error: err.message };
         }
 },
-searchContractArysQuery: async(canal) => {
-    try{
-        let query = `select * from VWBUSCARCONTRATOSSERVICIOSARYS where CESTATUSGENERAL <> 22${ canal.ccanal ? ' and CCANAL = @ccanal' : '' }`;
-        let pool = await sql.connect(config);
-        let result = await pool.request()
-            .input('ccanal', sql.Int, canal.ccanal)
-            .query(query);
-        //sql.close();
-        return { result: result };
-    }catch(err){
-        return { error: err.message };
+// searchContractArysQuery: async(canal) => {
+//     try{
+//         let query = `select * from VWBUSCARCONTRATOSSERVICIOSARYS where CESTATUSGENERAL <> 22${ canal.ccanal ? ' and CCANAL = @ccanal' : '' }`;
+//         let pool = await sql.connect(config);
+//         let result = await pool.request()
+//             .input('ccanal', sql.Int, canal.ccanal)
+//             .query(query);
+//         //sql.close();
+//         return { result: result };
+//     }catch(err){
+//         return { error: err.message };
+//     }
+// },
+searchContractArysQuery: async (canal) => {
+    try {
+      let query = `select * from VWBUSCARCONTRATOSSERVICIOSARYS where CESTATUSGENERAL <> 22`;
+  
+      if (canal.cproductor) {
+        query += ` and CCANAL = @ccanal and CPRODUCTOR = @cproductor`;
+      } else if(canal.ccanal){
+        query += ` and CCANAL = @ccanal`;
+      }
+  
+      let pool = await sql.connect(config);
+      let result = await pool.request()
+        .input('ccanal', sql.Int, canal.ccanal)
+        .input('cproductor', sql.Int, canal.cproductor)
+        .query(query);
+  
+      return { result: result };
+    } catch (err) {
+      return { error: err.message };
     }
-},
+  },
+  
 getCompanyContractData: async() => {
     try {
         let pool = await sql.connect(config);

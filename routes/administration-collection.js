@@ -32,6 +32,7 @@ const operationSearchCollection = async(authHeader, requestBody) => {
         xplaca: requestBody.xplaca ? requestBody.xplaca.toUpperCase() : undefined,
         ccorredor: requestBody.ccorredor ? requestBody.ccorredor: undefined,
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let searchCollection = await bd.searchCollectionQuery(searchData).then((res) => res);
     if(searchCollection.error){ return { status: false, code: 500, message: searchCollection.error }; }
