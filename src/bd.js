@@ -8862,12 +8862,12 @@ module.exports = {
             return { error: err.message };
         }
     },
-    getBroker: async(ccorredor) => {
+    getPipelineSalesQuery: async(ccanal) => {
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
-            .input('ccorredor', sql.Int, ccorredor)
-            .query('select * from macorredores where ccorredor = @ccorredor');
+            .input('ccanal', sql.Int, ccanal ? ccanal: undefined)
+            .query(`select * from MACANALVENTA where BACTIVO = 1${ ccanal ? ' and CCANAL = @ccanal' : '' }`);
             return { result: result }
         }catch(err){
             return { error: err.message };
@@ -14338,19 +14338,37 @@ getServiceTypePlanQuery: async(cplan) => {
         return { error: err.message };
     }
 },
-valrepPlanWithoutRcvQuery: async(searchData) => {
-    try{
-        let query = `select * from VWBUSCARPLANDATA where CPAIS = @cpais and CCOMPANIA = @ccompania AND BRCV = 0 AND BACTIVO = 1 AND CTIPOPLAN = 2${ searchData.ccanal ? ' and CCANAL = @ccanal' : '' }`;
-        let pool = await sql.connect(config);
-        let result = await pool.request()
-            .input('ccanal', sql.Int, searchData.ccanal ? searchData.ccanal: undefined)
+valrepPlanWithoutRcvQuery: async (searchData, plan) => {
+    try {
+      let resultados = [];
+      let pool = await sql.connect(config);
+  
+      // Consulta para buscar todos los planes
+      let generalQuery = `select * from VWBUSCARPLANDATA where CPAIS = @cpais and CCOMPANIA = @ccompania AND BACTIVO = 1`;
+  
+      // Consultar todos los planes si no se especifica un cplan
+      if (!plan.some(item => item.cplan)) {
+        let generalResult = await pool.request()
+          .input('cpais', sql.Numeric(4, 0), searchData.cpais)
+          .input('ccompania', sql.Int, searchData.ccompania)
+          .query(generalQuery);
+        resultados.push(generalResult);
+      }
+  
+      // Consultar planes específicos si se especifica un cplan
+      for (let i = 0; i < plan.length; i++) {
+        if (plan[i].cplan) {
+          let specificResult = await pool.request()
+            .input('cplan', sql.Int, plan[i].cplan)
             .input('cpais', sql.Numeric(4, 0), searchData.cpais)
             .input('ccompania', sql.Int, searchData.ccompania)
-            .query(query);
-        //sql.close();
-        return { result: result };
-    }catch(err){
-        return { error: err.message };
+            .query(`${generalQuery} and CPLAN = @cplan`);
+          resultados.push(specificResult);
+        }
+      }
+      return { result: resultados };
+    } catch (err) {
+      return { error: err.message };
     }
 },
 createContractServiceArysQuery: async(userData) => {
@@ -14398,7 +14416,7 @@ createContractServiceArysQuery: async(userData) => {
             .input('fhasta_pol', sql.DateTime, userData.fhasta_pol)
             .input('fnac', sql.DateTime, userData.fnac)
             .input('cplan_rc', sql.Int, userData.cplan_rc)
-            .input('xcobertura', sql.NVarChar, userData.xcobertura)
+            .input('xcobertura', sql.NVarChar, userData.xcobertura ? userData.xcobertura: undefined)
             .input('msuma_casco', sql.Numeric(18, 2), userData.msuma_casco)
             .input('mprima_casco', sql.Numeric(18, 2), userData.mprima_casco)
             .input('xmes_venplaca', sql.NVarChar, userData.xmes_venplaca)
@@ -14409,6 +14427,7 @@ createContractServiceArysQuery: async(userData) => {
              return { result: { rowsAffected: rowsAffected} };
     }
     catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16511,6 +16530,18 @@ salesPipelineValrepQuery: async(data) => {
         let result = await pool.request()
             .input('ccanal', sql.Int, data.ccanal)
             .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+planDataQuery: async(ccanal) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('ccanal', sql.Int, ccanal)
+            .query('select * from MACANAL_PLAN where CCANAL = @ccanal');
         //sql.close();
         return { result: result };
     }catch(err){
