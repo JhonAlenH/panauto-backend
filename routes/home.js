@@ -24,7 +24,8 @@ const operationContract = async(authHeader, requestBody) => {
     let data = {
         cpais: requestBody.cpais,
         ccompania: requestBody.ccompania,
-        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let dataPendingContract = await bd.dataPendingContractQuery(data).then((res) => res);
     if(dataPendingContract.error){ return { status: false, code: 500, message: dataPendingContract.error }; }
@@ -63,7 +64,8 @@ const operationNotification = async(authHeader, requestBody) => {
     let data = {
         cpais: requestBody.cpais,
         ccompania: requestBody.ccompania,
-        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined
+        ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let dataNotifications = await bd.dataNotificationsQuery(data).then((res) => res);
     if(dataNotifications.error){ return { status: false, code: 500, message: dataNotifications.error }; }
@@ -71,38 +73,6 @@ const operationNotification = async(authHeader, requestBody) => {
     if(dataNotifications.result.rowsAffected > 0){
         return { status: true, 
                 nnotificacion: dataNotifications.result.recordset[0].NNOTIFICACION,
-        }
-    }else{ 
-        return { status: false, code: 404, message: 'Coin not found.' }; 
-    }
-}
-
-router.route('/arys-service').post((req, res) => {
-    if(!req.header('Authorization')){
-        res.status(400).json({ data: { status: false, code: 400, message: 'Required authorization header not found.' } });
-        return;
-    }else{
-        operationArysService(req.header('Authorization'), req.body).then((result) => {
-            if(!result.status){
-                res.status(result.code).json({ data: result });
-                return;
-            }
-            res.json({ data: result });
-        }).catch((err) => {
-            res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationArysService' } });
-        });
-    }
-});
-
-const operationArysService = async(authHeader, requestBody) => {
-    if(!helper.validateAuthorizationToken(authHeader)){ return { status: false, code: 401, condition: 'token-expired', expired: true }; }
-
-    let dataCountArysService = await bd.dataCountArysServiceQuery().then((res) => res);
-    if(dataCountArysService.error){ return { status: false, code: 500, message: dataCountArysService.error }; }
-
-    if(dataCountArysService.result.rowsAffected > 0){
-        return { status: true, 
-                 npersonas_arys: dataCountArysService.result.recordset[0].CCODIGO_SERV
         }
     }else{ 
         return { status: false, code: 404, message: 'Coin not found.' }; 
@@ -165,6 +135,7 @@ const operationAmountsPaid = async(authHeader, requestBody) => {
     let data = {
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
         ccompania: requestBody.ccompania,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let amountsPaid = await bd.amountsPaidQuery(data).then((res) => res);
     if(amountsPaid.error){ return  { status: false, code: 500, message: amountsPaid.error }; }
@@ -228,6 +199,7 @@ const operationAmountsOutstanding = async(authHeader, requestBody) => {
     let data = {
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
         ccompania: requestBody.ccompania,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let amountsOutstanding = await bd.amountsOutstandingQuery(data).then((res) => res);
     if(amountsOutstanding.error){ return  { status: false, code: 500, message: amountsOutstanding.error }; }
@@ -291,6 +263,7 @@ const operationCountNotifications = async(authHeader, requestBody) => {
     let data = {
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
         ccompania: requestBody.ccompania,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let countNotifications = await bd.countNotificationsQuery(data).then((res) => res);
     if(countNotifications.error){ return  { status: false, code: 500, message: countNotifications.error }; }
