@@ -32,6 +32,7 @@ const operationSearchCollection = async(authHeader, requestBody) => {
         xplaca: requestBody.xplaca ? requestBody.xplaca.toUpperCase() : undefined,
         ccorredor: requestBody.ccorredor ? requestBody.ccorredor: undefined,
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
     }
     let searchCollection = await bd.searchCollectionQuery(searchData).then((res) => res);
     if(searchCollection.error){ return { status: false, code: 500, message: searchCollection.error }; }
@@ -106,6 +107,7 @@ const operationDetailCollection = async(authHeader, requestBody) => {
                 mprima: mprima,
                 xmoneda: detailCollection.result.recordset[0].xmoneda,
                 mprima_pagada: detailCollection.result.recordset[0].MPRIMA_PAGADA,
+                mprima_anual: detailCollection.result.recordset[0].MPRIMA_ANUAL,
                 ccodigo_ubii: detailCollection.result.recordset[0].CCODIGO_UBII,
                 ccontratoflota: detailCollection.result.recordset[0].CCONTRATOFLOTA
                };
