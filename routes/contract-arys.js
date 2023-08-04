@@ -103,12 +103,58 @@ const operationCreate = async(authHeader, requestBody) => {
         xclave_club: requestBody.xclave_club,
         nkilometraje: requestBody.nkilometraje ? requestBody.nkilometraje: null,
         ccanal: requestBody.ccanal ? requestBody.ccanal: undefined,
-        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined
+        cproductor: requestBody.cproductor ? requestBody.cproductor: undefined,
+        xmarcanueva: requestBody.xmarcanueva ? requestBody.xmarcanueva: undefined,
+        xmodelonuevo: requestBody.xmodelonuevo ? requestBody.xmodelonuevo: undefined,
+        xversionnuevo: requestBody.xversionnuevo ? requestBody.xversionnuevo: undefined
     };
-    let contrato;
+    let cmarcaValue;
+    let cmodeloValue;
+    let cversionValue;
     if(userData){
-        let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
-        if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
+        if(userData.xmarcanueva){
+            let createBrand = await bd.createBrandFromContractQuery(userData.xmarcanueva).then((res) => res);
+            if(createBrand.error){ return { status: false, code: 500, message: createBrand.error }; }
+            if(createBrand.result.rowsAffected > 0){
+                let searchBrand = await bd.searchBrandFromContractQuery(userData.xmarcanueva).then((res) => res);
+                if(searchBrand.error){ return { status: false, code: 500, message: searchBrand.error }; }
+                if (searchBrand.result.recordset.length > 0) {
+                    cmarcaValue = searchBrand.result.recordset[0].CMARCA;
+                }
+
+                if(userData.xmodelonuevo){
+                    let createModel = await bd.createModelFromContractQuery(cmarcaValue, userData.xmodelonuevo).then((res) => res);
+                    if(createModel.error){ return { status: false, code: 500, message: createModel.error }; }
+                    if(createModel.result.rowsAffected > 0){
+                        let searchModel = await bd.searchModelFromContractQuery(cmarcaValue, userData.xmodelonuevo).then((res) => res);
+                        if(searchModel.error){ return { status: false, code: 500, message: searchModel.error }; }
+                        if (searchModel.result.recordset.length > 0) {
+                            cmodeloValue = searchModel.result.recordset[0].CMODELO;
+                        }
+
+                        if(userData.xversionnuevo){
+                            let createVersion = await bd.createVersionFromContractQuery(cmarcaValue, cmodeloValue, userData.xversionnuevo, userData).then((res) => res);
+                            if(createVersion.error){ return { status: false, code: 500, message: createVersion.error }; }
+                            if(createVersion.result.rowsAffected > 0){
+                                let searchVersion = await bd.searchVersionFromContractQuery(cmarcaValue, cmodeloValue, userData.xversionnuevo).then((res) => res);
+                                if(searchVersion.error){ return { status: false, code: 500, message: searchVersion.error }; }
+                                if (searchVersion.result.recordset.length > 0) {
+                                    cversionValue = searchVersion.result.recordset[0].CVERSION;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        console.log(userData.cmarca)
+        console.log(userData.xmodelonuevo)
+        console.log(userData.xversionnuevo)
+        if(userData.cmarca && userData.xmodelonuevo && userData.xversionnuevo){
+            console.log('hola buenos dias')
+        }
+        // let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
+        // if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
         // if(createContractServiceArys.result.rowsAffected > 0){
         //     let transporter = nodemailer.createTransport({
         //         service: 'gmail',
