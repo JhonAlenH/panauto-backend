@@ -111,7 +111,7 @@ const operationCreate = async(authHeader, requestBody) => {
     let cmarcaValue;
     let cmodeloValue;
     let cversionValue;
-    if(userData){
+    
         if(userData.xmarcanueva){
             let createBrand = await bd.createBrandFromContractQuery(userData.xmarcanueva).then((res) => res);
             if(createBrand.error){ return { status: false, code: 500, message: createBrand.error }; }
@@ -146,61 +146,112 @@ const operationCreate = async(authHeader, requestBody) => {
                     }
                 }
             }
+            console.log(userData.xmarcanueva)
+            console.log(userData.xmodelonuevo)
+            console.log(userData.xversionnuevo)
+            if(cmarcaValue && cmodeloValue && cversionValue){
+                userData.cmarca = cmarcaValue;
+                userData.cmodelo = cmodeloValue;
+                userData.cversion = cversionValue;
+            }
         }
-        console.log(userData.cmarca)
-        console.log(userData.xmodelonuevo)
-        console.log(userData.xversionnuevo)
-        if(userData.cmarca || userData.cmarca == 0 && userData.xmodelonuevo && userData.xversionnuevo){
-            console.log('hola buenos dias')
+
+        if(userData.cmarca && userData.xmodelonuevo && userData.xversionnuevo){
+            if(userData.xmodelonuevo){
+                let createModel = await bd.createModelFromContractQuery(userData.cmarca, userData.xmodelonuevo).then((res) => res);
+                if(createModel.error){ return { status: false, code: 500, message: createModel.error }; }
+                if(createModel.result.rowsAffected > 0){
+                    let searchModel = await bd.searchModelFromContractQuery(userData.cmarca, userData.xmodelonuevo).then((res) => res);
+                    if(searchModel.error){ return { status: false, code: 500, message: searchModel.error }; }
+                    if (searchModel.result.recordset.length > 0) {
+                        cmodeloValue = searchModel.result.recordset[0].CMODELO;
+                    }
+
+                    if(userData.xversionnuevo){
+                        let createVersion = await bd.createVersionFromContractQuery(userData.cmarca, cmodeloValue, userData.xversionnuevo, userData).then((res) => res);
+                        if(createVersion.error){ return { status: false, code: 500, message: createVersion.error }; }
+                        if(createVersion.result.rowsAffected > 0){
+                            let searchVersion = await bd.searchVersionFromContractQuery(userData.cmarca, cmodeloValue, userData.xversionnuevo).then((res) => res);
+                            if(searchVersion.error){ return { status: false, code: 500, message: searchVersion.error }; }
+                            if (searchVersion.result.recordset.length > 0) {
+                                cversionValue = searchVersion.result.recordset[0].CVERSION;
+                            }
+                        }
+                    }
+                }
+                if(cmodeloValue && cversionValue){
+                    userData.cmodelo = cmodeloValue;
+                    userData.cversion = cversionValue;
+                }
+            }
         }
-        // let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
-        // if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
-        // if(createContractServiceArys.result.rowsAffected > 0){
-        //     let transporter = nodemailer.createTransport({
-        //         service: 'gmail',
-        //         auth: {
-        //           user: 'alenjhon9@gmail.com',
-        //           pass: 'nnvwygxnvdpjegbj'
-        //         }
-        //       });
-            
-        //     let mailOptions = {
-        //       from: 'alenjhon9@gmail.com',
-        //       to: `${userData.email}`,
-        //       subject: '¡Bienvenido a Panauto Club!',
-        //       html: `
-        //         <html>
-        //           <body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-        //             <div style="text-align: center;">
-        //               <img src="https://i.ibb.co/YXWxSk5/panauto.png" alt="Logo" style="width: 250px; height: auto;">
-        //               <h2>Hola <span style="color: #0070C0;">${userData.xnombre} ${userData.xapellido}</span>,</h2>
-        //               <h4 style="color: #0070C0;">¡Te damos la bienvenida al Club PanAuto!</h4>
-        //               <h4>Ahora podrás disfrutar de todos los beneficios de PanAuto, tu plataforma online.</h4>
-        //               <h4>Para acceder a nuestro canal de autogestión online, puedes hacerlo con:</h4>
-        //               <h4>Correo electrónico</h4>
-        //               <h2 style="color:#0070c0;margin-top: -17px;">${userData.email}</h2>
-        //               <h4>Contraseña</h4>
-        //               <h2 style="color:#0070c0;margin-top: -17px;">${userData.xclave_club}</h2>
-        //               <h4>¿Qué ventajas tienes como usuario registrado?</h4>
-        //               <p>Realizar trámites y consultas desde el lugar donde estés, acceder y agendar todos los servicios de forma digital asociados a tu perfil.</p>
-        //               <h4>Conoce lo que puedes hacer <a href="https://www.panautoclub.com/">aquí</a>.</h4>
-        //               <p style="font-size: 18px; font-style: italic; border-radius: 10px; background-color: lightgray; padding: 10px;">Tu manejas, nosotros te acompañamos.</p>
-        //             </div>
-        //           </body>
-        //         </html>
-        //       `
-        //     };
-            
-        //     transporter.sendMail(mailOptions, function(error, info) {
-        //       if (error) {
-        //         console.log('Error al enviar el correo:', error);
-        //       } else {
-        //         console.log('Correo enviado correctamente:', info.response);
-        //         return {status: true}
-        //       }
-        //     });
-        // }
-    }
+
+        if(userData.cmarca && userData.cmodelo && userData.xversionnuevo){
+            if(userData.xversionnuevo){
+                let createVersion = await bd.createVersionFromContractQuery(userData.cmarca, userData.cmodelo, userData.xversionnuevo, userData).then((res) => res);
+                if(createVersion.error){ return { status: false, code: 500, message: createVersion.error }; }
+                if(createVersion.result.rowsAffected > 0){
+                    let searchVersion = await bd.searchVersionFromContractQuery(userData.cmarca, userData.cmodelo, userData.xversionnuevo).then((res) => res);
+                    if(searchVersion.error){ return { status: false, code: 500, message: searchVersion.error }; }
+                    if (searchVersion.result.recordset.length > 0) {
+                        cversionValue = searchVersion.result.recordset[0].CVERSION;
+                    }
+                }
+                if(cversionValue){
+                    userData.cversion = cversionValue;
+                }
+            }
+        }
+
+        if(userData){
+            // let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
+            // if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
+            // if(createContractServiceArys.result.rowsAffected > 0){
+            //     let transporter = nodemailer.createTransport({
+            //         service: 'gmail',
+            //         auth: {
+            //           user: 'alenjhon9@gmail.com',
+            //           pass: 'nnvwygxnvdpjegbj'
+            //         }
+            //       });
+                
+            //     let mailOptions = {
+            //       from: 'alenjhon9@gmail.com',
+            //       to: `${userData.email}`,
+            //       subject: '¡Bienvenido a Panauto Club!',
+            //       html: `
+            //         <html>
+            //           <body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+            //             <div style="text-align: center;">
+            //               <img src="https://i.ibb.co/YXWxSk5/panauto.png" alt="Logo" style="width: 250px; height: auto;">
+            //               <h2>Hola <span style="color: #0070C0;">${userData.xnombre} ${userData.xapellido}</span>,</h2>
+            //               <h4 style="color: #0070C0;">¡Te damos la bienvenida al Club PanAuto!</h4>
+            //               <h4>Ahora podrás disfrutar de todos los beneficios de PanAuto, tu plataforma online.</h4>
+            //               <h4>Para acceder a nuestro canal de autogestión online, puedes hacerlo con:</h4>
+            //               <h4>Correo electrónico</h4>
+            //               <h2 style="color:#0070c0;margin-top: -17px;">${userData.email}</h2>
+            //               <h4>Contraseña</h4>
+            //               <h2 style="color:#0070c0;margin-top: -17px;">${userData.xclave_club}</h2>
+            //               <h4>¿Qué ventajas tienes como usuario registrado?</h4>
+            //               <p>Realizar trámites y consultas desde el lugar donde estés, acceder y agendar todos los servicios de forma digital asociados a tu perfil.</p>
+            //               <h4>Conoce lo que puedes hacer <a href="https://www.panautoclub.com/">aquí</a>.</h4>
+            //               <p style="font-size: 18px; font-style: italic; border-radius: 10px; background-color: lightgray; padding: 10px;">Tu manejas, nosotros te acompañamos.</p>
+            //             </div>
+            //           </body>
+            //         </html>
+            //       `
+            //     };
+                
+            //     transporter.sendMail(mailOptions, function(error, info) {
+            //       if (error) {
+            //         console.log('Error al enviar el correo:', error);
+            //       } else {
+            //         console.log('Correo enviado correctamente:', info.response);
+            //         return {status: true}
+            //       }
+            //     });
+            // }
+        }
     return { 
         status: true, 
         code: 200

@@ -16766,7 +16766,7 @@ createVersionFromContractQuery: async(cmarcaValue, cmodeloValue, xversionnuevo, 
             .input('cmodelo', sql.Int, cmodeloValue)
             .input('xversion', sql.NVarChar, xversionnuevo)
             .input('cano', sql.Int, userData.cano)
-            .input('npasajero', sql.Int, userData.npasajero)
+            .input('npasajero', sql.Int, userData.ncapacidad_p)
             .input('cpais', sql.Int, 507)
             .input('bactivo', sql.Int, 1)
             .input('cusuariocreacion', sql.Int, 6)
