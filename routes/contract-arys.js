@@ -150,7 +150,7 @@ const operationCreate = async(authHeader, requestBody) => {
         console.log(userData.cmarca)
         console.log(userData.xmodelonuevo)
         console.log(userData.xversionnuevo)
-        if(userData.cmarca && userData.xmodelonuevo && userData.xversionnuevo){
+        if(userData.cmarca || userData.cmarca == 0 && userData.xmodelonuevo && userData.xversionnuevo){
             console.log('hola buenos dias')
         }
         // let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
