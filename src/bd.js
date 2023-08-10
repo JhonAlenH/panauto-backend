@@ -16789,7 +16789,6 @@ searchVersionFromContractQuery: async(cmarcaValue, cmodeloValue, xversionnuevo) 
             .input('xversionnuevo', sql.NVarChar, xversionnuevo)
             .query(query);
         //sql.close();
-        console.log(result)
         return { result: result };
     }catch(err){
         return { error: err.message };

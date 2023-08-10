@@ -109,8 +109,11 @@ const operationCreate = async(authHeader, requestBody) => {
         xversionnuevo: requestBody.xversionnuevo ? requestBody.xversionnuevo: undefined
     };
     let cmarcaValue;
+    let xmarcaValue;
     let cmodeloValue;
+    let xmodeloValue;
     let cversionValue;
+    let xversionValue;
     
         if(userData.xmarcanueva){
             let createBrand = await bd.createBrandFromContractQuery(userData.xmarcanueva).then((res) => res);
@@ -120,6 +123,7 @@ const operationCreate = async(authHeader, requestBody) => {
                 if(searchBrand.error){ return { status: false, code: 500, message: searchBrand.error }; }
                 if (searchBrand.result.recordset.length > 0) {
                     cmarcaValue = searchBrand.result.recordset[0].CMARCA;
+                    xmarcaValue = searchBrand.result.recordset[0].XMARCA;
                 }
 
                 if(userData.xmodelonuevo){
@@ -130,6 +134,7 @@ const operationCreate = async(authHeader, requestBody) => {
                         if(searchModel.error){ return { status: false, code: 500, message: searchModel.error }; }
                         if (searchModel.result.recordset.length > 0) {
                             cmodeloValue = searchModel.result.recordset[0].CMODELO;
+                            xmodeloValue = searchModel.result.recordset[0].XMODELO;
                         }
 
                         if(userData.xversionnuevo){
@@ -140,19 +145,12 @@ const operationCreate = async(authHeader, requestBody) => {
                                 if(searchVersion.error){ return { status: false, code: 500, message: searchVersion.error }; }
                                 if (searchVersion.result.recordset.length > 0) {
                                     cversionValue = searchVersion.result.recordset[0].CVERSION;
+                                    xversionValue = searchVersion.result.recordset[0].XVERSION;
                                 }
                             }
                         }
                     }
                 }
-            }
-            console.log(userData.xmarcanueva)
-            console.log(userData.xmodelonuevo)
-            console.log(userData.xversionnuevo)
-            if(cmarcaValue && cmodeloValue && cversionValue){
-                userData.cmarca = cmarcaValue;
-                userData.cmodelo = cmodeloValue;
-                userData.cversion = cversionValue;
             }
         }
 
@@ -203,20 +201,37 @@ const operationCreate = async(authHeader, requestBody) => {
             }
         }
 
+        if(cmarcaValue && cmodeloValue && cversionValue){
+            userData.cmarca = cmarcaValue;
+            userData.cmodelo = cmodeloValue;
+            userData.cversion = cversionValue;
+            userData.xmarca = userData.xmarcanueva;
+            userData.xmodelo = userData.xmodelonuevo;
+            userData.xversion = userData.xversionnuevo;
+        }else if(userData.cmarca && cmodeloValue && cversionValue){
+            userData.cmodelo = cmodeloValue;
+            userData.cversion = cversionValue;
+            userData.xmodelo = userData.xmodelonuevo;
+            userData.xversion = userData.xversionnuevo;
+        }else if(userData.cmarca && userData.cmodelo && cversionValue){
+            userData.cversion = cversionValue;
+            userData.xversion = userData.xversionnuevo;
+        }
+
         if(userData){
-            // let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
-            // if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
+            let createContractServiceArys = await bd.createContractServiceArysQuery(userData).then((res) => res);
+            if(createContractServiceArys.error){ return { status: false, code: 500, message: createContractServiceArys.error }; }
             // if(createContractServiceArys.result.rowsAffected > 0){
             //     let transporter = nodemailer.createTransport({
             //         service: 'gmail',
             //         auth: {
-            //           user: 'alenjhon9@gmail.com',
-            //           pass: 'nnvwygxnvdpjegbj'
+            //           user: 'soporte@panautoclub.com',
+            //           pass: 'lfzxkurerrjephat'
             //         }
             //       });
                 
             //     let mailOptions = {
-            //       from: 'alenjhon9@gmail.com',
+            //       from: 'soporte@panautoclub.com',
             //       to: `${userData.email}`,
             //       subject: '¡Bienvenido a Panauto Club!',
             //       html: `
