@@ -16693,5 +16693,106 @@ planDataQuery: async(ccanal) => {
         return { error: err.message };
     }
 },
+createBrandFromContractQuery: async(xmarcanueva) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        let insert = await pool.request()
+            .input('xmarca', sql.NVarChar, xmarcanueva)
+            .input('cpais', sql.Int, 507)
+            .input('bactivo', sql.Int, 1)
+            .input('cusuariocreacion', sql.Int, 6)
+            .input('fcreacion', sql.DateTime, new Date())
+            .query('insert into MAMARCA (XMARCA, CPAIS, BACTIVO, FCREACION, CUSUARIOCREACION) values (@xmarca, @cpais, @bactivo, @fcreacion, @cusuariocreacion)')
+            rowsAffected = rowsAffected + insert.rowsAffected;
+        
+        return { result: { rowsAffected: rowsAffected } };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchBrandFromContractQuery: async(xmarcanueva) => {
+    try{
+        let query = `select * from MAMARCA where XMARCA = @xmarcanueva`
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('xmarcanueva', sql.NVarChar, xmarcanueva)
+            .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+createModelFromContractQuery: async(cmarcaValue, xmodelonuevo) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        let insert = await pool.request()
+            .input('cmarca', sql.Int, cmarcaValue)
+            .input('xmodelo', sql.NVarChar, xmodelonuevo)
+            .input('cpais', sql.Int, 507)
+            .input('bactivo', sql.Int, 1)
+            .input('cusuariocreacion', sql.Int, 6)
+            .input('fcreacion', sql.DateTime, new Date())
+            .query('insert into MAMODELO (CMARCA, XMODELO, CPAIS, BACTIVO, FCREACION, CUSUARIOCREACION) values (@cmarca, @xmodelo, @cpais, @bactivo, @fcreacion, @cusuariocreacion)')
+            rowsAffected = rowsAffected + insert.rowsAffected;
+        
+        return { result: { rowsAffected: rowsAffected } };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchModelFromContractQuery: async(cmarcaValue, xmodelonuevo) => {
+    try{
+        let query = `select * from MAMODELO where CMARCA = @cmarcaValue AND XMODELO = @xmodelonuevo`
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cmarcaValue', sql.Int, cmarcaValue)
+            .input('xmodelonuevo', sql.NVarChar, xmodelonuevo)
+            .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+createVersionFromContractQuery: async(cmarcaValue, cmodeloValue, xversionnuevo, userData) => {
+    try{
+        let rowsAffected = 0;
+        let pool = await sql.connect(config);
+        let insert = await pool.request()
+            .input('cmarca', sql.Int, cmarcaValue)
+            .input('cmodelo', sql.Int, cmodeloValue)
+            .input('xversion', sql.NVarChar, xversionnuevo)
+            .input('cano', sql.Int, userData.cano)
+            .input('npasajero', sql.Int, userData.ncapacidad_p)
+            .input('cpais', sql.Int, 507)
+            .input('bactivo', sql.Int, 1)
+            .input('cusuariocreacion', sql.Int, 6)
+            .input('fcreacion', sql.DateTime, new Date())
+            .query('insert into MAVERSION (CMARCA, CMODELO, XVERSION, CANO, NPASAJERO, CPAIS, BACTIVO, FCREACION, CUSUARIOCREACION) values (@cmarca, @cmodelo, @xversion, @cano, @npasajero, @cpais, @bactivo, @fcreacion, @cusuariocreacion)')
+            rowsAffected = rowsAffected + insert.rowsAffected;
+        
+        return { result: { rowsAffected: rowsAffected } };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchVersionFromContractQuery: async(cmarcaValue, cmodeloValue, xversionnuevo) => {
+    try{
+        let query = `select * from MAVERSION where CMARCA = @cmarcaValue AND CMODELO = @cmodeloValue AND XVERSION = @xversionnuevo`
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cmarcaValue', sql.Int, cmarcaValue)
+            .input('cmodeloValue', sql.Int, cmodeloValue)
+            .input('xversionnuevo', sql.NVarChar, xversionnuevo)
+            .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
 }
 
