@@ -348,6 +348,20 @@ module.exports = {
             return { error: err.message };
         }
     },
+    updateChangePasswordEmailQuery:  async(data) => {
+        try{
+            let pool = await sql.connect(config);
+            let result = await pool.request()
+                .input('xemail', sql.NVarChar, data.email)
+                .input('xcontrasena', sql.NVarChar, data.xcontrasena)
+                .query('update SEUSUARIO set XCONTRASENA = @xcontrasena where XEMAIL = @xemail');
+            //sql.close();
+            return { result: result }; 
+        }catch(err){
+            console.log(err.message)
+            return { error: err.message };
+        }
+    },
     searchModulesQuery: async(cusuario) => {
         try{
             let pool = await sql.connect(config);
