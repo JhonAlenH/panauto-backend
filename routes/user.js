@@ -329,4 +329,31 @@ const operationSearchBroker = async(authHeader, requestBody) => {
     }else{ return { status: false, code: 404, message: 'Owner not found.' }; }
 }
 
+router.route('/change-password-email').post((req, res) => {
+    operationChangeUserPasswordEmail(req.body).then((result) => {
+        if(!result.status){
+            res.status(result.code).json({ data: result });
+            return;
+        }
+        res.json({ data: result });
+    }).catch((err) => {
+        res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationChangeUserPasswordEmail' } });
+    });
+});
+
+const operationChangeUserPasswordEmail = async(requestBody) => {
+    let data = {
+        email: requestBody.email,
+        xcontrasena: requestBody.xcontrasena
+    }
+    let updateChangePassword = await bd.updateChangePasswordEmailQuery(data).then((res) => res);
+    if(updateChangePassword.error){ return { status: false, code: 500, message: updateChangePassword.error }; }
+    if(updateChangePassword.result.rowsAffected > 0){
+        return { status: true}
+    }else{
+        return { status: false, code: 404, message: '¡El correo no se encuentra activo!'}
+    }
+}
+    
+
 module.exports = router;
