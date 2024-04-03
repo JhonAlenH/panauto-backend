@@ -565,7 +565,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
-            xcanal: getPipelineSales.result.recordset[0].XCANALVENTA,
+            xcanal: 'La Regional de Seguros',
             // xdocidentidadcorredor: getPipelineSales.result.recordset[0].XDOCIDENTIDAD,
             // xtelefonocorredor: getPipelineSales.result.recordset[0].XTELEFONO,
             services: serviceList,
