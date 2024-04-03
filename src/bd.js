@@ -8880,7 +8880,7 @@ module.exports = {
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
-            .input('ccanal', sql.Int, ccanal ? ccanal: undefined)
+            .input('ccanal', sql.Int, 12 ? ccanal: undefined)
             .query(`select * from MACANALVENTA where BACTIVO = 1${ ccanal ? ' and CCANAL = @ccanal' : '' }`);
             return { result: result }
         }catch(err){
