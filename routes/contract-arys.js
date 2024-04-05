@@ -475,7 +475,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
                 })
             }
         }
-        let getPipelineSales = await bd.getPipelineSalesQuery(contractData.ccanal);
+        let getPipelineSales = await bd.getPipelineSalesQuery(getContractArysData.result.recordset[0].CCANAL);
         if(getPipelineSales.error){ return { status: false, code: 500, message: getPipelineSales.error }; }
         return {
             status: true,
@@ -565,7 +565,7 @@ const operationDetailAdministrationContractArys = async(authHeader, requestBody)
             xclase: getContractArysData.result.recordset[0].XCLASE,
             nkilometraje: getContractArysData.result.recordset[0].NKILOMETRAJE,
             xzona_postal_propietario: getContractArysData.result.recordset[0].XZONA_POSTAL_PROPIETARIO,
-            xcanal: 'La Regional de Seguros',
+            xcanal: getPipelineSales.result.recordset[0].XCANALVENTA,
             // xdocidentidadcorredor: getPipelineSales.result.recordset[0].XDOCIDENTIDAD,
             // xtelefonocorredor: getPipelineSales.result.recordset[0].XTELEFONO,
             services: serviceList,

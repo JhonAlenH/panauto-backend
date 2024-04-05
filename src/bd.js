@@ -8877,11 +8877,13 @@ module.exports = {
         }
     },
     getPipelineSalesQuery: async(ccanal) => {
+        console.log(ccanal)
         try{
             let pool = await sql.connect(config);
             let result = await pool.request()
-            .input('ccanal', sql.Int, 12 ? ccanal: undefined)
+            .input('ccanal', sql.Int, ccanal ? ccanal: undefined)
             .query(`select * from MACANALVENTA where BACTIVO = 1${ ccanal ? ' and CCANAL = @ccanal' : '' }`);
+            console.log(result)
             return { result: result }
         }catch(err){
             return { error: err.message };
