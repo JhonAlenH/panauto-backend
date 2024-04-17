@@ -224,6 +224,7 @@ const operationSearchDataPlan = async(requestBody) => {
         cplan: client.result.recordset[0].CPLAN,
         mcosto: client.result.recordset[0].MCOSTO,
         ccontratoflota: client.result.recordset[0].CCONTRATOFLOTA,
+        xtipo: client.result.recordset[0].XTIPOPLAN,
         listTypeService : DataTypeService,
     }
 }
@@ -299,6 +300,33 @@ const operationSearchProveedor = async(requestBody) => {
     return { 
         status: true, 
         ListProveedor : ListProveedor,
+    }
+}
+
+router.route('/Data/Client/contract').post((req, res) => {
+    operationSearchContract(req.body).then((result) => {
+        if(!result.status){ 
+            res.status(result.code).json({ data: result });
+            return;
+        }
+        res.json({ data: result });
+    }).catch((err) => {
+        res.status(500).json({ data: { status: false, code: 500, message: err.message, hint: 'operationSearchContract' } });
+    });
+});
+
+const operationSearchContract = async(requestBody) => {
+    let Data = {       
+        cpropietario: requestBody.cpropietario,
+    };
+    console.log(Data)
+    let Contract = await bd.searchContractClub(Data).then((res) => res);
+    if(Contract.error){ return { status: false, code: 500, message: Contract.error }; }
+    console.log(Contract.result.recordset[0].CCONTRATOFLOTA)
+    return { 
+        status: true, 
+        ccontratoflota: Contract.result.recordset[0].CCONTRATOFLOTA
+
     }
 }
 
@@ -701,5 +729,6 @@ const DeleteEventAgend = async(requestBody) => {
     status: false, 
 
 };
+
 }
 module.exports = router;

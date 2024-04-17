@@ -24,7 +24,7 @@ module.exports = {
             return { result: result };
         }
         catch(err){
-
+            console.log(err.message)
             return { error: err.message};
         }
     },
@@ -53,6 +53,7 @@ module.exports = {
             }
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message};
         }
     },
@@ -66,6 +67,7 @@ module.exports = {
             return { result: result };
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -82,6 +84,7 @@ module.exports = {
             return { result: result };
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message};
         }
     },
@@ -95,6 +98,7 @@ module.exports = {
             return { result: result };
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -123,6 +127,7 @@ module.exports = {
             return { result: create };
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -137,6 +142,7 @@ module.exports = {
             return { result: result };
         }
         catch(err){
+            console.log(err.message)
             return { error: err.message };
         }
     },
@@ -16159,6 +16165,7 @@ getCompanyContractData: async() => {
     }
 },
 getContractArysDataQuery: async(contractData) => {
+    console.log(contractData)
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
@@ -16170,6 +16177,7 @@ getContractArysDataQuery: async(contractData) => {
         
         return { result: result };
     }catch(err){
+        console.log(err.message)
         return { error: err.message };
     }
 },
@@ -16804,6 +16812,18 @@ searchVersionFromContractQuery: async(cmarcaValue, cmodeloValue, xversionnuevo) 
             .input('cmodeloValue', sql.Int, cmodeloValue)
             .input('xversionnuevo', sql.NVarChar, xversionnuevo)
             .query(query);
+        //sql.close();
+        return { result: result };
+    }catch(err){
+        return { error: err.message };
+    }
+},
+searchContractClub: async(Data) => {
+    try{
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('cpropietario', sql.Int, Data.cpropietario)
+            .query('select CCONTRATOFLOTA from SUCONTRATOFLOTA where cpropietario = @cpropietario');
         //sql.close();
         return { result: result };
     }catch(err){

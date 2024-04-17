@@ -21,6 +21,7 @@ const operationAuth = async(requestBody) => {
     let xcontrasena = requestBody.xcontrasena;
     let query = await bd.authQuery(xemail).then((res) => res);
     if(query.error){ return { status: false, code: 500, message: query.error }; }
+    console.log('pasa')
     if(query.result.rowsAffected > 0){
         if(query.result.recordset[0].XCONTRASENA != xcontrasena){ 
             let createAuthError = await bd.createAuthErrorQuery(query.result.recordset[0].CUSUARIO).then((res) => res);
@@ -74,13 +75,38 @@ const operationAuth = async(requestBody) => {
                         csession: jwt.token, expires: jwt.expires };
                 }
             }else{
-                let securityToken = helper.generateSecurityToken(20);
-                let createPasswordChange = await bd.createPasswordChangeQuery(query.result.recordset[0].CUSUARIO, securityToken).then((res) => res);
-                if(createPasswordChange.error){ return { status: false, code: 500, message: createPasswordChange }; }
-                if(createPasswordChange.result.rowsAffected > 0){
-                    return { status: false, code: 401, condition: 'change-password', token: securityToken, expired: false };
-                }else{ return { status: false, code: 500, message: 'Server Internal Error.', hint: 'createPasswordChange' }; }
+                await bd.createSignInQuery(query.result.recordset[0].CUSUARIO);
+                let jwt = helper.generateJsonWebToken(query.result.recordset[0].CUSUARIO);
+                return { 
+                    status: true, 
+                    cusuario: query.result.recordset[0].CUSUARIO, 
+                    crol: query.result.recordset[0].CROL, 
+                    ccompania: query.result.recordset[0].CCOMPANIA, 
+                    xcompania: query.result.recordset[0].XCOMPANIA, 
+                    xcolornav: query.result.recordset[0].XCOLORNAV, 
+                    ctipo_sistema: query.result.recordset[0].CTIPO_SISTEMA,
+                    cpropietario: query.result.recordset[0].CPROPIETARIO,
+                    xcolorprimario: query.result.recordset[0].XCOLORPRIMARIO, 
+                    xcolorsegundario: query.result.recordset[0].XCOLORSEGUNDARIO, 
+                    xcolorterciario: query.result.recordset[0].XCOLORTERCIARIO, 
+                    xcolortexto: query.result.recordset[0].XCOLORTEXTO, 
+                    cpais: query.result.recordset[0].CPAIS, 
+                    cproveedor: query.result.recordset[0].CPROVEEDOR ? query.result.recordset[0].CPROVEEDOR : undefined, 
+                    cproductor: query.result.recordset[0].CPRODUCTOR ? query.result.recordset[0].CPRODUCTOR : undefined,
+                    ccanal: query.result.recordset[0].CCANAL ? query.result.recordset[0].CCANAL : undefined,
+                    xlogo: query.result.recordset[0].xlogo,
+                    csession: jwt.token, expires: jwt.expires };
             }
+                
+                // let securityToken = helper.generateSecurityToken(20);
+                // let createPasswordChange = await bd.createPasswordChangeQuery(query.result.recordset[0].CUSUARIO, securityToken).then((res) => res);
+
+                // if(createPasswordChange.error){ return { status: false, code: 500, message: createPasswordChange }; }
+                // if(createPasswordChange.result.rowsAffected > 0){
+                //     return { status: false, code: 401, condition: 'change-password', token: securityToken, expired: false };
+                // }else{ return { status: false, code: 500, message: 'Server Internal Error.', hint: 'createPasswordChange' }; }
+                
+            
         }
     }else{ return { status: false, code: 404, message: 'User not found.' }; }
 }
