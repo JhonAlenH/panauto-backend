@@ -846,6 +846,7 @@ const operationDetailNotification = async(authHeader, requestBody) => {
                 }
                 serviceOrder.push(serviceOrderList);
             }
+            console.log(serviceOrder)
         }
         return {
             status: true,

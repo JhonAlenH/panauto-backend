@@ -10324,7 +10324,6 @@ module.exports = {
             //sql.close();
             return { result: result };
         }catch(err){
-
             return { error: err.message };
         }
     },
@@ -12748,12 +12747,14 @@ module.exports = {
         }
     },
     ClienDataClubPlanService: async(ClientData) => {
+        console.log(ClientData)
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
-            .input('ctiposervicio', sql.Int, ClientData.ctiposervicio)
             .input('ccontratoflota', sql.Int, ClientData.ccontratoflota)
-            .query('select * from VWBUSCARSERVICIOSPARACLUB where CTIPOSERVICIO = @ctiposervicio AND CCONTRATOFLOTA = @ccontratoflota');
+            .input('cplan', sql.Int, ClientData.cplan)
+            .input('ctiposervicio', sql.Int, ClientData.ctiposervicio)
+            .query('select * from VWBUSCARSERVICIOSXCONTRATOFLOTA where CCONTRATOFLOTA = @ccontratoflota and CPLAN = @cplan and CTIPOSERVICIO = @ctiposervicio');
         //sql.close();
         return { result: result };
     }catch(err){
@@ -12776,24 +12777,53 @@ module.exports = {
     },
     SolicitudServiceClub: async(ClientData) => {
         try{
+            let notificacion;
             let pool = await sql.connect(config);
             let result = await pool.request()
                 .input('cpais', sql.Int, ClientData.cpais)
-                .input('cestado', sql.Int, ClientData.cestado)
-                .input('cciudad', sql.Int, ClientData.cciudad)
-                .input('cservicio', sql.Int, ClientData.cservicio)
-                .input('ctiposervicio', sql.Int, ClientData.ctiposervicio)
-                .input('cproveedor', sql.Int, ClientData.cproveedor)
-                .input('fsolicitud', sql.DateTime, ClientData.fsolicitud)
-                .input('cpropietario', sql.Int, ClientData.cpropietario)
                 .input('ccontratoflota', sql.Int, ClientData.ccontratoflota)
-                .input('isolicitante', sql.NVarChar, 'USR')
+                .input('xnombre', sql.NVarChar, ClientData.xnombre)
+                .input('xapellido', sql.NVarChar, ClientData.xapellido)
+                .input('xtelefono', sql.NVarChar, ClientData.xtelefono)
+                .input('ccompania', sql.Int, ClientData.ccompania)
+                .input('ctiponotificacion', sql.Int, 2)
+                .input('ccausasiniestro', sql.Int, 36)
+                .input('bdano', sql.Bit, 0)
+                .input('btransitar', sql.Bit, 0)
+                .input('bdanootro', sql.Bit, 0)
+                .input('blesionado', sql.Bit, 0)
+                .input('bpropietario', sql.Bit, 1)
+                .input('fevento', sql.DateTime, new Date())
+                .input('xdireccion', sql.NVarChar, 'PANAMÁ')
+                .input('xobservacion', sql.NVarChar, 'ARYSAUTOCLUB')
+                .input('bactivo', sql.Bit, 1)
+                .input('btransito', sql.Bit, 0)
+                .input('bcargo', sql.Bit, 0)
+                .input('bpasajero', sql.Bit, 0)
                 .input('fcreacion', sql.DateTime, new Date())
-                .query('INSERT INTO evsolicitudservicio (CPAIS, CESTADO,CCIUDAD,CSERVICIO,CTIPOSERVICIO,CPROVEEDOR,CPROPIETARIO,ISOLICITANTE,CCONTRATOFLOTA,FCREACION, FSOLICITUD) VALUES(@cpais,@cestado,@cciudad,@cservicio,@ctiposervicio,@cproveedor, @cpropietario,@isolicitante,@ccontratoflota, @fcreacion, @fsolicitud)');
-            //sql.close();
-            return { result: result };
+                .input('cusuariocreacion', sql.Int, ClientData.cusuario)
+                .query('INSERT INTO EVNOTIFICACION (ccontratoflota, ctiponotificacion, ccausasiniestro, xnombre, xapellido, xtelefono, bdano, btransitar, bdanootro, blesionado, bpropietario, fevento, xdireccion, xobservacion, btransito, bcarga, bpasajero, cpais, ccompania, bactivo, fcreacion, cusuariocreacion) VALUES(@ccontratoflota, @ctiponotificacion, @ccausasiniestro, @xnombre, @xapellido, @xtelefono, @bdano, @btransitar, @bdanootro, @blesionado, @bpropietario, @fevento, @xdireccion, @xobservacion, @btransito, @bcargo, @bpasajero, @cpais, @ccompania, @bactivo, @fcreacion, @cusuariocreacion) SELECT SCOPE_IDENTITY() AS CNOTIFICACION');
+            
+                if (result.recordset.length > 0) {
+                    notificacion = result.recordset[0].CNOTIFICACION;
+
+                    let result2 = await pool.request()
+                    .input('cpais', sql.Int, ClientData.cpais)
+                    .input('cservicio', sql.Int, ClientData.cservicio)
+                    .input('fcreacion', sql.DateTime, new Date())
+                    .input('fajuste', sql.DateTime, new Date())
+                    .input('cnotificacion', sql.Int, notificacion)
+                    .input('xobservacion', sql.NVarChar, 'ARYSAUTOCLUB')
+                    .input('cmoneda', sql.Int, 2)
+                    .input('ccompania', sql.Int, ClientData.ccompania)
+                    .input('cestatusgeneral', sql.Int, 13)
+                    .input('bactivo', sql.Bit, 1)
+                    .query('INSERT INTO EVORDENSERVICIO (cservicio, fcreacion, cnotificacion, xobservacion, cmoneda, ccompania, cestatusgeneral, bactivo, fajuste) VALUES(@cservicio, @fcreacion, @cnotificacion, @xobservacion, @cmoneda, @ccompania, @cestatusgeneral, @bactivo, @fajuste)');
+                }
+
+                return { result: result };
         }catch(err){
-            console.error(err);
+            console.error(err.message);
             return { error: err.message };
         }
     },

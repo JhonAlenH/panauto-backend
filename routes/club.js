@@ -138,7 +138,6 @@ const operationSearchDataClientVehicle = async(requestBody) => {
             xseriamotor: client.result.recordset[0].XSERIALMOTOR,
         });
     }
-   
     return { 
         status: true, 
         listdatavehicle: DatosVehiculo
@@ -243,8 +242,9 @@ router.route('/Data/Client/Plan/service').post((req, res) => {
 
 const operationSearchDataPlanService = async(requestBody) => {
     let ClientData = {
-        ctiposervicio: requestBody.ctiposervicio,
         ccontratoflota: requestBody.ccontratoflota,
+        cplan: requestBody.cplan,
+        ctiposervicio: requestBody.ctiposervicio,
     };
     let client = await bd.ClienDataClubPlanService(ClientData).then((res) => res);
     if(client.error){ return { status: false, code: 500, message: client.error }; }
@@ -319,10 +319,8 @@ const operationSearchContract = async(requestBody) => {
     let Data = {       
         cpropietario: requestBody.cpropietario,
     };
-    console.log(Data)
     let Contract = await bd.searchContractClub(Data).then((res) => res);
     if(Contract.error){ return { status: false, code: 500, message: Contract.error }; }
-    console.log(Contract.result.recordset[0].CCONTRATOFLOTA)
     return { 
         status: true, 
         ccontratoflota: Contract.result.recordset[0].CCONTRATOFLOTA
@@ -344,15 +342,14 @@ router.route('/Data/Solicitud').post((req, res) => {
 
 const operationGenerateSolicitud = async(requestBody) => {
     let ClientData = {       
-        cestado: requestBody.cestado,
-        cpais: requestBody.cpais,
-        cciudad: requestBody.cciudad,
-        cservicio: requestBody.cservicio,
-        ctiposervicio: requestBody.ctiposervicio,
-        cproveedor: requestBody.cproveedor,
-        cpropietario: requestBody.cpropietario,
         ccontratoflota: requestBody.ccontratoflota,
-        fsolicitud: requestBody.fsolicitud,
+        xnombre: requestBody.xnombre,
+        xapellido: requestBody.xapellido, 
+        xtelefono: requestBody.telefono,
+        cpais: 507,
+        ccompania: requestBody.ccompania,
+        cusuario: requestBody.cusuario,
+        cservicio: requestBody.cservicio,
     };
     let client = await bd.SolicitudServiceClub(ClientData).then((res) => res);
     if(client.error){ return { status: false, code: 500, message: client.error }; }
