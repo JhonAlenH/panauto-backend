@@ -276,12 +276,7 @@ router.route('/Data/Proveedor').post((req, res) => {
 });
 
 const operationSearchProveedor = async(requestBody) => {
-    let ClientData = {
-        cservicio: requestBody.cservicio,
-        cestado: requestBody.cestado,
-        cciudad: requestBody.cciudad,
-    };
-    let client = await bd.ClienDataProveedor(ClientData).then((res) => res);
+    let client = await bd.ClienDataProveedor().then((res) => res);
     if(client.error){ return { status: false, code: 500, message: client.error }; }
 
     if(client.rowsAffected == 0){ return { status: false, code: 404 }; }
@@ -296,7 +291,7 @@ const operationSearchProveedor = async(requestBody) => {
             xtelefonocelular: client.result.recordset[i].XTELEFONOCELULAR
         });
     }
-
+    
     return { 
         status: true, 
         ListProveedor : ListProveedor,
@@ -350,6 +345,7 @@ const operationGenerateSolicitud = async(requestBody) => {
         ccompania: requestBody.ccompania,
         cusuario: requestBody.cusuario,
         cservicio: requestBody.cservicio,
+        cproveedor: requestBody.cproveedor,
     };
     let client = await bd.SolicitudServiceClub(ClientData).then((res) => res);
     if(client.error){ return { status: false, code: 500, message: client.error }; }

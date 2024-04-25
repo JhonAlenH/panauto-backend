@@ -388,6 +388,7 @@ const operationValrepNotificationServiceOrder = async(authHeader, requestBody) =
                          xestatusgeneral: query.result.recordset[0].XESTATUSGENERAL, 
                          ccausaanulacion: query.result.recordset[0].CCAUSAANULACION, 
                          xcausaanulacion: query.result.recordset[0].XCAUSAANULACION,
+                         fsolicitud: query.result.recordset[0].FSOLICITUD,
                          xauto: auto,
                          xnombres: nombres,
                          xnombresalternativos: nombresalternativos,

@@ -1157,7 +1157,8 @@ const operationUpdateNotification = async(authHeader, requestBody) => {
                     corden: requestBody.serviceOrder.update[i].orden.corden,
                     bactivo: requestBody.serviceOrder.update[i].orden.bactivo,
                     cestatusgeneral: requestBody.serviceOrder.update[i].orden.cestatusgeneral,
-                    ccausaanulacion: requestBody.serviceOrder.update[i].orden.ccausaanulacion
+                    ccausaanulacion: requestBody.serviceOrder.update[i].orden.ccausaanulacion,
+                    fajuste: requestBody.serviceOrder.update[i].orden.fajuste,
                 })
             }
             let updateServiceOrderByNotificationUpdate = await bd.updateServiceOrderByNotificationUpdateQuery(serviceOrderUpdateList, notificationData).then((res) => res);
