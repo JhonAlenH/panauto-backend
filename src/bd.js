@@ -13244,7 +13244,8 @@ ValidatePLate: async(searchData) => {
         let pool = await sql.connect(config);
         let result = await pool.request()
         .input('xplaca', sql.NVarChar, searchData.xplaca)
-        .query('select * from SURECIBO WHERE XPLACA = @xplaca AND CESTATUSGENERAL <> 3');
+        .query('select * from suVcontratoflota_cliente WHERE XPLACA = @xplaca AND CESTATUSGENERAL <> 3');
+            console.log(result.recordset[0]);
             return { result: result };
         }catch(err){
             return { error: err.message };

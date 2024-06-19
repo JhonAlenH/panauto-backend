@@ -1616,9 +1616,10 @@ const operationValidatePlate = async(authHeader, requestBody) => {
         if(query.error){ return { status: false, code: 500, message: operationValidatePLace.error };  }
         return { status: true,
                 xdocidentidad: query.result.recordset[0].XDOCIDENTIDAD,
-                fdesde_pol: query.result.recordset[0].FDESDE_POL.toLocaleDateString(),
-                fhasta_pol: query.result.recordset[0].FHASTA_POL.toLocaleDateString(),
-                xpoliza: query.result.recordset[0].XPOLIZA,
+                ccausaanulacion: query.result.recordset[0].CCAUSAANULACION,
+                fdesde_pol: query.result.recordset[0].FDESDE_POL? query.result.recordset[0].FDESDE_POL.toLocaleDateString(): query.result.recordset[0].FDESDE_POL,
+                fhasta_pol: query.result.recordset[0].FHASTA_POL? query.result.recordset[0].FHASTA_POL.toLocaleDateString(): query.result.recordset[0].FHASTA_POL,
+                xpoliza: query.result.recordset[0].xpoliza,
                 }
     
      
