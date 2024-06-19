@@ -13240,11 +13240,12 @@ ValidateTarifaPerdida: async(searchData) => {
         }
 },
 ValidatePLate: async(searchData) => {
+    console.log('search', searchData);
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
         .input('xplaca', sql.NVarChar, searchData.xplaca)
-        .query('select * from suVcontratoflota_cliente WHERE XPLACA = @xplaca AND CESTATUSGENERAL <> 3');
+        .query('select * from suVcontratoflota_cliente WHERE XPLACA = @xplaca');
             return { result: result };
         }catch(err){
             return { error: err.message };
