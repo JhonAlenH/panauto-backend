@@ -13240,7 +13240,6 @@ ValidateTarifaPerdida: async(searchData) => {
         }
 },
 ValidatePLate: async(searchData) => {
-    console.log('search', searchData);
     try{
         let pool = await sql.connect(config);
         let result = await pool.request()
