@@ -1620,9 +1620,9 @@ const operationValidatePlate = async(authHeader, requestBody) => {
                     xestatusgeneral: query.result.recordset[0].XESTATUSGENERAL? query.result.recordset[0].CESTATUSGENERAL: null,
                     xdocidentidad: query.result.recordset[0].XDOCIDENTIDAD? query.result.recordset[0].XDOCIDENTIDAD : null,
                     ccausaanulacion: query.result.recordset[0].CCAUSAANULACION? query.result.recordset[0].CCAUSAANULACION:null,
-                    fdesde_pol: query.result.recordset[0].FDESDE_POL? query.result.recordset[0].FDESDE_POL.toLocaleDateString(): query.result.recordset[0].FDESDE_POL,
-                    fhasta_pol: query.result.recordset[0].FHASTA_POL? query.result.recordset[0].FHASTA_POL.toLocaleDateString(): query.result.recordset[0].FHASTA_POL,
-                    xpoliza: query.result.recordset[0].xpoliza,
+                    fdesde_pol: query.result.recordset[0].FDESDE_POL? query.result.recordset[0].FDESDE_POL: null,
+                    fhasta_pol: query.result.recordset[0].FHASTA_POL? query.result.recordset[0].FHASTA_POL: null,
+                    xpoliza: query.result.recordset[0].xpoliza? query.result.recordset[0].xpoliza: null,
             }
         } else {
             return { status: true,
