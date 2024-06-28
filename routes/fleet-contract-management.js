@@ -1614,15 +1614,22 @@ const operationValidatePlate = async(authHeader, requestBody) => {
 
         let query = await bd.ValidatePLate(searchData).then((res) => res);
         if(query.error){ return { status: false, code: 500, message: operationValidatePLace.error };  }
-        return { status: true,
-                cestatusgeneral: query.result.recordset[0].CESTATUSGENERAL,
-                xestatusgeneral: query.result.recordset[0].XESTATUSGENERAL,
-                xdocidentidad: query.result.recordset[0].XDOCIDENTIDAD? query.result.recordset[0].XDOCIDENTIDAD : '',
-                ccausaanulacion: query.result.recordset[0].CCAUSAANULACION,
-                fdesde_pol: query.result.recordset[0].FDESDE_POL? query.result.recordset[0].FDESDE_POL.toLocaleDateString(): query.result.recordset[0].FDESDE_POL,
-                fhasta_pol: query.result.recordset[0].FHASTA_POL? query.result.recordset[0].FHASTA_POL.toLocaleDateString(): query.result.recordset[0].FHASTA_POL,
-                xpoliza: query.result.recordset[0].xpoliza,
-                }
+        if(query.result.recordset.length > 0) {
+            return { status: true,
+                    cestatusgeneral: query.result.recordset[0].CESTATUSGENERAL? query.result.recordset[0].CESTATUSGENERAL: null,
+                    xestatusgeneral: query.result.recordset[0].XESTATUSGENERAL? query.result.recordset[0].CESTATUSGENERAL: null,
+                    xdocidentidad: query.result.recordset[0].XDOCIDENTIDAD? query.result.recordset[0].XDOCIDENTIDAD : null,
+                    ccausaanulacion: query.result.recordset[0].CCAUSAANULACION? query.result.recordset[0].CCAUSAANULACION:null,
+                    fdesde_pol: query.result.recordset[0].FDESDE_POL? query.result.recordset[0].FDESDE_POL.toLocaleDateString(): query.result.recordset[0].FDESDE_POL,
+                    fhasta_pol: query.result.recordset[0].FHASTA_POL? query.result.recordset[0].FHASTA_POL.toLocaleDateString(): query.result.recordset[0].FHASTA_POL,
+                    xpoliza: query.result.recordset[0].xpoliza,
+            }
+        } else {
+            return { status: true,
+                cestatusgeneral: null, xestatusgeneral: null, xdocidentidad: null, ccausaanulacion: null,
+                fdesde_pol: null, fhasta_pol: null, xpoliza: null,
+            }
+        }
     
      
 }
